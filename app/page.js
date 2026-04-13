@@ -169,11 +169,15 @@ const CONTENT_TYPES = [
   { code:"G", name:"허락형", color:"#FF8B94" },
 ];
 
-// ── SYSTEM PROMPT (Extended JSON) ──
+// ── SYSTEM PROMPTS ──
 const SYSTEM_PROMPT = `당신은 Trip.com 한국 숏폼 콘텐츠 전략가입니다.
 규칙: 1.후킹에 브랜드명 금지 2.관심사90%+여행10% 3.콘텐츠유형A~G 4.Dream/Plan/Book/Share 5.시리즈1편(90/10)→2편(60/40)→3편(30/70) 6.USP5종(원스톱플랫폼/24시간한국어CS/Trip.Best랭킹/가격경쟁력/트립지니AI)
 JSON 배열로만 응답. 마크다운 없이. 반드시 5개 아이디어를 생성하세요.
-[{"rank":1,"title":"제목","contentType":"A~G중하나","stage":"Dream|Plan|Book|Share","perspective":"A|B|C","contextCombo":"맥락 조합 요약","conversionScore":85~98,"hook3s":"0~3초 후킹카피","sceneFlow":["씬1","씬2","씬3","씬4"],"uspConnection":"연결 USP","target":"타겟","creatorStrategy":"크리에이터 협업 전략 한 줄","dataProof":"검색 데이터 근거","seriesNote":"시리즈 구성","youtubeShorts":{"title":"유튜브용 제목","hook":"유튜브용 후킹","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA 행동","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"최적 업로드 시간","targetCluster":"타겟 클러스터"},"instagramReels":{"title":"인스타용 제목(다른톤)","hook":"인스타용 후킹(다른표현)","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA 행동","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"최적 업로드 시간","targetCluster":"타겟 클러스터"}}]`;
+[{"rank":1,"title":"제목","contentType":"A~G중하나","stage":"Dream|Plan|Book|Share","perspective":"A|B|C","contextCombo":"맥락 조합 요약","conversionScore":85~98,"hook3s":"0~3초 후킹카피","sceneFlow":["씬1","씬2","씬3","씬4"],"uspConnection":"연결 USP","target":"타겟","creatorStrategy":"크리에이터 협업 전략 한 줄","dataProof":"검색 데이터 근거","seriesNote":"시리즈 구성"}]`;
+
+const PLATFORM_PROMPT = `당신은 Trip.com 한국 숏폼 콘텐츠 전략가입니다. 아래 아이디어를 유튜브 쇼츠와 인스타그램 릴스에 맞게 확장하세요.
+JSON 객체로만 응답. 마크다운 없이.
+{"youtubeShorts":{"title":"유튜브용 제목","hook":"유튜브용 후킹","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA 행동","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"최적 업로드 시간","targetCluster":"타겟 클러스터"},"instagramReels":{"title":"인스타용 제목(다른톤)","hook":"인스타용 후킹(다른표현)","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA 행동","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"최적 업로드 시간","targetCluster":"타겟 클러스터"}}`;
 
 // ══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
@@ -258,19 +262,27 @@ export default function BrandformanceEngine() {
     finally { setYtLoading(p => ({...p,[oppId]:false})); }
   }, [ytCreators, ytLoading]);
 
-  // ── Claude API ──
+  // ── Claude API (with 60s timeout) ──
+  const fetchWithTimeout = async (url, options, timeoutMs = 60000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      return res;
+    } finally { clearTimeout(timer); }
+  };
+
   const generateIdeas = useCallback(async (opp) => {
     if (loadingIds[opp.id]) return;
     setLoadingIds(p => ({...p,[opp.id]:true}));
-    // Clear previous errors
     setGeneratedIdeas(p => { const n = {...p}; if(n[opp.id]?.[0]?.error) delete n[opp.id]; return n; });
     const ctx = CONTEXT_DATA[opp.id] || {};
     const contextStr = Object.entries(ctx).map(([k,v]) => `${k}: ${v.tags?.join(", ")} | ${v.evidence}`).join("\n");
     try {
-      const res = await fetch("/api/generate", {
+      const res = await fetchWithTimeout("/api/generate", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ system: SYSTEM_PROMPT, messages: [{ role: "user", content: `숏폼 아이디어 5개를 생성하세요:\n제목:${opp.title}\n인사이트:${opp.keyInsight}\n인구통계:${opp.demographics}\n검색량:월${opp.monthlyVol?.toLocaleString()}\n전략:${opp.strategyCopy}\n후킹:${opp.hookType} ${opp.hookLabel}\n콘텐츠훅:${opp.contentHook}\nUSP:${opp.uspConnection}\n페인:${(opp.painPoints||[]).join(",")}\n데이터:${opp.dataProof}\n6축맥락:\n${contextStr}` }] })
-      });
+      }, 60000);
       const data = await res.json();
       if (data.error) throw new Error(data.error?.message || (typeof data.error === "string" ? data.error : JSON.stringify(data.error)));
       const text = data.content?.[0]?.text || "";
@@ -279,9 +291,44 @@ export default function BrandformanceEngine() {
         setGeneratedIdeas(p => ({...p,[opp.id]:JSON.parse(m[0])}));
         setCurrentView("ideas");
       } else throw new Error("JSON 파싱 실패 — 응답: " + text.substring(0, 100));
-    } catch (e) { setGeneratedIdeas(p => ({...p,[opp.id]:[{error:e.message}]})); setCurrentView("ideas"); }
+    } catch (e) {
+      const msg = e.name === "AbortError" ? "요청 시간 초과 (60초). 잠시 후 다시 시도해주세요." : e.message;
+      setGeneratedIdeas(p => ({...p,[opp.id]:[{error:msg}]})); setCurrentView("ideas");
+    }
     finally { setLoadingIds(p => ({...p,[opp.id]:false})); }
   }, [loadingIds]);
+
+  // ── Platform content generation (on-demand for storyboard) ──
+  const [platformLoading, setPlatformLoading] = useState({});
+  const generatePlatformContent = useCallback(async (idea, opp) => {
+    const key = `${opp.id}-${idea.rank||0}`;
+    if (platformLoading[key] || idea.youtubeShorts) return;
+    setPlatformLoading(p => ({...p,[key]:true}));
+    try {
+      const res = await fetchWithTimeout("/api/generate", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ system: PLATFORM_PROMPT, messages: [{ role: "user", content: `아이디어:\n제목:${idea.title}\n콘텐츠유형:${idea.contentType}\n스테이지:${idea.stage}\n후킹:${idea.hook3s}\n씬:${(idea.sceneFlow||[]).join(" → ")}\nUSP:${idea.uspConnection}\n타겟:${idea.target||opp.demographics}\n데이터:${idea.dataProof||opp.dataProof}` }] })
+      }, 45000);
+      const data = await res.json();
+      if (!data.error) {
+        const text = data.content?.[0]?.text || "";
+        const m = text.match(/\{[\s\S]*\}/);
+        if (m) {
+          const platform = JSON.parse(m[0]);
+          // Merge platform content into the idea
+          setGeneratedIdeas(prev => {
+            const ideas = [...(prev[opp.id]||[])];
+            const idx = ideas.findIndex(i => (i.rank||0) === (idea.rank||0));
+            if (idx >= 0) ideas[idx] = {...ideas[idx], ...platform};
+            return {...prev, [opp.id]: ideas};
+          });
+          // Update selectedIdea too
+          setSelectedIdea(prev => prev ? {...prev, ...platform} : prev);
+        }
+      }
+    } catch(e) { console.log("Platform content error:", e.message); }
+    finally { setPlatformLoading(p => ({...p,[key]:false})); }
+  }, [platformLoading]);
 
   // Auto-search creators when opp is selected
   useEffect(() => { if (selectedOpp) searchCreators(selectedOpp.id); }, [selectedOpp]);
@@ -854,12 +901,21 @@ export default function BrandformanceEngine() {
   // ══════════════════════════════════════════════════════════════
   // VIEW 4: STORYBOARD
   // ══════════════════════════════════════════════════════════════
+  // Auto-generate platform content when entering storyboard
+  useEffect(() => {
+    if (currentView === "storyboard" && selectedIdea && selectedOpp && !selectedIdea.youtubeShorts) {
+      generatePlatformContent(selectedIdea, selectedOpp);
+    }
+  }, [currentView, selectedIdea, selectedOpp]);
+
   const renderStoryboard = () => {
     if (!selectedOpp || !selectedIdea) return null;
     const opp = selectedOpp;
     const idea = selectedIdea;
     const yt = idea.youtubeShorts || {};
     const ig = idea.instagramReels || {};
+    const pKey = `${opp.id}-${idea.rank||0}`;
+    const isPlatformLoading = platformLoading[pKey];
     const ct = CONTENT_TYPES.find(c => c.code === idea.contentType) || CONTENT_TYPES[0];
     const ss = STAGE_STYLES[idea.stage] || {};
 
@@ -929,6 +985,12 @@ export default function BrandformanceEngine() {
         </div>
 
         {/* 2-Column: YouTube + Instagram */}
+        {isPlatformLoading && !yt.title && (
+          <div style={{ textAlign:"center", padding:40, background:C.card, borderRadius:14, border:`1px solid ${C.border}`, marginBottom:16 }}>
+            <div style={{ display:"inline-block", width:32, height:32, border:"3px solid #E2E8F0", borderTopColor:C.primary, borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
+            <div style={{ color:C.textSoft, fontSize:13, marginTop:12 }}>플랫폼별 콘텐츠를 생성 중...</div>
+          </div>
+        )}
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
           <PlatformCard platform="YouTube Shorts" color={C.youtube} icon="▶" maxDur="60s" data={yt} />
           <PlatformCard platform="Instagram Reels" color={C.instagram} icon="📷" maxDur="90s" data={ig} />

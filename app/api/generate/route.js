@@ -1,6 +1,9 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 
+// Vercel serverless function max duration (seconds)
+export const maxDuration = 60;
+
 function getApiKey() {
   if (process.env.ANTHROPIC_API_KEY) {
     return process.env.ANTHROPIC_API_KEY;
@@ -27,7 +30,7 @@ async function callClaude(apiKey, system, messages, retries = 3) {
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 4096,
+          max_tokens: 3000,
           system,
           messages,
         }),
