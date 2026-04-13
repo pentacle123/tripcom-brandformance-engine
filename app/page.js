@@ -2,25 +2,27 @@
 import React, { useState, useCallback } from "react";
 
 // ══════════════════════════════════════════════════════════════
-// Trip.com AI Brandformance Engine v3.0
-// 3-Tab Structure | Opportunity-Driven | Claude API
+// Trip.com AI Brandformance Engine v4.0
+// Step Progress Navigation | Light Theme | Opportunity-Driven
 // ══════════════════════════════════════════════════════════════
 
-// ── COLOR SYSTEM ──
+// ── COLOR SYSTEM (LIGHT THEME) ──
 const C = {
   primary: "#0770E3",
   secondary: "#FF6B00",
-  dark: "#0A1628",
-  card: "#13203A",
-  cardHover: "#182848",
-  surface: "#0E1A2E",
-  border: "rgba(7,112,227,0.20)",
-  text: "#E8ECF1",
+  bg: "#F5F7FA",
+  card: "#FFFFFF",
+  cardHover: "#F8FAFC",
+  surface: "#F0F2F5",
+  border: "#E8ECF0",
+  borderActive: "#0770E3",
+  text: "#1A1A2E",
   textSoft: "#8B99AE",
-  accent: "#00D4AA",
+  accent: "#00B894",
   warn: "#FF4757",
-  gold: "#FFD700",
+  gold: "#F59E0B",
   purple: "#8B5CF6",
+  heroGrad: "linear-gradient(135deg, #0770E3, #0055B8)",
 };
 
 const STAGE_COLORS = { Dream: "#FF9A9E", Plan: "#A8E6CF", Book: C.primary, Share: C.gold };
@@ -213,23 +215,40 @@ const SEASON_DATA = {
   "스페인": [75,70,65,55,65,60,45,45,45,55,55,55],
 };
 
+// ── LEVEL BADGES ──
+const LvS = {
+  HIGH: { fg: "#15803d", bg: "#dcfce7" },
+  MEDIUM: { fg: "#a16207", bg: "#fef9c3" },
+  LOW: { fg: "#1d4ed8", bg: "#dbeafe" },
+};
+const getLevel = (vol) => vol >= 100000 ? "HIGH" : vol >= 20000 ? "MEDIUM" : "LOW";
+
+// ── PROGRESS STEPS ──
+const PROGRESS_STEPS = [
+  { n: "1", label: "기회 발견" },
+  { n: "2", label: "기회 분석" },
+  { n: "3", label: "AI 아이디어" },
+  { n: "4", label: "스토리보드" },
+];
+
 // ══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
 export default function Home() {
-  const [activeTab, setActiveTab] = useState(0);
+  const [stage, setStage] = useState(0);
+  const [maxStage, setMaxStage] = useState(0);
+  const [selectedOpp, setSelectedOpp] = useState(null);
+  const [selectedIdea, setSelectedIdea] = useState(null);
+  const [tab, setTab] = useState("opportunity");
   const [expandedCards, setExpandedCards] = useState({});
   const [generating, setGenerating] = useState(false);
   const [generatedIdeas, setGeneratedIdeas] = useState({});
   const [selectedUsp, setSelectedUsp] = useState(null);
 
+  const goStage = (s) => { setStage(s); setMaxStage(prev => Math.max(prev, s)); };
+  const pick = (opp) => { setSelectedOpp(opp); goStage(1); };
+  const reset = () => { setStage(0); setSelectedOpp(null); setSelectedIdea(null); setMaxStage(0); };
   const toggleCard = (id) => setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
-
-  const tabs = [
-    { name: "기회 발견", icon: "◉" },
-    { name: "콘텐츠 전략", icon: "◇" },
-    { name: "USP × 크리에이터", icon: "▸" },
-  ];
 
   const generateIdeas = async (oppId, context) => {
     setGenerating(true);
@@ -270,137 +289,7 @@ export default function Home() {
     setGenerating(false);
   };
 
-  return (
-    <div style={{ minHeight: "100vh", background: `linear-gradient(180deg, ${C.dark} 0%, ${C.surface} 100%)`, color: C.text, fontFamily: "'Pretendard', -apple-system, sans-serif" }}>
-      {/* HEADER */}
-      <header style={{ background: "rgba(10,22,40,0.95)", borderBottom: `1px solid ${C.border}`, padding: "12px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", backdropFilter: "blur(10px)", position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ background: C.primary, borderRadius: 8, padding: "6px 12px", fontWeight: 800, fontSize: 14, letterSpacing: 1 }}>Trip.com</div>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 15 }}>AI Brandformance Engine</div>
-            <div style={{ fontSize: 10, color: C.textSoft, letterSpacing: 2, textTransform: "uppercase" }}>Pentacle x AI</div>
-          </div>
-        </div>
-        <div style={{ fontSize: 11, color: C.textSoft }}>v3.0</div>
-      </header>
-
-      {/* TAB BAR */}
-      <div style={{ background: C.dark, borderBottom: `1px solid ${C.border}`, padding: "0 24px", position: "sticky", top: 50, zIndex: 99 }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 4, padding: "8px 0" }}>
-          {tabs.map((tab, i) => (
-            <button key={i} onClick={() => setActiveTab(i)} style={{
-              background: activeTab === i ? C.primary : "transparent",
-              color: activeTab === i ? "#fff" : C.textSoft,
-              border: "none", borderRadius: 8, padding: "8px 18px", cursor: "pointer",
-              fontSize: 13, fontWeight: activeTab === i ? 700 : 500, transition: "all 0.2s",
-              display: "flex", alignItems: "center", gap: 6,
-            }}>
-              <span style={{ fontSize: 10 }}>{tab.icon}</span> {tab.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* CONTENT */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px" }}>
-        {activeTab === 0 && (
-          <TabOpportunity
-            expandedCards={expandedCards} toggleCard={toggleCard}
-            generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas}
-          />
-        )}
-        {activeTab === 1 && <TabContent />}
-        {activeTab === 2 && (
-          <TabUSP
-            selectedUsp={selectedUsp} setSelectedUsp={setSelectedUsp}
-            generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas}
-            expandedCards={expandedCards} toggleCard={toggleCard}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════════════════════
-// TAB 1: OPPORTUNITY DISCOVERY
-// ══════════════════════════════════════════════════════════════
-function TabOpportunity({ expandedCards, toggleCard, generating, generatedIdeas, generateIdeas }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
-      {/* HERO */}
-      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center" }}>
-        <div style={{ flex: "1 1 55%", minWidth: 320 }}>
-          <div style={{ fontSize: 11, color: C.primary, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>TRIP.COM x PENTACLE</div>
-          <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1.3, marginBottom: 8 }}>AI Brandformance Engine</div>
-          <div style={{ fontSize: 13, color: C.textSoft, lineHeight: 1.6 }}>
-            검색 데이터 기반 기회 발견 → 숏폼 콘텐츠 전략 → AI 아이디어 생성까지 원스톱 전략 시스템
-          </div>
-        </div>
-        <div style={{ flex: "1 1 40%", minWidth: 300, display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          {[
-            { label: "해외 출국자", value: "29.24M", sub: "2025년 내국인 해외관광", color: C.text },
-            { label: "트립닷컴 검색", value: "9.49M", sub: "브랜드 직접 검색", color: C.primary },
-            { label: "발견 공백", value: "14.60M+", sub: "목적지만 검색 (기회)", color: C.secondary },
-          ].map((d, i) => (
-            <div key={i} style={{ background: C.card, borderRadius: 16, padding: "16px 20px", minWidth: 150, border: `1px solid ${C.border}` }}>
-              <div style={{ fontSize: 11, color: C.textSoft, marginBottom: 4 }}>{d.label}</div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: d.color }}>{d.value}</div>
-              <div style={{ fontSize: 11, color: C.textSoft, marginTop: 2 }}>{d.sub}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* CONCEPT BANNER */}
-      <div style={{ background: `linear-gradient(90deg, ${C.primary}15, ${C.secondary}10)`, borderRadius: 16, padding: "14px 24px", border: `1px solid ${C.border}`, textAlign: "center" }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>
-          검색 데이터에서 발견한 13개 기회 클러스터 — 각 기회에서 바로 숏폼 아이디어를 AI 생성합니다
-        </div>
-      </div>
-
-      {/* CATEGORY A: DESTINATION */}
-      <div>
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>A. 여행 목적지에서 출발한 기회</div>
-        <div style={{ fontSize: 13, color: C.textSoft, marginBottom: 16 }}>목적지 검색 데이터 기반 7개 기회 클러스터</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {DESTINATION_OPPORTUNITIES.map(opp => (
-            <OpportunityCard
-              key={opp.id} opp={opp} color={C.primary}
-              expandedCards={expandedCards} toggleCard={toggleCard}
-              generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* CATEGORY B: INTEREST */}
-      <div>
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>B. 소비자 관심사에서 출발한 기회</div>
-        <div style={{ fontSize: 13, color: C.textSoft, marginBottom: 16 }}>라이프스타일 관심사 기반 6개 기회 클러스터</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {INTEREST_OPPORTUNITIES.map(opp => (
-            <OpportunityCard
-              key={opp.id} opp={opp} color={C.secondary}
-              expandedCards={expandedCards} toggleCard={toggleCard}
-              generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════════════════════
-// OPPORTUNITY CARD (Collapse / Expand)
-// ══════════════════════════════════════════════════════════════
-function OpportunityCard({ opp, color, expandedCards, toggleCard, generating, generatedIdeas, generateIdeas }) {
-  const isOpen = expandedCards[opp.id];
-  const ideas = generatedIdeas[opp.id] || [];
-  const stageColor = STAGE_COLORS[opp.stage] || C.primary;
-
-  const handleGenerate = () => {
+  const handleGenerateForOpp = (opp) => {
     const context = `기회: ${opp.title}
 총월간검색량: ${opp.totalMonthlyVol.toLocaleString()}
 인구통계: ${opp.demographics}
@@ -412,81 +301,495 @@ USP연결: ${opp.uspConnection}
 
 이 기회에서 숏폼 아이디어 5개를 생성해주세요.`;
     generateIdeas(opp.id, context);
+    goStage(2);
   };
 
   return (
-    <div style={{ background: C.card, borderRadius: 16, border: `1px solid ${C.border}`, borderLeft: `3px solid ${color}`, overflow: "hidden" }}>
-      {/* COLLAPSED */}
-      <div onClick={() => toggleCard(opp.id)} style={{ padding: 24, cursor: "pointer", display: "flex", alignItems: "flex-start", gap: 16 }}>
-        <div style={{ fontSize: 28, flexShrink: 0, lineHeight: 1 }}>{opp.icon}</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
-            <div style={{ fontSize: 15, fontWeight: 700 }}>{opp.title}</div>
-            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 6, fontWeight: 700, background: `${stageColor}25`, color: stageColor }}>{opp.stage}</span>
-            {opp.e3tag && (
-              <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 6, fontWeight: 700, background: `${C.gold}20`, color: C.gold }}>{opp.e3tag}</span>
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'Pretendard', -apple-system, sans-serif" }}>
+      {/* PROGRESS BAR */}
+      <div style={{ background: "#fff", borderBottom: "1px solid " + C.border, padding: "14px 24px", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ maxWidth: 960, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ background: C.primary, borderRadius: 6, padding: "4px 10px", fontWeight: 800, fontSize: 12, color: "#fff", letterSpacing: 1 }}>Trip.com</div>
+              <span style={{ fontWeight: 700, fontSize: 13, color: C.text }}>AI Brandformance Engine</span>
+            </div>
+            {stage > 0 && (
+              <button onClick={reset} style={{ background: "none", border: "none", color: "#ccc", fontSize: 9, cursor: "pointer", padding: "4px 8px" }}>
+                ← 처음으로
+              </button>
             )}
           </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
-            <span style={{ fontSize: 20, fontWeight: 800, color: C.primary }}>{opp.totalMonthlyVol.toLocaleString()}</span>
-            <span style={{ fontSize: 11, color: C.textSoft }}>/월</span>
-            <span style={{ fontSize: 11, color: C.textSoft }}>· 연간 {opp.annualVol.toLocaleString()}</span>
+          {/* STEP INDICATORS */}
+          <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+            {PROGRESS_STEPS.map((step, i) => {
+              const visited = i <= maxStage;
+              const current = i === stage;
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "center", flex: 1 }}>
+                  <div
+                    onClick={() => { if (visited) goStage(i); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6, cursor: visited ? "pointer" : "default",
+                      opacity: visited ? 1 : 0.4,
+                    }}
+                  >
+                    <div style={{
+                      width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                      background: current ? C.primary : visited ? C.primary + "20" : "#eee",
+                      color: current ? "#fff" : visited ? C.primary : "#ccc",
+                      fontSize: 10, fontWeight: 700,
+                    }}>
+                      {step.n}
+                    </div>
+                    <span style={{ fontSize: 10, fontWeight: current ? 700 : 500, color: current ? C.primary : visited ? C.text : "#ccc" }}>
+                      {step.label}
+                    </span>
+                  </div>
+                  {i < PROGRESS_STEPS.length - 1 && (
+                    <div style={{ flex: 1, height: 3, background: i < maxStage ? C.primary : "#eee", margin: "0 8px", borderRadius: 2 }} />
+                  )}
+                </div>
+              );
+            })}
           </div>
-          <div style={{ fontSize: 12, color: C.accent, fontWeight: 600, lineHeight: 1.5 }}>{opp.keyInsight}</div>
         </div>
-        <span style={{ fontSize: 18, color: C.textSoft, transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s", flexShrink: 0 }}>▾</span>
       </div>
 
-      {/* EXPANDED */}
-      {isOpen && (
-        <div style={{ padding: "0 24px 24px", borderTop: `1px solid ${C.border}` }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, paddingTop: 16 }}>
-            <div style={{ background: C.surface, borderRadius: 12, padding: 14 }}>
-              <div style={{ fontSize: 11, color: C.textSoft, marginBottom: 4 }}>인구통계</div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>{opp.demographics}</div>
+      {/* CONTENT */}
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 16px" }}>
+        {stage === 0 && (
+          <StageHome
+            tab={tab} setTab={setTab} pick={pick}
+            expandedCards={expandedCards} toggleCard={toggleCard}
+            selectedUsp={selectedUsp} setSelectedUsp={setSelectedUsp}
+            generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas}
+          />
+        )}
+        {stage === 1 && selectedOpp && (
+          <StageDetail
+            opp={selectedOpp}
+            onGenerate={() => handleGenerateForOpp(selectedOpp)}
+            onBack={() => goStage(0)}
+            generating={generating}
+          />
+        )}
+        {stage === 2 && selectedOpp && (
+          <StageIdeas
+            opp={selectedOpp}
+            ideas={generatedIdeas[selectedOpp.id] || []}
+            generating={generating}
+            onSelectIdea={(idea) => { setSelectedIdea(idea); goStage(3); }}
+            onBack={() => goStage(1)}
+            onRegenerate={() => handleGenerateForOpp(selectedOpp)}
+          />
+        )}
+        {stage === 3 && selectedIdea && (
+          <StageStoryboard
+            idea={selectedIdea}
+            opp={selectedOpp}
+            onBack={() => goStage(2)}
+          />
+        )}
+      </div>
+
+      {/* FOOTER */}
+      <div style={{ textAlign: "center", padding: "32px 0 16px", fontSize: 7, color: "#ddd", letterSpacing: 2 }}>
+        PENTACLE × AI ALGORITHM PERFORMANCE PLATFORM
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// STAGE 0: HOME
+// ══════════════════════════════════════════════════════════════
+function StageHome({ tab, setTab, pick, expandedCards, toggleCard, selectedUsp, setSelectedUsp, generating, generatedIdeas, generateIdeas }) {
+  const tabs = [
+    { id: "opportunity", icon: "◉", label: "기회 발견" },
+    { id: "content", icon: "◇", label: "콘텐츠 전략" },
+    { id: "usp", icon: "▸", label: "USP × 크리에이터" },
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* HERO: 2-COLUMN */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        {/* LEFT: Blue gradient */}
+        <div style={{
+          background: C.heroGrad, borderRadius: 14, padding: "22px 20px", color: "#fff",
+          display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 180,
+        }}>
+          <div>
+            <div style={{ fontSize: 9, opacity: 0.6, letterSpacing: 2, marginBottom: 8 }}>TRIP.COM × PENTACLE</div>
+            <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.3, marginBottom: 8 }}>AI Brandformance Engine</div>
+            <div style={{ fontSize: 10, opacity: 0.65, lineHeight: 1.6 }}>
+              소비자 검색 데이터에서 Trip.com이 발견될 기회를 찾고,
             </div>
-            <div style={{ background: C.surface, borderRadius: 12, padding: 14 }}>
-              <div style={{ fontSize: 11, color: C.textSoft, marginBottom: 4 }}>피크 시즌</div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>{opp.peakSeason}</div>
-            </div>
-            <div style={{ background: C.surface, borderRadius: 12, padding: 14, gridColumn: "1 / -1" }}>
-              <div style={{ fontSize: 11, color: C.textSoft, marginBottom: 4 }}>검색 여정</div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>
-                {opp.pathJourney.split("→").map((step, i, arr) => (
-                  <span key={i}>
-                    <span style={{ color: C.text }}>{step.trim()}</span>
-                    {i < arr.length - 1 && <span style={{ color: C.primary, margin: "0 4px" }}> → </span>}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div style={{ background: C.surface, borderRadius: 12, padding: 14 }}>
-              <div style={{ fontSize: 11, color: C.textSoft, marginBottom: 4 }}>USP 연결</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: C.accent }}>{opp.uspConnection}</div>
-            </div>
-            <div style={{ background: C.surface, borderRadius: 12, padding: 14 }}>
-              <div style={{ fontSize: 11, color: C.textSoft, marginBottom: 4 }}>데이터 근거</div>
-              <div style={{ fontSize: 12, fontWeight: 600 }}>{opp.dataProof}</div>
-            </div>
-            <div style={{ background: `${C.secondary}10`, borderRadius: 12, padding: 14, gridColumn: "1 / -1", border: `1px solid ${C.secondary}30` }}>
-              <div style={{ fontSize: 11, color: C.secondary, marginBottom: 4, fontWeight: 700 }}>콘텐츠 훅 예시</div>
-              <div style={{ fontSize: 13, fontWeight: 700 }}>{opp.contentHook}</div>
+            <div style={{ fontSize: 10, opacity: 0.65, lineHeight: 1.6 }}>
+              알고리즘이 좋아하는 숏폼 콘텐츠로 연결합니다
             </div>
           </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 12 }}>
+            <span style={{ background: "rgba(255,255,255,0.15)", borderRadius: 6, padding: "3px 8px", fontSize: 9, fontWeight: 600 }}>BRAND</span>
+            <span style={{ fontSize: 9, opacity: 0.5 }}>×</span>
+            <span style={{ background: "rgba(255,255,255,0.15)", borderRadius: 6, padding: "3px 8px", fontSize: 9, fontWeight: 600 }}>PERFORMANCE</span>
+            <span style={{ fontSize: 9, opacity: 0.5 }}>=</span>
+            <span style={{ background: "rgba(255,255,255,0.25)", borderRadius: 6, padding: "3px 8px", fontSize: 9, fontWeight: 700 }}>BRANDFORMANCE</span>
+          </div>
+        </div>
 
-          {/* GENERATE BUTTON */}
-          <button onClick={handleGenerate} disabled={generating} style={{
-            marginTop: 16, background: generating ? C.textSoft : C.primary, color: "#fff",
-            border: "none", borderRadius: 12, padding: "0 28px", fontSize: 15, fontWeight: 700,
-            cursor: generating ? "wait" : "pointer", width: "100%", height: 48, transition: "all 0.2s",
-          }}>
-            {generating ? "아이디어 생성 중..." : "🎬 이 기회에서 숏폼 아이디어 생성"}
+        {/* RIGHT: White card */}
+        <div style={{
+          background: "#fff", borderRadius: 14, padding: "22px 20px", border: "1px solid #f0f0f0",
+          display: "flex", flexDirection: "column", justifyContent: "space-between",
+        }}>
+          <div>
+            <div style={{ fontSize: 8, color: "#ccc", letterSpacing: 2, marginBottom: 8 }}>DISCOVERY GAP</div>
+            <div style={{ fontSize: 14, fontWeight: 900, color: C.text, lineHeight: 1.4 }}>
+              29.24M 명의 해외 여행자 중
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 900, color: C.secondary, lineHeight: 1.4 }}>
+              14.60M+ 이 Trip.com을 발견하지 못하고 있습니다
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 16 }}>
+            <div style={{ textAlign: "center", flex: 1 }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: C.text }}>29.24M</div>
+              <div style={{ fontSize: 9, color: C.textSoft }}>해외 출국자</div>
+            </div>
+            <div style={{ fontSize: 14, color: C.textSoft, fontWeight: 700 }}>-</div>
+            <div style={{ textAlign: "center", flex: 1 }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: C.primary }}>9.49M</div>
+              <div style={{ fontSize: 9, color: C.textSoft }}>트립닷컴 검색</div>
+            </div>
+            <div style={{ fontSize: 14, color: C.textSoft, fontWeight: 700 }}>=</div>
+            <div style={{ textAlign: "center", flex: 1 }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: C.secondary }}>14.60M+</div>
+              <div style={{ fontSize: 9, color: C.textSoft }}>발견 공백</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CONCEPT BANNER */}
+      <div style={{
+        background: C.primary + "08", border: "1px solid " + C.primary + "20", borderRadius: 10, padding: 12, textAlign: "center",
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: C.text, lineHeight: 1.6 }}>
+          여행을 검색하는 소비자 + 여행을 검색하지 않지만 관심사에서 여행자가 되는 소비자 = Trip.com의 성장 기회
+        </div>
+      </div>
+
+      {/* TAB SELECTOR */}
+      <div style={{ background: "#fff", borderRadius: 10, padding: 4, border: "1px solid #f0f0f0", display: "flex", gap: 4 }}>
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            style={{
+              flex: 1, padding: "8px 0", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600,
+              background: tab === t.id ? C.heroGrad : "transparent",
+              color: tab === t.id ? "#fff" : C.textSoft,
+              transition: "all 0.2s",
+            }}
+          >
+            {t.icon} {t.label}
           </button>
+        ))}
+      </div>
 
-          {/* IDEAS */}
-          {ideas.length > 0 && (
-            <IdeaCards ideas={ideas} expandedCards={expandedCards} toggleCard={toggleCard} prefix={opp.id} />
+      {/* TAB CONTENT */}
+      {tab === "opportunity" && <TabOpportunityList pick={pick} />}
+      {tab === "content" && <TabContent />}
+      {tab === "usp" && (
+        <TabUSP
+          selectedUsp={selectedUsp} setSelectedUsp={setSelectedUsp}
+          generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas}
+          expandedCards={expandedCards} toggleCard={toggleCard}
+        />
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// TAB: OPPORTUNITY LIST (2-col grid cards)
+// ══════════════════════════════════════════════════════════════
+function TabOpportunityList({ pick }) {
+  const totalDestVol = DESTINATION_OPPORTUNITIES.reduce((s, o) => s + o.annualVol, 0);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      {/* CATEGORY A HEADER */}
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: C.text }}>여행 목적지에서 출발한 기회</div>
+          <span style={{ background: C.primary, color: "#fff", fontSize: 9, padding: "3px 10px", borderRadius: 6, fontWeight: 600 }}>
+            연간 {(totalDestVol / 10000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}만+ 검색
+          </span>
+        </div>
+        <div style={{ fontSize: 11, color: C.textSoft }}>
+          같은 '여행'을 검색해도 목적지에 따라 궁금해하는 것은 완전히 다릅니다
+        </div>
+      </div>
+
+      {/* CATEGORY A CARDS */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        {DESTINATION_OPPORTUNITIES.map(opp => (
+          <OppCard key={opp.id} opp={opp} color={C.primary} onClick={() => pick(opp)} />
+        ))}
+      </div>
+
+      {/* CATEGORY B HEADER */}
+      <div style={{ marginTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: C.text }}>소비자 관심사에서 출발한 기회</div>
+          <span style={{ background: C.secondary, color: "#fff", fontSize: 9, padding: "3px 10px", borderRadius: 6, fontWeight: 600 }}>
+            라이프스타일 기반
+          </span>
+        </div>
+        <div style={{ fontSize: 11, color: C.textSoft }}>
+          여행을 검색하지 않지만 관심사에서 여행자가 되는 소비자 클러스터
+        </div>
+      </div>
+
+      {/* CATEGORY B CARDS */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        {INTEREST_OPPORTUNITIES.map(opp => (
+          <OppCard key={opp.id} opp={opp} color={C.secondary} onClick={() => pick(opp)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── OPPORTUNITY CARD (Grid item) ──
+function OppCard({ opp, color, onClick }) {
+  const level = getLevel(opp.totalMonthlyVol);
+  const lv = LvS[level];
+  const stageColor = STAGE_COLORS[opp.stage] || C.primary;
+  const annualMan = Math.round(opp.annualVol / 10000);
+
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = color + "30";
+        e.currentTarget.style.boxShadow = "0 8px 28px " + color + "0A";
+        e.currentTarget.style.transform = "translateY(-2px)";
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = "#f0f0f0";
+        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.transform = "none";
+      }}
+      style={{
+        background: "#fff", borderRadius: 14, border: "1px solid #f0f0f0", overflow: "hidden",
+        cursor: "pointer", transition: "all 0.2s",
+      }}
+    >
+      {/* TOP COLOR BORDER */}
+      <div style={{ height: 3, background: color }} />
+      <div style={{ padding: "22px 20px" }}>
+        {/* ICON + LEVEL */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+          <span style={{ fontSize: 34 }}>{opp.icon}</span>
+          <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: lv.bg, color: lv.fg }}>{level}</span>
+        </div>
+        {/* TITLE */}
+        <div style={{ fontSize: 16, fontWeight: 900, color: C.text, marginBottom: 6 }}>{opp.title}</div>
+        {/* VOLUME */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 6 }}>
+          <span style={{ fontSize: 24, fontWeight: 800, color }}>{opp.totalMonthlyVol.toLocaleString()}</span>
+          <span style={{ fontSize: 10, color: C.textSoft }}>/월</span>
+        </div>
+        <div style={{ fontSize: 10, color: C.textSoft, marginBottom: 8 }}>연간 {annualMan}만 검색</div>
+        {/* INSIGHT */}
+        <div style={{ fontSize: 11, color: "#888", lineHeight: 1.5, marginBottom: 10 }}>{opp.keyInsight}</div>
+        {/* STAGE PILL + DESTINATION TAGS */}
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
+          <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 6, fontWeight: 700, background: stageColor + "20", color: stageColor }}>{opp.stage}</span>
+          {(opp.destinations || []).slice(0, 3).map((d, i) => (
+            <span key={i} style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, background: "#f5f5f5", color: "#888" }}>{d}</span>
+          ))}
+          {opp.e3tag && (
+            <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 6, fontWeight: 700, background: C.gold + "20", color: C.gold }}>{opp.e3tag}</span>
           )}
+        </div>
+        {/* USP CONNECTION */}
+        <div style={{ fontSize: 10, color: C.accent, fontWeight: 600 }}>USP: {opp.uspConnection}</div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// STAGE 1: OPPORTUNITY DETAIL (FULL-SCREEN DRILL-DOWN)
+// ══════════════════════════════════════════════════════════════
+function StageDetail({ opp, onGenerate, onBack, generating }) {
+  const stageColor = STAGE_COLORS[opp.stage] || C.primary;
+  const brandColor = opp.id.startsWith("opp-d") ? C.primary : C.secondary;
+
+  const contextGrid = [
+    { label: "WHO", q: "누가 검색하는가?", color: "#22c55e", content: opp.demographics },
+    { label: "WHEN", q: "언제 검색하는가?", color: "#f59e0b", content: opp.peakSeason },
+    { label: "JOURNEY", q: "어떤 경로로 검색하는가?", color: "#3b82f6", content: opp.pathJourney },
+    { label: "PAIN", q: "소비자의 고통은?", color: "#ef4444", content: opp.keyInsight },
+    { label: "USP FIT", q: "Trip.com이 해결할 수 있는 것", color: "#22c55e", content: opp.uspConnection },
+    { label: "HOOK", q: "콘텐츠 진입점", color: "#a855f7", content: opp.contentHook },
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* BACK */}
+      <button onClick={onBack} style={{ background: "none", border: "none", color: "#ccc", fontSize: 9, cursor: "pointer", padding: 0, textAlign: "left" }}>
+        ← 이전 단계
+      </button>
+
+      {/* HEADER */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 28 }}>{opp.icon}</span>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 900, color: C.text }}>{opp.title}</div>
+            <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 6, fontWeight: 700, background: stageColor + "20", color: stageColor }}>{opp.stage}</span>
+          </div>
+        </div>
+        <button
+          onClick={onGenerate}
+          disabled={generating}
+          style={{
+            background: generating ? C.textSoft : "linear-gradient(135deg, " + C.primary + ", " + C.primary + "CC)",
+            color: "#fff", border: "none", borderRadius: 10, padding: "10px 24px", fontSize: 12, fontWeight: 700,
+            cursor: generating ? "wait" : "pointer", transition: "all 0.2s",
+          }}
+        >
+          {generating ? "생성 중..." : "AI 아이디어 생성 실행"}
+        </button>
+      </div>
+
+      {/* CONTEXT GRID */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        {contextGrid.map((item, i) => (
+          <div key={i} style={{
+            background: "#fff", borderRadius: 12, padding: "16px 18px", border: "1px solid #f0f0f0",
+            display: "flex", gap: 10,
+          }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", background: item.color, flexShrink: 0, marginTop: 4 }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: item.color, marginBottom: 2 }}>{item.label}</div>
+              <div style={{ fontSize: 10, color: "#aaa", marginBottom: 6 }}>{item.q}</div>
+              <div style={{ fontSize: 12, color: C.text, fontWeight: 500, lineHeight: 1.5 }}>{item.content}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* DATA EVIDENCE */}
+      <div style={{ background: "#fafafa", borderLeft: "2px solid " + brandColor + "40", borderRadius: 8, padding: "12px 16px" }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: brandColor, marginBottom: 4 }}>DATA EVIDENCE</div>
+        <div style={{ fontSize: 11, color: C.text, lineHeight: 1.6 }}>{opp.dataProof}</div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// STAGE 2: AI IDEAS
+// ══════════════════════════════════════════════════════════════
+function StageIdeas({ opp, ideas, generating, onSelectIdea, onBack, onRegenerate }) {
+  const stageColor = STAGE_COLORS[opp.stage] || C.primary;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* BACK */}
+      <button onClick={onBack} style={{ background: "none", border: "none", color: "#ccc", fontSize: 9, cursor: "pointer", padding: 0, textAlign: "left" }}>
+        ← 이전 단계
+      </button>
+
+      {/* HEADER */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ fontSize: 24 }}>{opp.icon}</span>
+        <div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: C.text }}>{opp.title}</div>
+          <div style={{ fontSize: 10, color: C.textSoft }}>AI 아이디어 생성 결과</div>
+        </div>
+      </div>
+
+      {/* LOADING */}
+      {generating && (
+        <div style={{ background: "#fff", borderRadius: 14, padding: "40px 20px", border: "1px solid #f0f0f0", textAlign: "center" }}>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>🤖</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.primary }}>아이디어 생성 중...</div>
+          <div style={{ fontSize: 11, color: C.textSoft, marginTop: 4 }}>Claude가 검색 데이터를 분석하고 있습니다</div>
+        </div>
+      )}
+
+      {/* IDEA CARDS */}
+      {!generating && ideas.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.accent }}>숏폼 아이디어 {ideas.length}개 생성 완료</div>
+          {ideas.map((idea, i) => {
+            const typeInfo = CONTENT_TYPES.find(t => t.id === idea.contentType) || CONTENT_TYPES[0];
+            const ideaStageColor = STAGE_COLORS[idea.stage] || C.primary;
+            return (
+              <div key={i} style={{ background: "#fff", borderRadius: 12, border: "1px solid #f0f0f0", overflow: "hidden" }}>
+                <div style={{ padding: "18px 20px" }}>
+                  {/* BADGES */}
+                  <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
+                    <span style={{ background: C.primary, color: "#fff", fontSize: 9, padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>#{idea.rank || i + 1}</span>
+                    <span style={{ background: typeInfo.color + "20", color: typeInfo.color, fontSize: 9, padding: "2px 8px", borderRadius: 4, fontWeight: 600 }}>{idea.contentType}. {typeInfo.name}</span>
+                    <span style={{ background: ideaStageColor + "20", color: ideaStageColor, fontSize: 9, padding: "2px 8px", borderRadius: 4, fontWeight: 600 }}>{idea.stage}</span>
+                  </div>
+                  {/* TITLE */}
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 4 }}>{idea.title}</div>
+                  {/* HOOK */}
+                  <div style={{ fontSize: 12, color: C.secondary, fontWeight: 600, marginBottom: 10 }}>"{idea.hook3s}"</div>
+                  {/* 4-SCENE FLOW */}
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {(idea.sceneFlow || []).map((scene, j) => (
+                      <div key={j} style={{
+                        flex: 1, background: C.primary + "08", borderRadius: 6, padding: "6px 8px", fontSize: 10, color: C.text,
+                        border: "1px solid " + C.primary + "15", textAlign: "center",
+                      }}>
+                        <span style={{ color: C.primary, fontWeight: 700 }}>{j + 1}.</span> {scene}
+                      </div>
+                    ))}
+                  </div>
+                  {/* USP + STORYBOARD BUTTON */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
+                    <div style={{ fontSize: 11, color: C.accent, fontWeight: 600 }}>USP: {idea.uspConnection}</div>
+                    <button
+                      onClick={() => onSelectIdea(idea)}
+                      style={{
+                        background: "none", border: "1px solid " + C.primary + "30", borderRadius: 8, padding: "5px 14px",
+                        fontSize: 10, fontWeight: 600, color: C.primary, cursor: "pointer",
+                      }}
+                    >
+                      스토리보드 보기 →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* NO IDEAS YET */}
+      {!generating && ideas.length === 0 && (
+        <div style={{ background: "#fff", borderRadius: 14, padding: "40px 20px", border: "1px solid #f0f0f0", textAlign: "center" }}>
+          <div style={{ fontSize: 14, color: C.textSoft }}>아이디어가 아직 생성되지 않았습니다</div>
+          <button
+            onClick={onRegenerate}
+            style={{
+              marginTop: 12, background: "linear-gradient(135deg, " + C.primary + ", " + C.primary + "CC)",
+              color: "#fff", border: "none", borderRadius: 10, padding: "10px 24px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            }}
+          >
+            AI 아이디어 생성
+          </button>
         </div>
       )}
     </div>
@@ -494,83 +797,87 @@ USP연결: ${opp.uspConnection}
 }
 
 // ══════════════════════════════════════════════════════════════
-// IDEA CARDS
+// STAGE 3: STORYBOARD VIEW
 // ══════════════════════════════════════════════════════════════
-function IdeaCards({ ideas, expandedCards, toggleCard, prefix }) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
-      <div style={{ fontSize: 14, fontWeight: 700, color: C.accent }}>숏폼 아이디어 {ideas.length}개 생성 완료</div>
-      {ideas.map((idea, i) => {
-        const cardId = `${prefix}-idea-${i}`;
-        const isOpen = expandedCards[cardId];
-        const typeInfo = CONTENT_TYPES.find(t => t.id === idea.contentType) || CONTENT_TYPES[0];
-        const stageColor = STAGE_COLORS[idea.stage] || C.primary;
-        return (
-          <div key={i} style={{ background: C.surface, borderRadius: 12, border: `1px solid ${C.border}`, overflow: "hidden" }}>
-            {/* COLLAPSED */}
-            <div onClick={() => toggleCard(cardId)} style={{ padding: "14px 16px", cursor: "pointer" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
-                    <span style={{ background: C.primary, color: "#fff", fontSize: 10, padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>#{idea.rank || i + 1}</span>
-                    <span style={{ background: `${typeInfo.color}30`, color: typeInfo.color, fontSize: 10, padding: "2px 8px", borderRadius: 4, fontWeight: 600 }}>{idea.contentType}. {typeInfo.name}</span>
-                    <span style={{ background: `${stageColor}25`, color: stageColor, fontSize: 10, padding: "2px 8px", borderRadius: 4, fontWeight: 600 }}>{idea.stage}</span>
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{idea.title}</div>
-                  <div style={{ fontSize: 12, color: C.secondary, fontWeight: 600 }}>🎣 "{idea.hook3s}"</div>
-                </div>
-                <span style={{ fontSize: 16, color: C.textSoft, transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▾</span>
-              </div>
-              {/* SCENE FLOW */}
-              <div style={{ display: "flex", gap: 4, marginTop: 8, flexWrap: "wrap" }}>
-                {(idea.sceneFlow || []).map((scene, j) => (
-                  <div key={j} style={{ background: `${C.primary}10`, borderRadius: 6, padding: "4px 8px", fontSize: 10, color: C.text, border: `1px solid ${C.primary}20`, flex: "1 1 100px", textAlign: "center" }}>
-                    <span style={{ color: C.primary, fontWeight: 700 }}>{j + 1}.</span> {scene}
-                  </div>
-                ))}
-              </div>
-              {/* USP */}
-              <div style={{ fontSize: 11, color: C.accent, marginTop: 6, fontWeight: 600 }}>USP: {idea.uspConnection}</div>
-            </div>
+function StageStoryboard({ idea, opp, onBack }) {
+  const typeInfo = CONTENT_TYPES.find(t => t.id === idea.contentType) || CONTENT_TYPES[0];
+  const stageColor = STAGE_COLORS[idea.stage] || C.primary;
+  const scenes = idea.sceneFlow || [];
+  const timeLabels = ["0-3초", "3-8초", "8-12초", "12-15초"];
+  const phaseLabels = ["후킹", "전개", "전환", "CTA"];
 
-            {/* EXPANDED */}
-            {isOpen && (
-              <div style={{ padding: "0 16px 16px", borderTop: `1px solid ${C.border}`, paddingTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <div>
-                  <span style={{ fontSize: 10, color: C.textSoft }}>타겟</span>
-                  <div style={{ fontSize: 12, fontWeight: 600 }}>{idea.target}</div>
-                </div>
-                <div>
-                  <span style={{ fontSize: 10, color: C.textSoft }}>크리에이터</span>
-                  <div style={{ fontSize: 12, fontWeight: 600 }}>{idea.creatorType}</div>
-                </div>
-                <div style={{ gridColumn: "1 / -1" }}>
-                  <span style={{ fontSize: 10, color: C.textSoft }}>데이터 근거</span>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: C.accent }}>{idea.dataProof}</div>
-                </div>
-                <div style={{ gridColumn: "1 / -1" }}>
-                  <span style={{ fontSize: 10, color: C.textSoft }}>시리즈 구성</span>
-                  <div style={{ fontSize: 12 }}>{idea.seriesNote}</div>
-                </div>
-              </div>
-            )}
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* BACK */}
+      <button onClick={onBack} style={{ background: "none", border: "none", color: "#ccc", fontSize: 9, cursor: "pointer", padding: 0, textAlign: "left" }}>
+        ← 이전 단계
+      </button>
+
+      {/* HEADER */}
+      <div>
+        <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
+          <span style={{ background: typeInfo.color + "20", color: typeInfo.color, fontSize: 9, padding: "2px 8px", borderRadius: 4, fontWeight: 600 }}>{idea.contentType}. {typeInfo.name}</span>
+          <span style={{ background: stageColor + "20", color: stageColor, fontSize: 9, padding: "2px 8px", borderRadius: 4, fontWeight: 600 }}>{idea.stage}</span>
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 900, color: C.text, marginBottom: 6 }}>{idea.title}</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: C.secondary, lineHeight: 1.5 }}>"{idea.hook3s}"</div>
+      </div>
+
+      {/* VERTICAL TIMELINE */}
+      <div style={{ background: "#fff", borderRadius: 14, padding: "22px 20px", border: "1px solid #f0f0f0" }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 16 }}>씬 플로우</div>
+        {scenes.map((scene, i) => (
+          <div key={i} style={{ display: "flex", gap: 14, marginBottom: i < scenes.length - 1 ? 20 : 0 }}>
+            {/* LEFT: time + dot + line */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 60, flexShrink: 0 }}>
+              <div style={{ fontSize: 9, color: C.textSoft, fontWeight: 600, marginBottom: 4 }}>{timeLabels[i] || ""}</div>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: C.primary, flexShrink: 0 }} />
+              {i < scenes.length - 1 && (
+                <div style={{ width: 2, flex: 1, background: C.primary + "20", marginTop: 4 }} />
+              )}
+            </div>
+            {/* RIGHT: description */}
+            <div style={{ flex: 1, paddingTop: 2 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: C.primary, marginBottom: 2 }}>{phaseLabels[i] || "씬 " + (i + 1)}</div>
+              <div style={{ fontSize: 12, color: C.text, lineHeight: 1.5 }}>{scene}</div>
+            </div>
           </div>
-        );
-      })}
+        ))}
+      </div>
+
+      {/* DETAIL GRID */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div style={{ background: "#fff", borderRadius: 12, padding: "16px 18px", border: "1px solid #f0f0f0" }}>
+          <div style={{ fontSize: 10, color: C.textSoft, marginBottom: 4 }}>타겟</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{idea.target}</div>
+        </div>
+        <div style={{ background: "#fff", borderRadius: 12, padding: "16px 18px", border: "1px solid #f0f0f0" }}>
+          <div style={{ fontSize: 10, color: C.textSoft, marginBottom: 4 }}>크리에이터 추천</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{idea.creatorType}</div>
+        </div>
+        <div style={{ background: "#fff", borderRadius: 12, padding: "16px 18px", border: "1px solid #f0f0f0", gridColumn: "1 / -1" }}>
+          <div style={{ fontSize: 10, color: C.textSoft, marginBottom: 4 }}>데이터 근거</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.accent }}>{idea.dataProof}</div>
+        </div>
+        <div style={{ background: "#fff", borderRadius: 12, padding: "16px 18px", border: "1px solid #f0f0f0", gridColumn: "1 / -1" }}>
+          <div style={{ fontSize: 10, color: C.textSoft, marginBottom: 4 }}>시리즈 구성</div>
+          <div style={{ fontSize: 12, color: C.text, lineHeight: 1.5 }}>{idea.seriesNote}</div>
+        </div>
+      </div>
     </div>
   );
 }
 
 // ══════════════════════════════════════════════════════════════
-// TAB 2: CONTENT STRATEGY
+// TAB: CONTENT STRATEGY (LIGHT THEME)
 // ══════════════════════════════════════════════════════════════
 function TabContent() {
   const months = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       {/* SEASON HEATMAP */}
-      <div style={{ background: C.card, borderRadius: 16, padding: 24, border: `1px solid ${C.border}` }}>
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>시즌 캘린더 히트맵</div>
+      <div style={{ background: "#fff", borderRadius: 14, padding: "22px 20px", border: "1px solid #f0f0f0" }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>시즌 캘린더 히트맵</div>
         <div style={{ overflowX: "auto" }}>
           <div style={{ minWidth: 700 }}>
             <div style={{ display: "grid", gridTemplateColumns: "80px repeat(12, 1fr)", gap: 2 }}>
@@ -580,12 +887,12 @@ function TabContent() {
               ))}
               {Object.entries(SEASON_DATA).map(([dest, vals]) => (
                 <div key={dest} style={{ display: "contents" }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", paddingRight: 8 }}>{dest}</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", paddingRight: 8, color: C.text }}>{dest}</div>
                   {vals.map((v, i) => {
                     const intensity = v / 100;
-                    const bg = intensity > 0.8 ? C.primary : intensity > 0.6 ? `${C.primary}90` : intensity > 0.4 ? `${C.primary}50` : `${C.primary}25`;
+                    const bg = intensity > 0.8 ? C.primary : intensity > 0.6 ? C.primary + "90" : intensity > 0.4 ? C.primary + "50" : C.primary + "25";
                     return (
-                      <div key={`${dest}-${i}`} style={{ background: bg, borderRadius: 4, padding: "6px 2px", textAlign: "center", fontSize: 10, fontWeight: v > 80 ? 700 : 400, color: v > 60 ? "#fff" : C.textSoft }}>
+                      <div key={dest + "-" + i} style={{ background: bg, borderRadius: 4, padding: "6px 2px", textAlign: "center", fontSize: 10, fontWeight: v > 80 ? 700 : 400, color: v > 60 ? "#fff" : C.textSoft }}>
                         {v}
                       </div>
                     );
@@ -598,34 +905,34 @@ function TabContent() {
       </div>
 
       {/* 7 CONTENT TYPES */}
-      <div style={{ background: C.card, borderRadius: 16, padding: 24, border: `1px solid ${C.border}` }}>
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>7가지 콘텐츠 유형 가이드</div>
-        <div style={{ fontSize: 13, color: C.textSoft, marginBottom: 16 }}>결정 단계(Dream → Plan → Book → Share)에 따른 최적 콘텐츠 유형</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
+      <div style={{ background: "#fff", borderRadius: 14, padding: "22px 20px", border: "1px solid #f0f0f0" }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 4 }}>7가지 콘텐츠 유형 가이드</div>
+        <div style={{ fontSize: 11, color: C.textSoft, marginBottom: 16 }}>결정 단계(Dream → Plan → Book → Share)에 따른 최적 콘텐츠 유형</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
           {CONTENT_TYPES.map(ct => (
-            <div key={ct.id} style={{ background: C.surface, borderRadius: 12, padding: 16, borderLeft: `3px solid ${ct.color}` }}>
+            <div key={ct.id} style={{ background: C.surface, borderRadius: 12, padding: 16, borderLeft: "3px solid " + ct.color }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 15, fontWeight: 700 }}>{ct.id}. {ct.name}</span>
-                <span style={{ fontSize: 10, background: `${ct.color}20`, color: ct.color, padding: "2px 8px", borderRadius: 6, fontWeight: 600 }}>{ct.stage}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{ct.id}. {ct.name}</span>
+                <span style={{ fontSize: 10, background: ct.color + "20", color: ct.color, padding: "2px 8px", borderRadius: 6, fontWeight: 600 }}>{ct.stage}</span>
               </div>
-              <div style={{ fontSize: 13, color: C.textSoft }}>{ct.desc}</div>
+              <div style={{ fontSize: 11, color: C.textSoft }}>{ct.desc}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* SERIES STRUCTURE */}
-      <div style={{ background: C.card, borderRadius: 16, padding: 24, border: `1px solid ${C.border}` }}>
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>시리즈 숏폼 연작 구조 (90/10 공식)</div>
-        <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+      <div style={{ background: "#fff", borderRadius: 14, padding: "22px 20px", border: "1px solid #f0f0f0" }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>시리즈 숏폼 연작 구조 (90/10 공식)</div>
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
           {[
             { ep: "1편 — 피드 유입", ratio: "관심사 90% + 여행 10%", desc: "알고리즘 최적화. 여행 태그 최소", color: C.accent },
             { ep: "2편 — 심화", ratio: "관심사 60% + 여행 40%", desc: "같은 크리에이터, 여행 비중 확대", color: C.primary },
             { ep: "3편 — 전환", ratio: "관심사 30% + 여행 70%", desc: "트립닷컴 제품 인터페이스 노출", color: C.secondary },
           ].map((ep, i) => (
-            <div key={i} style={{ flex: "1 1 200px", background: C.surface, borderRadius: 16, padding: 24, border: `1px solid ${ep.color}30` }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: ep.color, marginBottom: 6 }}>{ep.ep}</div>
-              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 4 }}>{ep.ratio}</div>
+            <div key={i} style={{ flex: "1 1 200px", background: C.surface, borderRadius: 14, padding: "22px 20px", border: "1px solid " + ep.color + "20" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: ep.color, marginBottom: 6 }}>{ep.ep}</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 4 }}>{ep.ratio}</div>
               <div style={{ fontSize: 11, color: C.textSoft }}>{ep.desc}</div>
             </div>
           ))}
@@ -633,8 +940,8 @@ function TabContent() {
       </div>
 
       {/* DECISION STAGE FLOW */}
-      <div style={{ background: C.card, borderRadius: 16, padding: 24, border: `1px solid ${C.border}` }}>
-        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>소비자 결정 단계 x 콘텐츠 매핑</div>
+      <div style={{ background: "#fff", borderRadius: 14, padding: "22px 20px", border: "1px solid #f0f0f0" }}>
+        <div style={{ fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 16 }}>소비자 결정 단계 x 콘텐츠 매핑</div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
           {[
             { stage: "Dream", icon: "💭", desc: "꿈꾸기 (3-4주 전)", types: "A.진정성 / D.발견 / G.허락", color: "#FF9A9E" },
@@ -643,10 +950,10 @@ function TabContent() {
             { stage: "Share", icon: "📸", desc: "공유 (여행 후)", types: "UGC 재생산 유도", color: C.gold },
           ].map((s, i, arr) => (
             <div key={s.stage} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ background: `${s.color}15`, borderRadius: 16, padding: 24, textAlign: "center", flex: "1 1 160px", border: `1px solid ${s.color}40`, minWidth: 160 }}>
+              <div style={{ background: s.color + "12", borderRadius: 14, padding: "22px 20px", textAlign: "center", flex: "1 1 160px", border: "1px solid " + s.color + "30", minWidth: 140 }}>
                 <div style={{ fontSize: 28 }}>{s.icon}</div>
-                <div style={{ fontSize: 15, fontWeight: 800, color: s.color, marginTop: 4 }}>{s.stage}</div>
-                <div style={{ fontSize: 11, color: C.textSoft, marginTop: 2 }}>{s.desc}</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: s.color, marginTop: 4 }}>{s.stage}</div>
+                <div style={{ fontSize: 10, color: C.textSoft, marginTop: 2 }}>{s.desc}</div>
                 <div style={{ fontSize: 10, fontWeight: 600, marginTop: 6, color: C.text }}>{s.types}</div>
               </div>
               {i < arr.length - 1 && (
@@ -661,21 +968,21 @@ function TabContent() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// TAB 3: USP x CREATOR
+// TAB: USP × CREATOR (LIGHT THEME)
 // ══════════════════════════════════════════════════════════════
 function TabUSP({ selectedUsp, setSelectedUsp, generating, generatedIdeas, generateIdeas, expandedCards, toggleCard }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       {/* USP CARDS */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 }}>
         {USPS.map(usp => (
           <button key={usp.id} onClick={() => setSelectedUsp(usp.id === selectedUsp ? null : usp.id)} style={{
-            background: usp.id === selectedUsp ? `${C.primary}25` : C.card,
-            border: `1px solid ${usp.id === selectedUsp ? C.primary : C.border}`,
-            borderRadius: 16, padding: 24, cursor: "pointer", textAlign: "left", color: C.text, transition: "all 0.2s",
+            background: usp.id === selectedUsp ? C.primary + "08" : "#fff",
+            border: "1px solid " + (usp.id === selectedUsp ? C.primary : "#f0f0f0"),
+            borderRadius: 14, padding: "22px 20px", cursor: "pointer", textAlign: "left", color: C.text, transition: "all 0.2s",
           }}>
             <div style={{ fontSize: 28, marginBottom: 6 }}>{usp.icon}</div>
-            <div style={{ fontSize: 15, fontWeight: 700 }}>{usp.name}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{usp.name}</div>
             <div style={{ fontSize: 11, color: C.textSoft, marginTop: 4 }}>{usp.desc}</div>
             <div style={{ fontSize: 10, color: C.warn, marginTop: 6 }}>
               {usp.pains[0]}
@@ -688,7 +995,7 @@ function TabUSP({ selectedUsp, setSelectedUsp, generating, generatedIdeas, gener
       {selectedUsp && (() => {
         const usp = USPS.find(x => x.id === selectedUsp);
         if (!usp) return null;
-        const oppId = `usp-${usp.id}`;
+        const oppId = "usp-" + usp.id;
         const ideas = generatedIdeas[oppId] || [];
 
         const handleGenerate = () => {
@@ -704,31 +1011,31 @@ function TabUSP({ selectedUsp, setSelectedUsp, generating, generatedIdeas, gener
         };
 
         return (
-          <div style={{ background: C.card, borderRadius: 16, padding: 24, border: `1px solid ${C.primary}40` }}>
-            <div style={{ fontSize: 20, fontWeight: 800 }}>{usp.icon} {usp.name}</div>
-            <div style={{ fontSize: 13, color: C.textSoft, marginTop: 4 }}>{usp.detail}</div>
+          <div style={{ background: "#fff", borderRadius: 14, padding: "22px 20px", border: "1px solid " + C.primary + "30" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: C.text }}>{usp.icon} {usp.name}</div>
+            <div style={{ fontSize: 11, color: C.textSoft, marginTop: 4 }}>{usp.detail}</div>
 
             {/* PAIN POINTS */}
             <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>소비자 페인포인트 매칭</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 8 }}>소비자 페인포인트 매칭</div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {usp.pains.map((p, i) => (
-                  <span key={i} style={{ background: `${C.warn}15`, color: C.warn, fontSize: 12, padding: "6px 12px", borderRadius: 8, border: `1px solid ${C.warn}30` }}>{p}</span>
+                  <span key={i} style={{ background: C.warn + "10", color: C.warn, fontSize: 11, padding: "6px 12px", borderRadius: 8, border: "1px solid " + C.warn + "20" }}>{p}</span>
                 ))}
               </div>
             </div>
 
             {/* CREATOR TIERS */}
             <div style={{ marginTop: 20 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 10 }}>크리에이터 티어별 전략</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 10 }}>크리에이터 티어별 전략</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
                 {CREATOR_TIERS.map(ct => (
-                  <div key={ct.tier} style={{ background: C.surface, borderRadius: 12, padding: 16, borderLeft: `3px solid ${ct.color}` }}>
+                  <div key={ct.tier} style={{ background: C.surface, borderRadius: 12, padding: 16, borderLeft: "3px solid " + ct.color }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 15, fontWeight: 800, color: ct.color }}>{ct.tier}</span>
+                      <span style={{ fontSize: 14, fontWeight: 800, color: ct.color }}>{ct.tier}</span>
                       <span style={{ fontSize: 11, color: C.textSoft }}>{ct.range}</span>
                     </div>
-                    <div style={{ fontSize: 12, marginTop: 6 }}>{ct.count} · {ct.cost}</div>
+                    <div style={{ fontSize: 12, marginTop: 6, color: C.text }}>{ct.count} · {ct.cost}</div>
                     <div style={{ fontSize: 11, color: C.accent, marginTop: 4 }}>KPI: {ct.kpi}</div>
                   </div>
                 ))}
@@ -736,32 +1043,99 @@ function TabUSP({ selectedUsp, setSelectedUsp, generating, generatedIdeas, gener
             </div>
 
             {/* TWO APPROACHES */}
-            <div style={{ marginTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <div style={{ background: C.surface, borderRadius: 16, padding: 24, border: `1px solid ${C.primary}30` }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: C.primary }}>접근법 A — USP 중심</div>
-                <div style={{ fontSize: 13, color: C.textSoft, marginTop: 6 }}>"{usp.name}" USP에 가장 적합한 크리에이터를 찾고, 그 크리에이터의 스타일에 맞는 콘텐츠를 설계</div>
+            <div style={{ marginTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div style={{ background: C.surface, borderRadius: 14, padding: "22px 20px", border: "1px solid " + C.primary + "20" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: C.primary }}>접근법 A — USP 중심</div>
+                <div style={{ fontSize: 11, color: C.textSoft, marginTop: 6 }}>"{usp.name}" USP에 가장 적합한 크리에이터를 찾고, 그 크리에이터의 스타일에 맞는 콘텐츠를 설계</div>
               </div>
-              <div style={{ background: C.surface, borderRadius: 16, padding: 24, border: `1px solid ${C.secondary}30` }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: C.secondary }}>접근법 B — 타겟 중심</div>
-                <div style={{ fontSize: 13, color: C.textSoft, marginTop: 6 }}>관심사 크리에이터(골프/미식/육아)가 여행을 자연스럽게 말하도록 설계. 크리에이터의 기존 팬층 활용</div>
+              <div style={{ background: C.surface, borderRadius: 14, padding: "22px 20px", border: "1px solid " + C.secondary + "20" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: C.secondary }}>접근법 B — 타겟 중심</div>
+                <div style={{ fontSize: 11, color: C.textSoft, marginTop: 6 }}>관심사 크리에이터(골프/미식/육아)가 여행을 자연스럽게 말하도록 설계. 크리에이터의 기존 팬층 활용</div>
               </div>
             </div>
 
             {/* GENERATE */}
             <button onClick={handleGenerate} disabled={generating} style={{
-              marginTop: 16, background: generating ? C.textSoft : C.primary, color: "#fff",
-              border: "none", borderRadius: 12, padding: "0 28px", fontSize: 15, fontWeight: 700,
-              cursor: generating ? "wait" : "pointer", width: "100%", height: 48, transition: "all 0.2s",
+              marginTop: 16,
+              background: generating ? C.textSoft : "linear-gradient(135deg, " + C.primary + ", " + C.primary + "CC)",
+              color: "#fff", border: "none", borderRadius: 10, padding: "10px 24px", fontSize: 12, fontWeight: 700,
+              cursor: generating ? "wait" : "pointer", width: "100%", transition: "all 0.2s",
             }}>
-              {generating ? "아이디어 생성 중..." : "🎬 USP x 크리에이터 아이디어 생성"}
+              {generating ? "아이디어 생성 중..." : "USP x 크리에이터 아이디어 생성"}
             </button>
 
             {ideas.length > 0 && (
-              <IdeaCards ideas={ideas} expandedCards={expandedCards} toggleCard={toggleCard} prefix={oppId} />
+              <USPIdeaCards ideas={ideas} expandedCards={expandedCards} toggleCard={toggleCard} prefix={oppId} />
             )}
           </div>
         );
       })()}
+    </div>
+  );
+}
+
+// ── USP IDEA CARDS (inline expand, no stage navigation) ──
+function USPIdeaCards({ ideas, expandedCards, toggleCard, prefix }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: C.accent }}>숏폼 아이디어 {ideas.length}개 생성 완료</div>
+      {ideas.map((idea, i) => {
+        const cardId = prefix + "-idea-" + i;
+        const isOpen = expandedCards[cardId];
+        const typeInfo = CONTENT_TYPES.find(t => t.id === idea.contentType) || CONTENT_TYPES[0];
+        const stageColor = STAGE_COLORS[idea.stage] || C.primary;
+        return (
+          <div key={i} style={{ background: C.surface, borderRadius: 12, border: "1px solid " + C.border, overflow: "hidden" }}>
+            {/* COLLAPSED */}
+            <div onClick={() => toggleCard(cardId)} style={{ padding: "14px 16px", cursor: "pointer" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
+                    <span style={{ background: C.primary, color: "#fff", fontSize: 9, padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>#{idea.rank || i + 1}</span>
+                    <span style={{ background: typeInfo.color + "20", color: typeInfo.color, fontSize: 9, padding: "2px 8px", borderRadius: 4, fontWeight: 600 }}>{idea.contentType}. {typeInfo.name}</span>
+                    <span style={{ background: stageColor + "20", color: stageColor, fontSize: 9, padding: "2px 8px", borderRadius: 4, fontWeight: 600 }}>{idea.stage}</span>
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 4 }}>{idea.title}</div>
+                  <div style={{ fontSize: 12, color: C.secondary, fontWeight: 600 }}>"{idea.hook3s}"</div>
+                </div>
+                <span style={{ fontSize: 16, color: C.textSoft, transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▾</span>
+              </div>
+              {/* SCENE FLOW */}
+              <div style={{ display: "flex", gap: 4, marginTop: 8, flexWrap: "wrap" }}>
+                {(idea.sceneFlow || []).map((scene, j) => (
+                  <div key={j} style={{ background: C.primary + "08", borderRadius: 6, padding: "4px 8px", fontSize: 10, color: C.text, border: "1px solid " + C.primary + "15", flex: "1 1 100px", textAlign: "center" }}>
+                    <span style={{ color: C.primary, fontWeight: 700 }}>{j + 1}.</span> {scene}
+                  </div>
+                ))}
+              </div>
+              {/* USP */}
+              <div style={{ fontSize: 11, color: C.accent, marginTop: 6, fontWeight: 600 }}>USP: {idea.uspConnection}</div>
+            </div>
+
+            {/* EXPANDED */}
+            {isOpen && (
+              <div style={{ padding: "0 16px 16px", borderTop: "1px solid " + C.border, paddingTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div>
+                  <span style={{ fontSize: 10, color: C.textSoft }}>타겟</span>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{idea.target}</div>
+                </div>
+                <div>
+                  <span style={{ fontSize: 10, color: C.textSoft }}>크리에이터</span>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{idea.creatorType}</div>
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <span style={{ fontSize: 10, color: C.textSoft }}>데이터 근거</span>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: C.accent }}>{idea.dataProof}</div>
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <span style={{ fontSize: 10, color: C.textSoft }}>시리즈 구성</span>
+                  <div style={{ fontSize: 12, color: C.text }}>{idea.seriesNote}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
