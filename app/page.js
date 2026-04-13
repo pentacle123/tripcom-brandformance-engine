@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 
 // ═══════════════════════════════════════════════════════════
 // Trip.com AI Brandformance Engine v2.0
