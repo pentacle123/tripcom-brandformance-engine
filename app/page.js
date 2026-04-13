@@ -2,8 +2,8 @@
 import React, { useState, useCallback, useEffect } from "react";
 
 // ══════════════════════════════════════════════════════════════
-// Trip.com AI Brandformance Engine v6.0
-// Light Theme | YouTube API Creators | 4-Step | Samyang Patterns
+// Trip.com AI Brandformance Engine v7.0
+// Page Navigation | Light Theme | YouTube API | Samyang Patterns
 // ══════════════════════════════════════════════════════════════
 
 // ── COLOR SYSTEM (LIGHT THEME) ──
@@ -36,12 +36,12 @@ const YT_QUERIES = {
   "opp-d5": ["대만 야시장 먹방", "타이베이 맛집"],
   "opp-d6": ["괌 가족여행", "하와이 브이로그"],
   "opp-d7": ["삿포로 눈축제", "삿포로 겨울여행"],
-  "opp-i1": ["골프 라운딩 브이로그", "해외 골프"],
-  "opp-i2": ["신혼여행 브이로그", "발리 풀빌라"],
-  "opp-i3": ["한달살기 브이로그", "치앙마이 생활"],
+  "opp-i1": ["골프 라운딩 브이로그", "해외 골프 여행"],
+  "opp-i2": ["신혼여행 브이로그", "발리 풀빌라 후기"],
+  "opp-i3": ["한달살기 브이로그", "치앙마이 한달살기"],
   "opp-i4": ["부모님 여행 브이로그", "효도여행 후기"],
-  "opp-i5": ["영어캠프 후기", "세부 어학연수"],
-  "opp-i6": ["해외 콘서트 브이로그", "마라톤 여행"],
+  "opp-i5": ["영어캠프 후기", "세부 어학연수 엄마"],
+  "opp-i6": ["해외 콘서트 여행", "마라톤 해외 대회"],
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -68,6 +68,33 @@ const INT_OPPS = [
 
 const ALL_OPPS = [...DEST_OPPS, ...INT_OPPS];
 
+// ── USP TAGS per opportunity ──
+const USP_TAGS = {
+  "opp-d1": ["tripbest", "price"],
+  "opp-d2": ["price", "tripgenie"],
+  "opp-d3": ["cs", "onestop"],
+  "opp-d4": ["onestop", "tripbest", "cs"],
+  "opp-d5": ["tripbest", "price"],
+  "opp-d6": ["onestop", "cs"],
+  "opp-d7": ["tripbest"],
+  "opp-i1": ["onestop", "price"],
+  "opp-i2": ["onestop", "tripgenie"],
+  "opp-i3": ["price", "tripgenie"],
+  "opp-i4": ["cs"],
+  "opp-i5": ["onestop"],
+  "opp-i6": ["onestop", "price"],
+};
+
+const USP_MAP = [
+  { id:"onestop", icon:"🔗", name:"원스톱 플랫폼", pain:"항공+호텔+액티비티를 따로 예약하는 고통을 해결", count:8 },
+  { id:"cs", icon:"🇰🇷", name:"24시간 한국어 CS", pain:"해외에서 문제 생기면?이라는 불안을 해소", count:4 },
+  { id:"tripbest", icon:"🏆", name:"Trip.Best 랭킹", pain:"너무 많아서 못 고르겠다는 선택 고통을 해결", count:5 },
+  { id:"price", icon:"💰", name:"가격 경쟁력", pain:"최저가를 찾아 헤매는 시간을 절약", count:6 },
+  { id:"tripgenie", icon:"🤖", name:"트립지니 AI", pain:"일정 짜기 귀찮다를 AI가 해결", count:4 },
+];
+const USP_ICONS = { onestop:"🔗", cs:"🇰🇷", tripbest:"🏆", price:"💰", tripgenie:"🤖" };
+const USP_NAMES = { onestop:"원스톱", cs:"한국어CS", tripbest:"Trip.Best", price:"가격", tripgenie:"트립지니" };
+
 // ══════════════════════════════════════════════════════════════
 // DATA: 6-AXIS CONTEXT (per opportunity)
 // ══════════════════════════════════════════════════════════════
@@ -87,61 +114,69 @@ const CONTEXT_DATA = {
   "opp-i6": { who:{tags:["20대 여성 (콘서트)","30-40대 남성 (마라톤)","미식 관심 여성"],evidence:"이벤트별 타겟 상이 | 높은 전환 의도"}, when:{tags:["이벤트 일정에 따라","공연 발표 직후","대회 등록 시즌"],evidence:"이벤트 확정 → 즉시 검색"}, journey:{tags:["이벤트 확인 → 일정 → 항공+숙소 → 예약"],evidence:"전환 경로 짧고 전환율 높음"}, pain:{tags:["이벤트 항공편 빨리 잡아야","교통+숙소 맞추기","티켓+여행 동시"],evidence:"시간 압박이 최대"}, usp:{tags:["이벤트 일정 연동","원스톱 예약","빠른 예약"],evidence:"원스톱이 최대 소구"}, hook:{tags:["도쿄마라톤 러닝+관광","해외 콘서트 원정","미식 페스티벌 TOP 5"],evidence:"마라톤 1,070/월"} },
 };
 
-// ── CONTENT TYPES ──
+// ── CONTENT TYPES & USPS ──
 const CONTENT_TYPES = [
   { code:"A", name:"진정성형", color:"#FF6B6B" },{ code:"B", name:"가성비증명형", color:"#4ECDC4" },
   { code:"C", name:"일정가이드형", color:"#45B7D1" },{ code:"D", name:"정보발견형", color:"#96CEB4" },
   { code:"E", name:"UGC리뷰형", color:"#DDA0DD" },{ code:"F", name:"USP실증형", color:"#FFD93D" },
   { code:"G", name:"허락형", color:"#FF8B94" },
 ];
-const USPS = [
-  { id:"onestop", name:"원스톱 플랫폼", icon:"🔗", desc:"항공+호텔+액티비티 한 번에", pains:["예약 따로따로 귀찮다","가격 비교에 지친다"] },
-  { id:"cs", name:"24시간 한국어 CS", icon:"🇰🇷", desc:"언제든 한국어 상담", pains:["해외에서 문제생기면?","영어 못하면?"] },
-  { id:"tripbest", name:"Trip.Best 랭킹", icon:"🏆", desc:"선택의 고통 해결", pains:["어디가 좋은지 모르겠다"] },
-  { id:"price", name:"가격 경쟁력", icon:"💰", desc:"최저가 보장 + 할인코드", pains:["최저가를 찾고 싶다"] },
-  { id:"tripgenie", name:"트립지니 AI", icon:"🤖", desc:"AI 여행 플래너", pains:["일정 짜기 귀찮다"] },
-];
-const CREATOR_TIERS = [
-  { tier:"MACRO", range:"10~100만", cost:"500~2,000만/편", role:"신뢰 구축", kpi:"저장/공유율", color:"#FF6B00" },
-  { tier:"MICRO", range:"1~10만", cost:"80~300만/편", role:"커뮤니티 침투", kpi:"인게이지먼트/CTR", color:"#0770E3" },
-  { tier:"NANO", range:"1만 미만", cost:"20~80만/편", role:"UGC 볼륨", kpi:"UGC 볼륨", color:"#8B5CF6" },
-];
 
-// ── SYSTEM PROMPT ──
+// ── SYSTEM PROMPT (Extended JSON) ──
 const SYSTEM_PROMPT = `당신은 Trip.com 한국 숏폼 콘텐츠 전략가입니다.
-규칙: 1.후킹에 브랜드명 금지 2.관심사90%+여행10% 3.콘텐츠유형A~G 4.Dream/Plan/Book/Share 5.시리즈1편(90/10)→2편(60/40)→3편(30/70) 6.USP5종
-JSON 배열로만 응답. 마크다운 없이.
-[{"rank":1,"title":"제목","contentType":"A~G","stage":"Dream|Plan|Book|Share","hook3s":"후킹카피","sceneFlow":["씬1","씬2","씬3","씬4"],"uspConnection":"USP","target":"타겟","creatorType":"MACRO|MICRO|NANO","dataProof":"근거","seriesNote":"시리즈","conversionScore":85~98,"perspective":"A|B|C","creatorMatch":{"name":"크리에이터명","strategy":"협업전략"},"youtubeShorts":{"title":"유튜브제목","hook":"유튜브후킹","hashtags":["태그1","태그2"],"uploadTime":"최적시간"},"instagramReels":{"title":"인스타제목","hook":"인스타후킹","hashtags":["태그1","태그2"],"uploadTime":"최적시간"},"adTargeting":"광고타겟팅"}]`;
+규칙: 1.후킹에 브랜드명 금지 2.관심사90%+여행10% 3.콘텐츠유형A~G 4.Dream/Plan/Book/Share 5.시리즈1편(90/10)→2편(60/40)→3편(30/70) 6.USP5종(원스톱플랫폼/24시간한국어CS/Trip.Best랭킹/가격경쟁력/트립지니AI)
+JSON 배열로만 응답. 마크다운 없이. 반드시 5개 아이디어를 생성하세요.
+[{"rank":1,"title":"제목","contentType":"A~G중하나","stage":"Dream|Plan|Book|Share","perspective":"A|B|C","contextCombo":"맥락 조합 요약","conversionScore":85~98,"hook3s":"0~3초 후킹카피","sceneFlow":["씬1","씬2","씬3","씬4"],"uspConnection":"연결 USP","target":"타겟","creatorStrategy":"크리에이터 협업 전략 한 줄","dataProof":"검색 데이터 근거","seriesNote":"시리즈 구성","youtubeShorts":{"title":"유튜브용 제목","hook":"유튜브용 후킹","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA 행동","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"최적 업로드 시간","targetCluster":"타겟 클러스터"},"instagramReels":{"title":"인스타용 제목(다른톤)","hook":"인스타용 후킹(다른표현)","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA 행동","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"최적 업로드 시간","targetCluster":"타겟 클러스터"}}]`;
 
 // ══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
 export default function BrandformanceEngine() {
-  const [step, setStep] = useState(0);
+  const [currentView, setCurrentView] = useState("main");
   const [selectedOpp, setSelectedOpp] = useState(null);
   const [selectedIdea, setSelectedIdea] = useState(null);
   const [generatedIdeas, setGeneratedIdeas] = useState({});
   const [loadingIds, setLoadingIds] = useState({});
-  const [expandedIdeas, setExpandedIdeas] = useState({});
   const [expandedSections, setExpandedSections] = useState({});
   const [hoveredCard, setHoveredCard] = useState(null);
   const [ideaPerspective, setIdeaPerspective] = useState("auto");
   const [ytCreators, setYtCreators] = useState({});
   const [ytLoading, setYtLoading] = useState({});
+  const [activeUsps, setActiveUsps] = useState(new Set());
 
   const fmtNum = (n) => n >= 1000000 ? (n/1000000).toFixed(1)+"M" : n >= 1000 ? (n/1000).toFixed(0)+"K" : String(n);
-  const toggleIdea = useCallback((k) => setExpandedIdeas(p => ({...p,[k]:!p[k]})),[]);
   const toggleSection = useCallback((k) => setExpandedSections(p => ({...p,[k]:!p[k]})),[]);
-  const selectOpp = (opp) => { setSelectedOpp(opp); setStep(1); setSelectedIdea(null); };
-  const goToIdeas = () => setStep(2);
-  const goToStoryboard = (idea) => { setSelectedIdea(idea); setStep(3); };
   const scoreColor = (s) => s >= 95 ? C.accent : s >= 85 ? C.primary : C.secondary;
+  const toggleUsp = (uspId) => setActiveUsps(prev => {
+    const next = new Set(prev);
+    if (next.has(uspId)) next.delete(uspId); else next.add(uspId);
+    return next;
+  });
+  const isOppHighlighted = (oppId) => {
+    if (activeUsps.size === 0) return true;
+    const tags = USP_TAGS[oppId] || [];
+    return tags.some(t => activeUsps.has(t));
+  };
 
   const classifyTier = (subs) => {
     if (subs >= 100000) return { tier:"MACRO", color:"#FF6B00" };
     if (subs >= 10000) return { tier:"MICRO", color:"#0770E3" };
     return { tier:"NANO", color:"#8B5CF6" };
   };
+
+  // ── Navigation ──
+  const goToAnalysis = (opp) => { setSelectedOpp(opp); setSelectedIdea(null); setCurrentView("analysis"); };
+  const goToIdeas = () => setCurrentView("ideas");
+  const goToStoryboard = (idea) => { setSelectedIdea(idea); setCurrentView("storyboard"); };
+  const goBack = () => {
+    if (currentView === "storyboard") setCurrentView("ideas");
+    else if (currentView === "ideas") setCurrentView("analysis");
+    else if (currentView === "analysis") { setCurrentView("main"); setSelectedOpp(null); }
+  };
+  const goHome = () => { setCurrentView("main"); setSelectedOpp(null); setSelectedIdea(null); };
+
+  const VIEW_STEP = { main: 0, analysis: 1, ideas: 2, storyboard: 3 };
+  const activeStep = VIEW_STEP[currentView] || 0;
 
   // ── YouTube API: Search Creators ──
   const searchCreators = useCallback(async (oppId) => {
@@ -179,18 +214,22 @@ export default function BrandformanceEngine() {
   const generateIdeas = useCallback(async (opp) => {
     if (loadingIds[opp.id]) return;
     setLoadingIds(p => ({...p,[opp.id]:true}));
+    const ctx = CONTEXT_DATA[opp.id] || {};
+    const contextStr = Object.entries(ctx).map(([k,v]) => `${k}: ${v.tags?.join(", ")} | ${v.evidence}`).join("\n");
     try {
       const res = await fetch("/api/generate", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system: SYSTEM_PROMPT, messages: [{ role: "user", content: `숏폼 아이디어 5개:\n제목:${opp.title}\n인사이트:${opp.keyInsight}\n인구통계:${opp.demographics}\n검색량:월${opp.monthlyVol?.toLocaleString()}\n전략:${opp.strategyCopy}\n후킹:${opp.hookType} ${opp.hookLabel}\n콘텐츠훅:${opp.contentHook}\nUSP:${opp.uspConnection}\n페인:${(opp.painPoints||[]).join(",")}\n데이터:${opp.dataProof}` }] })
+        body: JSON.stringify({ system: SYSTEM_PROMPT, messages: [{ role: "user", content: `숏폼 아이디어 5개를 생성하세요:\n제목:${opp.title}\n인사이트:${opp.keyInsight}\n인구통계:${opp.demographics}\n검색량:월${opp.monthlyVol?.toLocaleString()}\n전략:${opp.strategyCopy}\n후킹:${opp.hookType} ${opp.hookLabel}\n콘텐츠훅:${opp.contentHook}\nUSP:${opp.uspConnection}\n페인:${(opp.painPoints||[]).join(",")}\n데이터:${opp.dataProof}\n6축맥락:\n${contextStr}` }] })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error?.message || data.error);
       const text = data.content?.[0]?.text || "";
       const m = text.match(/\[[\s\S]*\]/);
-      if (m) setGeneratedIdeas(p => ({...p,[opp.id]:JSON.parse(m[0])}));
-      else throw new Error("JSON 파싱 실패");
-    } catch (e) { setGeneratedIdeas(p => ({...p,[opp.id]:[{error:e.message}]})); }
+      if (m) {
+        setGeneratedIdeas(p => ({...p,[opp.id]:JSON.parse(m[0])}));
+        setCurrentView("ideas");
+      } else throw new Error("JSON 파싱 실패");
+    } catch (e) { setGeneratedIdeas(p => ({...p,[opp.id]:[{error:e.message}]})); setCurrentView("ideas"); }
     finally { setLoadingIds(p => ({...p,[opp.id]:false})); }
   }, [loadingIds]);
 
@@ -200,13 +239,13 @@ export default function BrandformanceEngine() {
   // ── Pill style helper ──
   const pill = (bg, color, text, extra) => ({ fontSize:10, fontWeight:600, color, background:bg, padding:"3px 10px", borderRadius:8, display:"inline-block", ...extra });
 
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   // HEADER
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   const Header = () => (
     <div style={{ position:"sticky", top:0, zIndex:100, background:"#FFFFFF", borderBottom:`1px solid ${C.border}`, padding:"12px 0" }}>
       <div style={{ maxWidth:1200, margin:"0 auto", padding:"0 24px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }} onClick={() => { setStep(0); setSelectedOpp(null); setSelectedIdea(null); }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10, cursor:"pointer" }} onClick={goHome}>
           <div style={{ background:C.primary, color:"#fff", fontWeight:800, fontSize:11, padding:"4px 8px", borderRadius:6 }}>Trip.com</div>
           <div>
             <div style={{ color:C.text, fontSize:15, fontWeight:700 }}>AI Brandformance Engine</div>
@@ -218,20 +257,19 @@ export default function BrandformanceEngine() {
     </div>
   );
 
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   // STEP INDICATOR
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   const STEPS_LABEL = ["기회 발견","기회 분석","AI 아이디어","스토리보드"];
   const StepIndicator = () => (
     <div style={{ position:"sticky", top:52, zIndex:99, background:"#FFFFFF", borderBottom:`1px solid ${C.border}` }}>
       <div style={{ maxWidth:1200, margin:"0 auto", padding:"14px 24px", display:"flex", alignItems:"center" }}>
         {STEPS_LABEL.map((s,i) => (
           <React.Fragment key={i}>
-            {i > 0 && <div style={{ flex:1, height:2, background:i<=step?C.primary:"#CBD5E1", margin:"0 4px" }} />}
-            <div style={{ display:"flex", alignItems:"center", gap:6, cursor:i<=step?"pointer":"default", opacity:i<=step?1:0.4 }}
-              onClick={() => { if(i<=step){ setStep(i); if(i===0){setSelectedOpp(null);setSelectedIdea(null);} if(i<=1)setSelectedIdea(null); }}}>
-              <div style={{ width:26, height:26, borderRadius:13, display:"flex", alignItems:"center", justifyContent:"center", background:i<=step?(i===step?C.primary:C.accent):"#CBD5E1", color:i<=step?"#fff":C.textSoft, fontSize:12, fontWeight:700 }}>{i+1}</div>
-              <span style={{ color:i<=step?C.text:C.textSoft, fontSize:12, fontWeight:i===step?700:500, whiteSpace:"nowrap" }}>{s}</span>
+            {i > 0 && <div style={{ flex:1, height:2, background:i<=activeStep?C.primary:"#CBD5E1", margin:"0 4px" }} />}
+            <div style={{ display:"flex", alignItems:"center", gap:6, opacity:i<=activeStep?1:0.4 }}>
+              <div style={{ width:26, height:26, borderRadius:13, display:"flex", alignItems:"center", justifyContent:"center", background:i===activeStep?C.primary:i<activeStep?C.accent:"#CBD5E1", color:i<=activeStep?"#fff":C.textSoft, fontSize:12, fontWeight:700 }}>{i+1}</div>
+              <span style={{ color:i<=activeStep?C.text:C.textSoft, fontSize:12, fontWeight:i===activeStep?700:500, whiteSpace:"nowrap" }}>{s}</span>
             </div>
           </React.Fragment>
         ))}
@@ -239,23 +277,23 @@ export default function BrandformanceEngine() {
     </div>
   );
 
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   // MINI HEATMAP
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   const MiniHeatmap = ({ data }) => (
-    <div style={{ display:"flex", gap:3, alignItems:"flex-end", height:28 }}>
+    <div style={{ display:"flex", gap:3, alignItems:"flex-end", height:40 }}>
       {data.map((v,i) => (
         <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:2 }}>
-          <div style={{ width:"100%", height:Math.max(4,v*0.24), borderRadius:2, background:v>=80?C.primary:v>=60?"rgba(7,112,227,0.4)":"rgba(7,112,227,0.15)" }} />
-          <span style={{ fontSize:8, color:C.textSoft }}>{i+1}</span>
+          <div style={{ width:"100%", height:Math.max(4,v*0.35), borderRadius:2, background:v>=80?C.primary:v>=60?"rgba(7,112,227,0.4)":"rgba(7,112,227,0.15)" }} />
+          <span style={{ fontSize:8, color:C.textSoft }}>{i+1}월</span>
         </div>
       ))}
     </div>
   );
 
-  // ══════════════════════════════════════════════════════
-  // CREATOR CARD (YouTube API result)
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
+  // CREATOR CARDS (YouTube API)
+  // ══════════════════════════════════════════════════════════════
   const CreatorCards = ({ oppId }) => {
     const creators = ytCreators[oppId];
     const loading = ytLoading[oppId];
@@ -279,7 +317,7 @@ export default function BrandformanceEngine() {
                   <span style={{ color:C.textSoft, fontSize:10 }}>{cr.subs ? fmtNum(cr.subs)+"명" : ""}</span>
                 </div>
                 {cr.videoTitle && <div style={{ color:C.textSoft, fontSize:11, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>최근: {cr.videoTitle}</div>}
-                <div style={{ color:C.primary, fontSize:10, marginTop:2 }}>이 크리에이터와 협업 시 → 관심사 90% + 여행 10% 콘텐츠로 자연스러운 노출</div>
+                <div style={{ color:C.primary, fontSize:10, marginTop:2 }}>이 크리에이터와 협업 시 - 관심사 90% + 여행 10% 콘텐츠로 자연스러운 노출</div>
               </div>
             </div>
           );
@@ -288,10 +326,20 @@ export default function BrandformanceEngine() {
     );
   };
 
-  // ══════════════════════════════════════════════════════
-  // STEP 0: OPPORTUNITY DISCOVERY
-  // ══════════════════════════════════════════════════════
-  const renderStep0 = () => (
+  // ══════════════════════════════════════════════════════════════
+  // BACK BUTTON
+  // ══════════════════════════════════════════════════════════════
+  const BackNav = ({ label }) => (
+    <div style={{ display:"flex", gap:16, alignItems:"center", marginBottom:20 }}>
+      <span onClick={goBack} style={{ color:C.primary, fontSize:13, fontWeight:600, cursor:"pointer" }}>{label || "← 이전 단계"}</span>
+      {currentView !== "analysis" && <span onClick={goHome} style={{ color:C.textSoft, fontSize:12, cursor:"pointer" }}>← 처음으로</span>}
+    </div>
+  );
+
+  // ══════════════════════════════════════════════════════════════
+  // VIEW 1: MAIN (기회 발견)
+  // ══════════════════════════════════════════════════════════════
+  const renderMain = () => (
     <div style={{ maxWidth:1200, margin:"0 auto", padding:"24px 24px 40px" }}>
       {/* Hero */}
       <div style={{ display:"grid", gridTemplateColumns:"55% 45%", gap:20, marginBottom:24 }}>
@@ -328,10 +376,32 @@ export default function BrandformanceEngine() {
       {/* Competition Banner */}
       <div style={{ background:C.bannerBg, border:`1px solid ${C.border}`, borderRadius:12, padding:"14px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:12, marginBottom:32 }}>
         <div style={{ color:C.textSoft, fontSize:12 }}><span style={{ color:C.text, fontWeight:600 }}>OTA 경쟁 환경:</span> 스카이스캐너 317.8만 {">"}아고다 160.8만 {">"}네이버항공권 157.7만 {">"}<span style={{ color:C.primary, fontWeight:600 }}>트립닷컴 79.1만</span> {">"}마이리얼트립 57.8만</div>
-        <div style={{ color:C.gold, fontSize:11 }}>💡 스카이스캐너→트립닷컴 크로스플로우</div>
+        <div style={{ color:C.gold, fontSize:11 }}>스카이스캐너→트립닷컴 크로스플로우</div>
       </div>
 
-      {/* Section A */}
+      {/* USP Asset Map */}
+      <div style={{ background:"#F0F9FF", borderRadius:20, padding:"28px 24px", marginBottom:32, border:`1px solid ${C.border}` }}>
+        <div style={{ marginBottom:16 }}>
+          <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>Trip.com이 이 기회를 잡을 수 있는 이유</div>
+          <div style={{ color:C.textSoft, fontSize:13 }}>5가지 USP 자산이 소비자의 페인포인트를 해결합니다{activeUsps.size > 0 ? ` · ${activeUsps.size}개 USP 필터 활성` : ""}</div>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(5, 1fr)", gap:12 }}>
+          {USP_MAP.map(usp => {
+            const isActive = activeUsps.has(usp.id);
+            return (
+              <div key={usp.id} onClick={() => toggleUsp(usp.id)} style={{ background:isActive?"#EFF6FF":"#FFFFFF", borderRadius:16, border:`2px solid ${isActive?C.primary:C.border}`, padding:20, cursor:"pointer", textAlign:"center", transition:"all 0.2s", transform:isActive?"translateY(-2px)":"none", boxShadow:isActive?"0 4px 12px rgba(7,112,227,0.15)":"none" }}>
+                <div style={{ fontSize:28, marginBottom:8 }}>{usp.icon}</div>
+                <div style={{ color:C.text, fontSize:13, fontWeight:700, marginBottom:6 }}>{usp.name}</div>
+                <div style={{ color:C.textSoft, fontSize:11, lineHeight:1.4, marginBottom:10, minHeight:30 }}>{usp.pain}</div>
+                <div style={{ color:C.primary, fontSize:22, fontWeight:800 }}>{usp.count}</div>
+                <div style={{ color:C.textSoft, fontSize:10 }}>기회 연결</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Section A: Destination */}
       <div style={{ marginBottom:40 }}>
         <div style={{ marginBottom:16 }}>
           <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>A. 여행 목적지에서 출발한 기회</div>
@@ -341,8 +411,10 @@ export default function BrandformanceEngine() {
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
           {DEST_OPPS.map(opp => {
             const ss = STAGE_STYLES[opp.stage] || {};
+            const highlighted = isOppHighlighted(opp.id);
+            const oppUsps = USP_TAGS[opp.id] || [];
             return (
-              <div key={opp.id} onClick={() => selectOpp(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?C.primary:C.border}`, borderLeft:`3px solid ${C.primary}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none" }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+              <div key={opp.id} onClick={() => goToAnalysis(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?C.primary:C.border}`, borderLeft:`3px solid ${C.primary}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none", opacity:highlighted?1:0.3 }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:48 }}>
                   <span style={{ fontSize:28 }}>{opp.icon}</span>
                   <span style={{ fontSize:9, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"2px 6px", borderRadius:4 }}>{opp.level}</span>
@@ -351,12 +423,15 @@ export default function BrandformanceEngine() {
                   <div style={{ color:C.text, fontSize:15, fontWeight:700, marginBottom:3 }}>{opp.title}</div>
                   <div style={{ fontSize:12, marginBottom:2 }}><span style={{ color:C.primary, fontWeight:600 }}>{opp.hookType}</span> <span style={{ color:C.textSoft }}>{opp.hookLabel}</span></div>
                   <div style={{ color:C.textSoft, fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{opp.strategyCopy}</div>
-                  <span style={pill(ss.bg||"#EFF6FF", ss.color||C.primary, "", {marginTop:4})}>{opp.stage}</span>
+                  <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginTop:4 }}>
+                    <span style={pill(ss.bg||"#EFF6FF", ss.color||C.primary, "")}>{opp.stage}</span>
+                    {oppUsps.map(u => <span key={u} style={pill("#F0F9FF",C.primary,"")}>{USP_ICONS[u]}{USP_NAMES[u]}</span>)}
+                  </div>
                 </div>
                 <div style={{ textAlign:"right", minWidth:80 }}>
                   <div style={{ color:C.primary, fontSize:22, fontWeight:800 }}>{fmtNum(opp.monthlyVol)}</div>
                   <div style={{ color:C.textSoft, fontSize:10 }}>연 {fmtNum(opp.annualVol)}</div>
-                  <div style={{ color:C.primary, fontSize:11, marginTop:4 }}>분석하기 →</div>
+                  <div style={{ color:C.primary, fontSize:18, marginTop:6 }}>→</div>
                 </div>
               </div>
             );
@@ -364,7 +439,7 @@ export default function BrandformanceEngine() {
         </div>
       </div>
 
-      {/* Section B */}
+      {/* Section B: Interest */}
       <div>
         <div style={{ marginBottom:16 }}>
           <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>B. 소비자 관심사에서 출발한 기회</div>
@@ -377,8 +452,10 @@ export default function BrandformanceEngine() {
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
           {INT_OPPS.map(opp => {
             const ss = STAGE_STYLES[opp.stage] || {};
+            const highlighted = isOppHighlighted(opp.id);
+            const oppUsps = USP_TAGS[opp.id] || [];
             return (
-              <div key={opp.id} onClick={() => selectOpp(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?C.secondary:C.border}`, borderLeft:`3px solid ${C.secondary}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none" }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+              <div key={opp.id} onClick={() => goToAnalysis(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?C.secondary:C.border}`, borderLeft:`3px solid ${C.secondary}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none", opacity:highlighted?1:0.3 }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:48 }}>
                   <span style={{ fontSize:28 }}>{opp.icon}</span>
                   <span style={{ fontSize:9, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"2px 6px", borderRadius:4 }}>{opp.level}</span>
@@ -388,11 +465,14 @@ export default function BrandformanceEngine() {
                   <div style={{ color:C.text, fontSize:15, fontWeight:700, marginBottom:3 }}>{opp.title}</div>
                   <div style={{ fontSize:12, marginBottom:2 }}><span style={{ color:C.secondary, fontWeight:600 }}>{opp.hookType}</span> <span style={{ color:C.textSoft }}>{opp.hookLabel}</span></div>
                   <div style={{ color:C.textSoft, fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{opp.strategyCopy}</div>
+                  <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginTop:4 }}>
+                    {oppUsps.map(u => <span key={u} style={pill("#F0F9FF",C.primary,"")}>{USP_ICONS[u]}{USP_NAMES[u]}</span>)}
+                  </div>
                 </div>
                 <div style={{ textAlign:"right", minWidth:80 }}>
                   <div style={{ color:C.secondary, fontSize:22, fontWeight:800 }}>{fmtNum(opp.monthlyVol)}</div>
                   <div style={{ color:C.textSoft, fontSize:10 }}>연 {fmtNum(opp.annualVol)}</div>
-                  <div style={{ color:C.secondary, fontSize:11, marginTop:4 }}>분석하기 →</div>
+                  <div style={{ color:C.secondary, fontSize:18, marginTop:6 }}>→</div>
                 </div>
               </div>
             );
@@ -402,56 +482,71 @@ export default function BrandformanceEngine() {
     </div>
   );
 
-  // ══════════════════════════════════════════════════════
-  // STEP 1: OPPORTUNITY ANALYSIS (6-axis)
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
+  // VIEW 2: ANALYSIS (기회 분석) — Full Page
+  // ══════════════════════════════════════════════════════════════
   const AXIS_CFG = [
-    { key:"who", color:"#FF6B6B", label:"WHO", sub:"누가 검색하는가?" },
-    { key:"when", color:"#4ECDC4", label:"WHEN", sub:"언제 검색하는가?" },
-    { key:"journey", color:"#45B7D1", label:"JOURNEY", sub:"어떤 경로로 검색하는가?" },
-    { key:"pain", color:"#FF8B94", label:"PAIN", sub:"소비자의 고통은?" },
-    { key:"usp", color:"#FFD93D", label:"USP FIT", sub:"Trip.com이 해결할 수 있는 것" },
-    { key:"hook", color:"#DDA0DD", label:"HOOK", sub:"콘텐츠 진입점" },
+    { key:"who", icon:"👤", color:"#FF6B6B", label:"WHO", sub:"누가 검색하는가?" },
+    { key:"when", icon:"📅", color:"#4ECDC4", label:"WHEN", sub:"언제 검색하는가?" },
+    { key:"journey", icon:"🔍", color:"#45B7D1", label:"JOURNEY", sub:"어떤 경로로 검색하는가?" },
+    { key:"pain", icon:"😣", color:"#FF8B94", label:"PAIN", sub:"소비자의 고통은?" },
+    { key:"usp", icon:"🔗", color:"#FFD93D", label:"USP FIT", sub:"Trip.com이 해결할 수 있는 것" },
+    { key:"hook", icon:"🎣", color:"#DDA0DD", label:"HOOK", sub:"콘텐츠 진입점" },
   ];
 
-  const renderStep1 = () => {
+  const renderAnalysis = () => {
     if (!selectedOpp) return null;
     const opp = selectedOpp;
     const ctx = CONTEXT_DATA[opp.id] || {};
-    const ideas = generatedIdeas[opp.id];
+    const ss = STAGE_STYLES[opp.stage] || {};
+    const isLoading = loadingIds[opp.id];
     return (
       <div style={{ maxWidth:1200, margin:"0 auto", padding:"24px 24px 40px" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:24 }}>
+        <BackNav label="← 이전 단계" />
+
+        {/* Title Area */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:28 }}>
           <div>
-            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:8 }}>
-              <span style={{ fontSize:36 }}>{opp.icon}</span>
-              <div><div style={{ color:C.text, fontSize:22, fontWeight:800 }}>{opp.title}</div><div style={{ color:C.textSoft, fontSize:13 }}>{opp.strategyCopy}</div></div>
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:10 }}>
+              <span style={{ fontSize:40 }}>{opp.icon}</span>
+              <div>
+                <div style={{ color:C.text, fontSize:26, fontWeight:800 }}>{opp.title}</div>
+                <div style={{ color:C.textSoft, fontSize:13, marginTop:2 }}>{opp.strategyCopy}</div>
+              </div>
             </div>
             <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-              <span style={pill("#EFF6FF",C.primary,"")}>📊 ListeningMind 검증</span>
-              <span style={pill("#F0FDF4",C.accent,"")}>🔍 PathFinder 경로</span>
+              <span style={pill(`${(ss.bg||"#EFF6FF")}`, ss.color||C.primary, "")}>{opp.hookType}</span>
+              <span style={pill(ss.bg||"#EFF6FF", ss.color||C.primary, "")}>{opp.stage}</span>
               <span style={{ fontSize:10, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"3px 10px", borderRadius:8 }}>{opp.level}</span>
+              <span style={pill("#EFF6FF",C.primary,"")}>월 {fmtNum(opp.monthlyVol)} / 연 {fmtNum(opp.annualVol)}</span>
             </div>
           </div>
-          <button onClick={() => { goToIdeas(); if(!ideas) generateIdeas(opp); }} style={{ background:C.primary, color:"#fff", border:"none", borderRadius:12, padding:"12px 24px", fontSize:14, fontWeight:700, cursor:"pointer", whiteSpace:"nowrap" }}>AI 아이디어 생성 실행 →</button>
+          <button onClick={() => { if(!generatedIdeas[opp.id]) generateIdeas(opp); else goToIdeas(); }} disabled={isLoading} style={{ background:C.primary, color:"#fff", border:"none", borderRadius:14, padding:"14px 28px", fontSize:14, fontWeight:700, cursor:isLoading?"wait":"pointer", whiteSpace:"nowrap", opacity:isLoading?0.7:1 }}>
+            {isLoading ? "생성 중..." : "AI 숏폼 아이디어 생성"}
+          </button>
         </div>
 
-        <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:16, marginBottom:20 }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-            <span style={{ color:C.textSoft, fontSize:11 }}>📊 월별 검색 트렌드</span>
-            <span style={{ color:C.primary, fontSize:20, fontWeight:800 }}>월 {fmtNum(opp.monthlyVol)}</span>
+        {/* Monthly Trend */}
+        <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20, marginBottom:20 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+            <span style={{ color:C.text, fontSize:14, fontWeight:600 }}>월별 검색 트렌드</span>
+            <span style={{ color:C.primary, fontSize:22, fontWeight:800 }}>월 {fmtNum(opp.monthlyVol)}</span>
           </div>
           <MiniHeatmap data={opp.peakMonths} />
         </div>
 
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+        {/* 6-Axis Grid (2col x 3row) */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
           {AXIS_CFG.map(ax => {
             const d = ctx[ax.key]; if(!d) return null;
             return (
               <div key={ax.key} style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:10 }}>
-                  <span style={{ color:ax.color, fontSize:14 }}>●</span>
-                  <div><div style={{ color:C.text, fontSize:14, fontWeight:700 }}>{ax.label}</div><div style={{ color:C.textSoft, fontSize:11 }}>{ax.sub}</div></div>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12 }}>
+                  <span style={{ fontSize:16 }}>{ax.icon}</span>
+                  <div>
+                    <div style={{ color:C.text, fontSize:14, fontWeight:700 }}>{ax.label}</div>
+                    <div style={{ color:C.textSoft, fontSize:11 }}>{ax.sub}</div>
+                  </div>
                 </div>
                 <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:12 }}>
                   {d.tags.map((tag,i) => <span key={i} style={{ fontSize:11, fontWeight:500, color:C.text, background:`${ax.color}15`, border:`1px solid ${ax.color}30`, padding:"4px 10px", borderRadius:20 }}>{tag}</span>)}
@@ -464,84 +559,188 @@ export default function BrandformanceEngine() {
             );
           })}
         </div>
+
+        {/* Search Journey (PathFinder) */}
+        <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20, marginBottom:16 }}>
+          <div style={{ color:C.text, fontSize:14, fontWeight:700, marginBottom:10 }}>🔍 검색 여정 (PathFinder)</div>
+          <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:10 }}>
+            {opp.pathJourney.map((node,i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span style={{ color:C.primary, fontWeight:700 }}>→</span>}
+                <span style={{ background:"#EFF6FF", color:C.primary, padding:"6px 14px", borderRadius:20, fontSize:12, fontWeight:600 }}>{node}</span>
+              </React.Fragment>
+            ))}
+          </div>
+          <div style={{ color:C.textSoft, fontSize:12 }}>{opp.pathInsight}</div>
+        </div>
+
+        {/* Cluster Insight */}
+        <div style={{ background:"#F0F9FF", borderRadius:14, border:`1px solid ${C.border}`, padding:20, marginBottom:16 }}>
+          <div style={{ color:C.text, fontSize:14, fontWeight:700, marginBottom:6 }}>🧠 소비자 인식 (Cluster)</div>
+          <div style={{ color:C.text, fontSize:13, lineHeight:1.6 }}>{opp.clusterInsight}</div>
+        </div>
+
+        {/* Top Keywords */}
+        <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20, marginBottom:16 }}>
+          <div style={{ color:C.text, fontSize:14, fontWeight:700, marginBottom:10 }}>🔑 관련 검색어 TOP</div>
+          <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+            {(opp.topKeywords||[]).map((kw,i) => (
+              <span key={i} style={{ background:i<3?"#EFF6FF":"#F8FAFC", color:i<3?C.primary:C.text, padding:"6px 12px", borderRadius:20, fontSize:12, fontWeight:i<3?600:400, border:`1px solid ${i<3?`${C.primary}30`:C.border}` }}>
+                {kw.keyword} <span style={{ color:C.textSoft, fontSize:10 }}>{fmtNum(kw.vol)}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Content Hook + Data Proof */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
+          <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20 }}>
+            <div style={{ color:C.text, fontSize:14, fontWeight:700, marginBottom:8 }}>콘텐츠 훅 예시</div>
+            <div style={{ color:C.secondary, fontSize:18, fontWeight:700, lineHeight:1.5 }}>{opp.contentHook}</div>
+          </div>
+          <div style={{ background:"#F8FAFC", borderRadius:14, border:`1px solid ${C.border}`, padding:20 }}>
+            <div style={{ color:C.text, fontSize:14, fontWeight:700, marginBottom:8 }}>DATA EVIDENCE</div>
+            <div style={{ color:C.text, fontSize:13, lineHeight:1.6 }}>{opp.dataProof}</div>
+          </div>
+        </div>
+
+        {/* Execute Button */}
+        <button onClick={() => { if(!generatedIdeas[opp.id]) generateIdeas(opp); else goToIdeas(); }} disabled={isLoading} style={{ width:"100%", background:C.primary, color:"#fff", border:"none", borderRadius:14, padding:"18px 0", fontSize:16, fontWeight:700, cursor:isLoading?"wait":"pointer", opacity:isLoading?0.7:1 }}>
+          {isLoading ? (
+            <span style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10 }}>
+              <span style={{ display:"inline-block", width:18, height:18, border:"2px solid rgba(255,255,255,0.3)", borderTopColor:"#fff", borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
+              AI가 아이디어를 생성 중...
+            </span>
+          ) : "실행 — AI 숏폼 아이디어 생성"}
+        </button>
       </div>
     );
   };
 
-  // ══════════════════════════════════════════════════════
-  // STEP 2: AI IDEAS
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
+  // VIEW 3: AI IDEAS
+  // ══════════════════════════════════════════════════════════════
   const PERSP = [{key:"auto",label:"AI 자동 추천"},{key:"A",label:"A. 소비자 맥락 조합"},{key:"B",label:"B. 검색 여정 발견"},{key:"C",label:"C. 크로스 카테고리"}];
 
-  const renderStep2 = () => {
+  const renderIdeas = () => {
     if (!selectedOpp) return null;
     const opp = selectedOpp;
     const ideas = generatedIdeas[opp.id];
     const isLoading = loadingIds[opp.id];
     return (
       <div style={{ maxWidth:1200, margin:"0 auto", padding:"24px 24px 40px" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-          <div><div style={{ color:C.text, fontSize:20, fontWeight:800 }}>{opp.icon} {opp.title} — AI 아이디어 TOP 5</div><div style={{ color:C.textSoft, fontSize:12 }}>Claude AI가 검색 데이터 기반으로 생성한 숏폼 아이디어</div></div>
-          {!ideas && !isLoading && <button onClick={() => generateIdeas(opp)} style={{ background:C.primary, color:"#fff", border:"none", borderRadius:12, padding:"10px 20px", fontSize:13, fontWeight:700, cursor:"pointer" }}>🎬 생성 실행</button>}
+        <BackNav label="← 이전 단계" />
+
+        {/* Title */}
+        <div style={{ marginBottom:20 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:6 }}>
+            <span style={{ fontSize:32 }}>{opp.icon}</span>
+            <div>
+              <div style={{ color:C.text, fontSize:22, fontWeight:800 }}>{opp.title}</div>
+              <div style={{ color:C.textSoft, fontSize:13 }}>AI 아이디어 생성 결과</div>
+            </div>
+          </div>
+          {ideas && !ideas[0]?.error && <div style={{ color:C.accent, fontSize:13, fontWeight:600 }}>숏폼 아이디어 {ideas.length}개 생성 완료</div>}
         </div>
-        <div style={{ display:"flex", gap:8, marginBottom:20 }}>
-          {PERSP.map(p => <button key={p.key} onClick={() => setIdeaPerspective(p.key)} style={{ padding:"6px 14px", borderRadius:16, border:`1px solid ${ideaPerspective===p.key?C.primary:C.border}`, background:ideaPerspective===p.key?"#EFF6FF":"transparent", color:ideaPerspective===p.key?C.primary:C.textSoft, fontSize:11, fontWeight:600, cursor:"pointer" }}>{p.label}</button>)}
+
+        {/* Perspective Tabs */}
+        <div style={{ display:"flex", gap:8, marginBottom:24 }}>
+          {PERSP.map((p,i) => (
+            <button key={p.key} onClick={() => i===0?setIdeaPerspective(p.key):null} style={{ padding:"8px 16px", borderRadius:20, border:`1px solid ${ideaPerspective===p.key?C.primary:C.border}`, background:ideaPerspective===p.key?C.primary:"transparent", color:ideaPerspective===p.key?"#fff":i===0?C.text:C.textSoft, fontSize:12, fontWeight:600, cursor:i===0?"pointer":"default", opacity:i===0?1:0.5 }}>
+              {p.label}{i>0 && " (준비중)"}
+            </button>
+          ))}
         </div>
-        {isLoading && <div style={{ textAlign:"center", padding:60 }}><div style={{ display:"inline-block", width:32, height:32, border:"3px solid #E2E8F0", borderTopColor:C.primary, borderRadius:"50%", animation:"spin 0.8s linear infinite" }} /><div style={{ color:C.textSoft, fontSize:13, marginTop:12 }}>AI가 아이디어를 생성 중...</div></div>}
-        {ideas && <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          {ideas.map((idea,idx) => {
-            if (idea.error) return <div key={idx} style={{ color:C.warn, fontSize:12, padding:16, background:"#FEF2F2", borderRadius:12 }}>⚠️ {idea.error}</div>;
-            const ct = CONTENT_TYPES.find(c => c.code === idea.contentType) || CONTENT_TYPES[0];
-            const score = idea.conversionScore || (95-idx*3);
-            const ideaKey = `${opp.id}-${idx}`;
-            const isExp = expandedIdeas[ideaKey];
-            const ss = STAGE_STYLES[idea.stage] || {};
-            if (ideaPerspective !== "auto" && idea.perspective && idea.perspective !== ideaPerspective) return null;
-            return (
-              <div key={idx} style={{ background:C.card, borderRadius:16, border:`1px solid ${C.border}`, borderLeft:`3px solid ${ct.color}`, overflow:"hidden" }}>
-                <div style={{ padding:"16px 20px", display:"flex", alignItems:"flex-start", gap:16 }}>
-                  <div style={{ fontSize:32, fontWeight:800, color:C.primary, minWidth:40, textAlign:"center", lineHeight:1 }}>#{idea.rank||idx+1}</div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ display:"flex", gap:6, marginBottom:6, flexWrap:"wrap" }}>
-                      <span style={pill(`${ct.color}20`,ct.color,"")}>{ct.code}.{ct.name}</span>
-                      <span style={pill(ss.bg||"#EFF6FF",ss.color||C.textSoft,"")}>{idea.stage}</span>
-                      {idea.perspective && <span style={pill(`${C.purple}12`,C.purple,"")}>{idea.perspective}</span>}
+
+        {/* Loading */}
+        {isLoading && (
+          <div style={{ textAlign:"center", padding:80 }}>
+            <div style={{ display:"inline-block", width:40, height:40, border:"3px solid #E2E8F0", borderTopColor:C.primary, borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
+            <div style={{ color:C.textSoft, fontSize:14, marginTop:16 }}>AI가 아이디어를 생성 중...</div>
+          </div>
+        )}
+
+        {/* Idea Cards */}
+        {ideas && (
+          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+            {ideas.map((idea,idx) => {
+              if (idea.error) return <div key={idx} style={{ color:C.warn, fontSize:12, padding:16, background:"#FEF2F2", borderRadius:12 }}>⚠️ {idea.error}</div>;
+              const ct = CONTENT_TYPES.find(c => c.code === idea.contentType) || CONTENT_TYPES[0];
+              const score = idea.conversionScore || (95-idx*3);
+              const ss = STAGE_STYLES[idea.stage] || {};
+              if (ideaPerspective !== "auto" && idea.perspective && idea.perspective !== ideaPerspective) return null;
+              return (
+                <div key={idx} style={{ background:C.card, borderRadius:16, border:`1px solid ${C.border}`, borderLeft:`4px solid ${ct.color}`, overflow:"hidden" }}>
+                  <div style={{ padding:"20px 24px", display:"flex", gap:20 }}>
+                    {/* Left: Rank */}
+                    <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"center", minWidth:50 }}>
+                      <div style={{ width:50, height:50, borderRadius:25, background:`${C.primary}10`, display:"flex", alignItems:"center", justifyContent:"center", color:C.primary, fontSize:24, fontWeight:800 }}>{idea.rank||idx+1}</div>
                     </div>
-                    <div style={{ color:C.text, fontSize:16, fontWeight:700, marginBottom:4 }}>{idea.title}</div>
-                    <div style={{ color:C.secondary, fontSize:14, fontStyle:"italic", marginBottom:8 }}>{idea.hook3s}</div>
-                    {idea.sceneFlow && <div style={{ display:"flex", gap:6, marginBottom:8 }}>
-                      {idea.sceneFlow.map((s,si) => <div key={si} style={{ flex:1, fontSize:10, color:C.textSoft, background:C.surface, padding:"6px 8px", borderRadius:8, textAlign:"center", border:`1px solid ${C.border}` }}><span style={{ color:C.primary, fontWeight:700 }}>{si+1}.</span> {s}</div>)}
-                    </div>}
-                    <div style={{ color:C.primary, fontSize:12 }}>USP: {idea.uspConnection}</div>
-                    {idea.creatorMatch && <div style={{ marginTop:8, background:C.surface, borderRadius:10, padding:"8px 12px", border:`1px solid ${C.border}` }}>
-                      <span style={{ fontSize:11, color:C.text }}>🎬 크리에이터 협업 — <b>{idea.creatorMatch.name}</b>이(가) {idea.creatorMatch.strategy}</span>
-                    </div>}
-                  </div>
-                  <div style={{ textAlign:"center", minWidth:70 }}>
-                    <div style={{ color:scoreColor(score), fontSize:36, fontWeight:800, lineHeight:1 }}>{score}</div>
-                    <div style={{ color:C.textSoft, fontSize:9, marginBottom:10 }}>전환점수</div>
-                    <button onClick={() => goToStoryboard(idea)} style={{ background:C.primary, color:"#fff", border:"none", borderRadius:8, padding:"6px 12px", fontSize:10, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap" }}>스토리보드 →</button>
+
+                    {/* Center: Content */}
+                    <div style={{ flex:1 }}>
+                      {/* Tags */}
+                      <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap" }}>
+                        <span style={pill(`${ct.color}20`,ct.color,"")}>{ct.code}.{ct.name}</span>
+                        <span style={pill(ss.bg||"#EFF6FF",ss.color||C.textSoft,"")}>{idea.stage}</span>
+                        {idea.perspective && <span style={pill(`${C.purple}12`,C.purple,"")}>{idea.perspective}</span>}
+                        {idea.contextCombo && <span style={pill("#F8FAFC",C.textSoft,"")}>{idea.contextCombo}</span>}
+                      </div>
+
+                      {/* Title */}
+                      <div style={{ color:C.text, fontSize:16, fontWeight:700, marginBottom:6 }}>{idea.title}</div>
+
+                      {/* Data Proof */}
+                      {idea.dataProof && <div style={{ color:C.textSoft, fontSize:12, marginBottom:8 }}>📊 {idea.dataProof}</div>}
+
+                      {/* Hook */}
+                      <div style={{ color:C.secondary, fontSize:16, fontWeight:700, marginBottom:12 }}>✦ HOOK: {idea.hook3s}</div>
+
+                      {/* Scene Flow - 4 boxes */}
+                      {idea.sceneFlow && (
+                        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr 1fr", gap:8, marginBottom:12 }}>
+                          {idea.sceneFlow.map((s,si) => (
+                            <div key={si} style={{ background:C.surface, padding:"8px 10px", borderRadius:10, border:`1px solid ${C.border}`, textAlign:"center" }}>
+                              <div style={{ color:C.primary, fontSize:11, fontWeight:700, marginBottom:2 }}>씬{si+1}</div>
+                              <div style={{ color:C.text, fontSize:11, lineHeight:1.4 }}>{s}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* USP */}
+                      <div style={{ color:C.primary, fontSize:12, marginBottom:6 }}>USP: {idea.uspConnection}</div>
+
+                      {/* Creator Strategy */}
+                      {idea.creatorStrategy && (
+                        <div style={{ background:C.surface, borderRadius:10, padding:"8px 12px", border:`1px solid ${C.border}` }}>
+                          <span style={{ fontSize:12, color:C.text }}>🎬 크리에이터 협업 — {idea.creatorStrategy}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right: Score + Button */}
+                    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"space-between", minWidth:80 }}>
+                      <div style={{ textAlign:"center" }}>
+                        <div style={{ color:scoreColor(score), fontSize:42, fontWeight:800, lineHeight:1 }}>{score}</div>
+                        <div style={{ color:C.textSoft, fontSize:10, marginTop:2 }}>전환점수</div>
+                      </div>
+                      <button onClick={() => goToStoryboard(idea)} style={{ background:C.primary, color:"#fff", border:"none", borderRadius:10, padding:"10px 16px", fontSize:12, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap", marginTop:12 }}>스토리보드 보기 →</button>
+                    </div>
                   </div>
                 </div>
-                <div onClick={() => toggleIdea(ideaKey)} style={{ padding:"8px 20px", borderTop:`1px solid ${C.border}`, cursor:"pointer", textAlign:"center" }}><span style={{ color:C.textSoft, fontSize:11 }}>{isExp?"▴ 접기":"▾ 상세 보기"}</span></div>
-                {isExp && <div style={{ padding:"0 20px 16px", display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-                  <div><span style={{ fontSize:10, color:C.textSoft }}>🎯 타겟</span><div style={{ color:C.text, fontSize:12, marginTop:2 }}>{idea.target}</div></div>
-                  <div><span style={{ fontSize:10, color:C.textSoft }}>🎬 크리에이터</span><div style={{ color:C.text, fontSize:12, marginTop:2 }}>{idea.creatorType}</div></div>
-                  <div><span style={{ fontSize:10, color:C.textSoft }}>📊 데이터 근거</span><div style={{ color:C.text, fontSize:12, marginTop:2 }}>{idea.dataProof}</div></div>
-                  <div><span style={{ fontSize:10, color:C.textSoft }}>📅 시리즈</span><div style={{ color:C.text, fontSize:12, marginTop:2 }}>{idea.seriesNote}</div></div>
-                </div>}
-              </div>
-            );
-          })}
-        </div>}
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   };
 
-  // ══════════════════════════════════════════════════════
-  // STEP 3: STORYBOARD (YouTube + Instagram 2-col)
-  // ══════════════════════════════════════════════════════
-  const renderStep3 = () => {
+  // ══════════════════════════════════════════════════════════════
+  // VIEW 4: STORYBOARD
+  // ══════════════════════════════════════════════════════════════
+  const renderStoryboard = () => {
     if (!selectedOpp || !selectedIdea) return null;
     const opp = selectedOpp;
     const idea = selectedIdea;
@@ -550,83 +749,148 @@ export default function BrandformanceEngine() {
     const ct = CONTENT_TYPES.find(c => c.code === idea.contentType) || CONTENT_TYPES[0];
     const ss = STAGE_STYLES[idea.stage] || {};
 
-    const PlatformCard = ({ platform, color, icon, maxDur, title, hook, hashtags, uploadTime }) => (
-      <div style={{ flex:1, background:C.card, borderRadius:16, border:`1px solid ${C.border}`, borderTop:`3px solid ${color}`, overflow:"hidden", padding:20 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12 }}>
-          <span style={{ fontSize:18 }}>{icon}</span>
-          <span style={{ color, fontSize:14, fontWeight:700 }}>{platform}</span>
-          <span style={{ color:C.textSoft, fontSize:11 }}>MAX {maxDur}, 9:16</span>
+    const PlatformCard = ({ platform, color, icon, maxDur, data }) => {
+      const d = data || {};
+      return (
+        <div style={{ flex:1, background:C.card, borderRadius:16, border:`1px solid ${C.border}`, borderTop:`3px solid ${color}`, overflow:"hidden", padding:24 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
+            <span style={{ fontSize:20 }}>{icon}</span>
+            <span style={{ color, fontSize:15, fontWeight:700 }}>{platform}</span>
+            <span style={pill(`${color}15`,color,"")}>MAX {maxDur}</span>
+            <span style={pill(`${color}15`,color,"")}>9:16</span>
+          </div>
+          <div style={{ color:C.text, fontSize:16, fontWeight:700, marginBottom:10 }}>{d.title || idea.title}</div>
+
+          <div style={{ marginBottom:14 }}>
+            <div style={{ color, fontSize:12, fontWeight:600, marginBottom:4 }}>✦ HOOK (0-3초)</div>
+            <div style={{ color:C.text, fontSize:14, fontStyle:"italic", fontWeight:500 }}>{d.hook || idea.hook3s}</div>
+          </div>
+
+          <div style={{ marginBottom:14 }}>
+            <div style={{ color, fontSize:12, fontWeight:600, marginBottom:8 }}>✦ SCENE FLOW</div>
+            {(d.scenes || idea.sceneFlow || []).map((s,i) => (
+              <div key={i} style={{ display:"flex", gap:8, marginBottom:6 }}>
+                <span style={{ color, fontSize:12, fontWeight:700, minWidth:20 }}>{i+1}.</span>
+                <span style={{ color:C.text, fontSize:12, lineHeight:1.5 }}>{s}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginBottom:14 }}>
+            <div style={{ color:C.accent, fontSize:12, fontWeight:600, marginBottom:4 }}>✓ PROOF</div>
+            <div style={{ color:C.text, fontSize:12 }}>{d.proof || idea.dataProof}</div>
+          </div>
+
+          <div style={{ marginBottom:14 }}>
+            <div style={{ color:C.secondary, fontSize:12, fontWeight:600, marginBottom:4 }}>→ CTA</div>
+            <div style={{ color:C.text, fontSize:12 }}>{d.cta || idea.uspConnection}</div>
+          </div>
+
+          {(d.hashtags||[]).length > 0 && (
+            <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:14 }}>
+              {d.hashtags.map((h,i) => <span key={i} style={{ fontSize:10, color, background:`${color}10`, padding:"3px 10px", borderRadius:12 }}>#{h}</span>)}
+            </div>
+          )}
+
+          <div style={{ display:"flex", gap:16, fontSize:11, color:C.textSoft, borderTop:`1px solid ${C.border}`, paddingTop:10 }}>
+            {d.uploadTime && <span>⏰ {d.uploadTime}</span>}
+            <span>🎯 {d.targetCluster || idea.target || opp.demographics}</span>
+          </div>
         </div>
-        <div style={{ color:C.text, fontSize:15, fontWeight:700, marginBottom:8 }}>{title || idea.title}</div>
-        <div style={{ marginBottom:12 }}><div style={{ color, fontSize:11, fontWeight:600, marginBottom:4 }}>✦ HOOK (0-3초)</div><div style={{ color:C.text, fontSize:13, fontStyle:"italic" }}>{hook || idea.hook3s}</div></div>
-        <div style={{ marginBottom:12 }}><div style={{ color, fontSize:11, fontWeight:600, marginBottom:6 }}>✦ SCENE FLOW</div>
-          {(idea.sceneFlow||[]).map((s,i) => <div key={i} style={{ display:"flex", gap:8, marginBottom:4 }}><span style={{ color, fontSize:11, fontWeight:700, minWidth:16 }}>{i+1}</span><span style={{ color:C.text, fontSize:12 }}>{s}</span></div>)}
-        </div>
-        <div style={{ marginBottom:12 }}><div style={{ color:C.accent, fontSize:11, fontWeight:600, marginBottom:4 }}>✓ PROOF</div><div style={{ color:C.text, fontSize:12 }}>{idea.dataProof}</div></div>
-        <div style={{ marginBottom:12 }}><div style={{ color:C.secondary, fontSize:11, fontWeight:600, marginBottom:4 }}>→ CTA</div><div style={{ color:C.text, fontSize:12 }}>{idea.uspConnection}</div></div>
-        {hashtags?.length > 0 && <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:12 }}>{hashtags.map((h,i) => <span key={i} style={{ fontSize:10, color, background:`${color}10`, padding:"2px 8px", borderRadius:10 }}>#{h}</span>)}</div>}
-        <div style={{ display:"flex", gap:12, fontSize:10, color:C.textSoft }}>{uploadTime && <span>⏰ {uploadTime}</span>}<span>🎯 {idea.target||opp.demographics}</span></div>
-      </div>
-    );
+      );
+    };
 
     return (
       <div style={{ maxWidth:1200, margin:"0 auto", padding:"24px 24px 40px" }}>
-        <div style={{ marginBottom:20 }}>
-          <div style={{ display:"flex", gap:8, marginBottom:8 }}><span style={pill(`${ct.color}20`,ct.color,"")}>{ct.code}.{ct.name}</span><span style={pill(ss.bg||"#EFF6FF",ss.color||C.textSoft,"")}>{idea.stage}</span></div>
-          <div style={{ color:C.text, fontSize:22, fontWeight:800, marginBottom:4 }}>{idea.title}</div>
-          <div style={{ color:C.secondary, fontSize:14, fontStyle:"italic" }}>{idea.hook3s}</div>
+        <BackNav label="← 이전 단계" />
+
+        {/* Title Area */}
+        <div style={{ marginBottom:24 }}>
+          <div style={{ display:"flex", gap:8, marginBottom:8 }}>
+            <span style={pill(`${ct.color}20`,ct.color,"")}>{ct.code}.{ct.name}</span>
+            <span style={pill(ss.bg||"#EFF6FF",ss.color||C.textSoft,"")}>{idea.stage}</span>
+          </div>
+          <div style={{ color:C.text, fontSize:24, fontWeight:800, marginBottom:6 }}>{idea.title}</div>
+          <div style={{ color:C.secondary, fontSize:16, fontStyle:"italic" }}>{idea.hook3s}</div>
         </div>
 
+        {/* 2-Column: YouTube + Instagram */}
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
-          <PlatformCard platform="YouTube Shorts" color={C.youtube} icon="▶" maxDur="60s" title={yt.title} hook={yt.hook} hashtags={yt.hashtags} uploadTime={yt.uploadTime} />
-          <PlatformCard platform="Instagram Reels" color={C.instagram} icon="📷" maxDur="90s" title={ig.title} hook={ig.hook} hashtags={ig.hashtags} uploadTime={ig.uploadTime} />
+          <PlatformCard platform="YouTube Shorts" color={C.youtube} icon="▶" maxDur="60s" data={yt} />
+          <PlatformCard platform="Instagram Reels" color={C.instagram} icon="📷" maxDur="90s" data={ig} />
         </div>
 
+        {/* 4-Grid Info */}
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr 1fr", gap:12, marginBottom:24 }}>
-          {[{i:"🎯",l:"타겟",v:idea.target||opp.demographics},{i:"🎬",l:"크리에이터",v:idea.creatorType||"MICRO"},{i:"📊",l:"데이터 근거",v:idea.dataProof},{i:"📅",l:"시리즈",v:idea.seriesNote||"1편(90/10)→2편(60/40)→3편(30/70)"}].map((d,i) => (
-            <div key={i} style={{ background:C.card, borderRadius:12, border:`1px solid ${C.border}`, padding:14 }}><div style={{ fontSize:10, color:C.textSoft, marginBottom:4 }}>{d.i} {d.l}</div><div style={{ fontSize:12, color:C.text, lineHeight:1.5 }}>{d.v}</div></div>
+          {[
+            {i:"🎯",l:"타겟",v:idea.target||opp.demographics},
+            {i:"🎬",l:"크리에이터 추천",v:idea.creatorStrategy||"MICRO 크리에이터 협업"},
+            {i:"📊",l:"데이터 근거",v:idea.dataProof},
+            {i:"📅",l:"시리즈 구성",v:idea.seriesNote||"1편(90/10)→2편(60/40)→3편(30/70)"}
+          ].map((d,i) => (
+            <div key={i} style={{ background:C.card, borderRadius:12, border:`1px solid ${C.border}`, padding:16 }}>
+              <div style={{ fontSize:11, color:C.textSoft, marginBottom:6 }}>{d.i} {d.l}</div>
+              <div style={{ fontSize:12, color:C.text, lineHeight:1.6 }}>{d.v}</div>
+            </div>
           ))}
         </div>
 
-        {/* Ad Targeting */}
+        {/* Collapsible: Ad Targeting */}
         <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, marginBottom:12, overflow:"hidden" }}>
-          <div onClick={() => toggleSection("ad")} style={{ padding:"14px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between" }}><span style={{ color:C.text, fontSize:14, fontWeight:600 }}>📢 광고 노출 추천</span><span style={{ color:C.textSoft }}>{expandedSections.ad?"▴":"▾"}</span></div>
-          {expandedSections.ad && <div style={{ padding:"0 20px 16px", borderTop:`1px solid ${C.border}`, paddingTop:12 }}><div style={{ color:C.text, fontSize:12, lineHeight:1.8, whiteSpace:"pre-line" }}>{idea.adTargeting || `• 관심사: ${opp.title} 관련 검색 이력자\n• 인구통계: ${opp.demographics}\n• 리타겟팅: Trip.com 방문 후 이탈자\n• 시즌: ${opp.peakSeason} 집중 노출`}</div></div>}
+          <div onClick={() => toggleSection("ad")} style={{ padding:"16px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+            <span style={{ color:C.text, fontSize:14, fontWeight:600 }}>📢 광고 노출 추천</span>
+            <span style={{ color:C.textSoft, fontSize:14 }}>{expandedSections.ad?"▴":"▾"}</span>
+          </div>
+          {expandedSections.ad && (
+            <div style={{ padding:"0 20px 16px", borderTop:`1px solid ${C.border}`, paddingTop:12 }}>
+              <div style={{ color:C.text, fontSize:12, lineHeight:1.8, whiteSpace:"pre-line" }}>
+                {idea.adTargeting || `• 관심사: ${opp.title} 관련 검색 이력자\n• 인구통계: ${opp.demographics}\n• 리타겟팅: Trip.com 방문 후 이탈자\n• 시즌: ${opp.peakSeason} 집중 노출`}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Creator Matching */}
-        <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, overflow:"hidden" }}>
-          <div onClick={() => toggleSection("creator")} style={{ padding:"14px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between" }}><span style={{ color:C.text, fontSize:14, fontWeight:600 }}>🎬 크리에이터 매칭 가이드 — YouTube API 실시간 검색</span><span style={{ color:C.textSoft }}>{expandedSections.creator?"▴":"▾"}</span></div>
-          {expandedSections.creator && <div style={{ padding:"0 20px 16px", borderTop:`1px solid ${C.border}`, paddingTop:12 }}>
-            <div style={{ color:C.textSoft, fontSize:11, marginBottom:8 }}>"{(YT_QUERIES[opp.id]||[])[0]}" 검색 결과 기반 추천</div>
-            <CreatorCards oppId={opp.id} />
-          </div>}
+        {/* Collapsible: Creator Matching */}
+        <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, marginBottom:24, overflow:"hidden" }}>
+          <div onClick={() => toggleSection("creator")} style={{ padding:"16px 20px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+            <span style={{ color:C.text, fontSize:14, fontWeight:600 }}>🎬 크리에이터 매칭 — YouTube API 실시간 검색</span>
+            <span style={{ color:C.textSoft, fontSize:14 }}>{expandedSections.creator?"▴":"▾"}</span>
+          </div>
+          {expandedSections.creator && (
+            <div style={{ padding:"0 20px 16px", borderTop:`1px solid ${C.border}`, paddingTop:12 }}>
+              <div style={{ color:C.textSoft, fontSize:12, marginBottom:10 }}>"{(YT_QUERIES[opp.id]||[])[0]}" 검색 결과 기반 추천</div>
+              <CreatorCards oppId={opp.id} />
+            </div>
+          )}
         </div>
+
+        {/* Back to ideas */}
+        <button onClick={() => setCurrentView("ideas")} style={{ width:"100%", background:C.surface, color:C.primary, border:`1px solid ${C.border}`, borderRadius:14, padding:"14px 0", fontSize:14, fontWeight:600, cursor:"pointer" }}>← 다른 아이디어 보기</button>
       </div>
     );
   };
 
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   // FOOTER
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   const Footer = () => (
     <div style={{ background:C.footerBg, borderTop:`1px solid ${C.border}`, padding:"24px 0", textAlign:"center" }}>
       <div style={{ color:"#94A3B8", fontSize:11, letterSpacing:3 }}>PENTACLE × AI&nbsp;&nbsp;&nbsp;ALGORITHM PERFORMANCE PLATFORM</div>
     </div>
   );
 
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   // MAIN RENDER
-  // ══════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════
   return (
     <div style={{ minHeight:"100vh", background:C.bg, color:C.text }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes pulse{0%,100%{opacity:0.6}50%{opacity:0.3}}`}</style>
       <Header />
       <StepIndicator />
-      {step===0 && renderStep0()}
-      {step===1 && renderStep1()}
-      {step===2 && renderStep2()}
-      {step===3 && renderStep3()}
+      {currentView === "main" && renderMain()}
+      {currentView === "analysis" && renderAnalysis()}
+      {currentView === "ideas" && renderIdeas()}
+      {currentView === "storyboard" && renderStoryboard()}
       <Footer />
     </div>
   );
