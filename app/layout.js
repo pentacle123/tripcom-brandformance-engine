@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Tripcom Brandformance Engine",
-  description: "Trip.com 브랜드포먼스 분석 엔진",
+  title: "Trip.com AI Brandformance Engine",
+  description: "한국 검색 행태 특화 숏폼 전략 시스템 | Pentacle × AI",
 };
 
 export default function RootLayout({ children }) {
@@ -8,15 +8,11 @@ export default function RootLayout({ children }) {
     <html lang="ko">
       <head>
         <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
           rel="stylesheet"
         />
       </head>
-      <body style={{ margin: 0, fontFamily: "'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <body style={{ margin: 0, background: "#0A1628", fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         {children}
       </body>
     </html>
