@@ -42,6 +42,11 @@ const YT_QUERIES = {
   "opp-i4": ["부모님 여행 브이로그", "효도여행 후기"],
   "opp-i5": ["영어캠프 후기", "세부 어학연수 엄마"],
   "opp-i6": ["해외 콘서트 여행", "마라톤 해외 대회"],
+  "opp-d8": ["홍콩 맛집 브이로그", "홍콩 야경 여행"],
+  "opp-d9": ["싱가포르 가족여행 브이로그", "싱가포르 맛집"],
+  "opp-d10": ["몽골 여행 브이로그", "몽골 초원 게르"],
+  "opp-d11": ["발리 풀빌라 브이로그", "발리 여행 비용"],
+  "opp-i7": ["크루즈 여행 후기", "일본 크루즈 브이로그"],
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -55,6 +60,10 @@ const DEST_OPPS = [
   { id:"opp-d5", title:"대만 맛집·야시장 탐방객", icon:"🧋", hookType:"Taste-hook", hookLabel:"야시장 어드벤처", strategyCopy:"대만=야시장. 먹거리 탐험이 곧 여행의 전부.", level:"MEGA", region:"동아시아", destinations:["대만"], monthlyVol:186300, annualVol:2235600, keyInsight:"맛집+야시장이 핵심", demographics:"여성 72% · 40-50대 56%", peakSeason:"10~1월", peakMonths:[85,60,55,50,55,60,55,50,55,65,65,70], stage:"Dream", pathJourney:["대만여행","맛집","야시장","관광지","경비"], pathInsight:"맛집/야시장이 핵심 허브", clusterInsight:"대만여행 클러스터에서 '야시장'과 '맛집'이 최대 허브", topKeywords:[{keyword:"대만 여행",vol:186300},{keyword:"대만 맛집",vol:9553},{keyword:"대만 야시장",vol:7200},{keyword:"타이베이 맛집",vol:5800},{keyword:"지우펀",vol:4500},{keyword:"대만 경비",vol:3200}], uspConnection:"Trip.Best 맛집 랭킹 + 가격 비교", painPoints:["야시장이 너무 많은데 어디가 진짜 맛있는지 모르겠다"], contentHook:"대만 야시장 먹거리 1만원으로 10가지 도전", dataProof:"대만여행 186,300/월, 맛집 9,553/월" },
   { id:"opp-d6", title:"괌·하와이 가족 리조트 여행자", icon:"🌺", hookType:"Family-hook", hookLabel:"가족 리조트", strategyCopy:"괌=30대 가족의 첫 해외, 하와이=50대 버킷리스트.", level:"MEGA", region:"미주", destinations:["괌","하와이"], monthlyVol:93359, annualVol:1120308, keyInsight:"괌=30대 가족, 하와이=50대+ 버킷리스트", demographics:"괌: 30대 36% / 하와이: 50대+ 30%", peakSeason:"괌 1,4~6월 / 하와이 1,5~7월", peakMonths:[70,55,55,55,65,75,70,50,65,75,90,70], stage:"Plan", pathJourney:["괌/하와이","맛집","비용","호텔","액티비티"], pathInsight:"괌은 '아이 첫 해외여행', 하와이는 '인생 여행'", clusterInsight:"괌 클러스터에서 '가족'과 '아이' 연결 강함", topKeywords:[{keyword:"괌 여행",vol:60576},{keyword:"하와이 여행",vol:32783},{keyword:"괌 맛집",vol:9636},{keyword:"하와이 맛집",vol:8500},{keyword:"하와이 비용",vol:12000},{keyword:"괌 호텔",vol:7200}], uspConnection:"원스톱 항공+호텔+액티비티", painPoints:["괌과 하와이 중 어디가 맞는지 모르겠다"], contentHook:"괌 vs 하와이, 아이 나이별로 추천이 다른 이유", dataProof:"괌 60,576/월, 하와이 32,783/월" },
   { id:"opp-d7", title:"삿포로 겨울 시즌 여행자", icon:"❄️", hookType:"Season-hook", hookLabel:"시즌 한정 경험", strategyCopy:"겨울에만 가능한 경험. 눈축제+온천+스키.", level:"MEGA", region:"일본", destinations:["삿포로"], monthlyVol:91766, annualVol:1101192, keyInsight:"겨울 시즌 집중", demographics:"여성 68% · 40대 29%", peakSeason:"11~2월", peakMonths:[85,70,50,40,45,50,55,45,40,70,85,100], stage:"Plan", pathJourney:["삿포로","눈축제","온천","스키","맛집"], pathInsight:"눈축제가 핵심 트리거", clusterInsight:"삿포로 클러스터에서 '겨울'이 압도적 허브", topKeywords:[{keyword:"삿포로 여행",vol:91766},{keyword:"삿포로 눈축제",vol:30000},{keyword:"삿포로 맛집",vol:18000},{keyword:"삿포로 온천",vol:9500},{keyword:"삿포로 스키",vol:7200}], uspConnection:"Trip.Best 시즌 추천 + 스키 패키지", painPoints:["눈축제 기간에 숙소 잡기 어렵다","겨울 옷차림 불안"], contentHook:"삿포로 눈축제 시즌 3박4일 완벽 동선", dataProof:"삿포로 91,766/월, 눈축제 30,000/월" },
+  { id:"opp-d8", title:"홍콩 쇼핑·야경·딤섬 여행자", icon:"🌃", hookType:"Experience-hook", hookLabel:"도시 경험 집약", strategyCopy:"3박이면 충분한 도시. 쇼핑+야경+딤섬의 밀도 높은 경험을 설계한다.", level:"MEGA", region:"동아시아", destinations:["홍콩","마카오"], monthlyVol:129400, annualVol:1561500, keyInsight:"마카오(연 73만)와 묶어서 검색하는 패턴. 짧은 일정 고밀도 여행", demographics:"여성 74% · 30대 25%, 40대 24%, 50대+ 26%", peakSeason:"1월, 10~12월", peakMonths:[100,73,68,58,69,63,80,83,74,95,88,92], stage:"Plan", pathJourney:["홍콩여행","맛집","야경","쇼핑","마카오"], pathInsight:"홍콩에서 시작 → 맛집/딤섬이 핵심 → 야경(빅토리아피크) → 쇼핑 → 마카오 당일치기 연결", clusterInsight:"홍콩 클러스터에서 '딤섬'과 '야경'이 양대 허브. 마카오와 강한 연결. 3박4일 일정이 주류", topKeywords:[{keyword:"홍콩 여행",vol:129400},{keyword:"마카오 여행",vol:60853},{keyword:"홍콩 맛집",vol:35000},{keyword:"홍콩 야경",vol:18000},{keyword:"홍콩 쇼핑",vol:15000},{keyword:"홍콩 딤섬",vol:12000}], uspConnection:"원스톱(홍콩+마카오 묶음) + Trip.Best 맛집", painPoints:["3박에 뭘 다 할 수 있을지 모르겠다","홍콩-마카오 이동이 복잡할까 걱정"], contentHook:"홍콩 3박4일 마카오까지, 딤섬 5곳 야경 2곳 완벽 동선", dataProof:"홍콩여행 129,400/월, 마카오 60,853/월, 맛집 35,000/월" },
+  { id:"opp-d9", title:"싱가포르 가족·시니어 여행자", icon:"🦁", hookType:"Family-hook", hookLabel:"안전한 가족 도시", strategyCopy:"깨끗하고 안전한 도시. 아이 동반 가족과 시니어 모두에게 최적의 첫 해외여행지.", level:"MEGA", region:"동남아", destinations:["싱가포르"], monthlyVol:101783, annualVol:1309350, keyInsight:"여성 77%로 가장 높은 여성 비율. 50대+ 34%로 시니어 강세", demographics:"여성 77% · 50대+ 34%, 40대 26%", peakSeason:"1월, 3월, 5~7월", peakMonths:[95,85,93,73,85,87,88,82,64,65,60,63], stage:"Plan", pathJourney:["싱가포르여행","관광지","맛집","유니버셜","호텔"], pathInsight:"싱가포르여행 진입 → 유니버셜스튜디오가 가족 핵심 → 맛집(칠리크랩) → 호텔(마리나베이샌즈)", clusterInsight:"싱가포르 클러스터에서 '유니버셜'과 '마리나베이'가 양대 허브. 가족과 시니어 타겟이 뚜렷", topKeywords:[{keyword:"싱가포르 여행",vol:101783},{keyword:"싱가포르 관광",vol:25000},{keyword:"싱가포르 맛집",vol:18000},{keyword:"싱가포르 호텔",vol:15000},{keyword:"유니버셜 싱가포르",vol:12000}], uspConnection:"24시간 CS + 가족 패키지 + Trip.Best", painPoints:["물가가 비쌀까 걱정된다","아이와 시니어 모두 즐길 수 있는 곳이 있을까"], contentHook:"싱가포르 4일, 아이도 부모님도 만족한 코스 비용 전부 공개", dataProof:"싱가포르여행 101,783/월, 여성77%, 50대+34%" },
+  { id:"opp-d10", title:"몽골 초원·모험 여행자", icon:"🐎", hookType:"Adventure-hook", hookLabel:"모험 어드벤처", strategyCopy:"도시가 아닌 초원. 다른 여행지와 완전히 다른 경험을 찾는 2030이 급증하고 있다.", level:"MEGA", region:"동아시아", destinations:["몽골"], monthlyVol:71916, annualVol:1157570, keyInsight:"성장률 +27%로 급성장 중! 2030 젊은 층이 '다른 경험'을 찾아 유입", demographics:"여성 67% · 20-30대 50%, 50대+ 28%", peakSeason:"5~8월 (여름 집중)", peakMonths:[47,55,67,60,80,90,89,79,48,42,45,38], stage:"Dream", pathJourney:["몽골여행","투어","게르","경비","준비물"], pathInsight:"몽골여행 진입 → 투어 필수(개별 이동 불가) → 게르 체험 → 경비 확인 → 준비물이 특이", clusterInsight:"몽골 클러스터에서 '투어'가 압도적 허브. 개별자유여행이 어려워 패키지 수요 높음", topKeywords:[{keyword:"몽골 여행",vol:71916},{keyword:"몽골 투어",vol:25000},{keyword:"몽골 경비",vol:12000},{keyword:"몽골 게르",vol:8000},{keyword:"몽골 준비물",vol:6000}], uspConnection:"원스톱 투어 패키지 + 트립지니 AI 일정", painPoints:["개별 여행이 가능한지 모르겠다","투어를 어디서 예약해야 하는지"], contentHook:"서울 직장인이 몽골 초원에서 보낸 5일, 인생이 바뀌었다", dataProof:"몽골여행 71,916/월, 성장률 +27%, 20-30대 50%" },
+  { id:"opp-d11", title:"발리 허니문·서퍼 여행자", icon:"🌴", hookType:"Emotion-hook", hookLabel:"꿈의 휴양지", strategyCopy:"신혼여행의 디폴트이자 서퍼의 성지. 성장률 +22%로 수요가 계속 늘고 있다.", level:"MEGA", region:"동남아", destinations:["발리"], monthlyVol:90523, annualVol:1112960, keyInsight:"성장률 +22% 급성장. 신혼여행+서핑+요가+디지털노마드 다층 타겟", demographics:"여성 70% · 30대 31%, 40대 24%, 50대+ 24%", peakSeason:"1~3월, 5~7월", peakMonths:[80,74,83,81,93,93,83,87,75,84,77,75], stage:"Dream", pathJourney:["발리여행","풀빌라","우붓","서핑","비용"], pathInsight:"발리여행 진입 → 풀빌라가 핵심 숙소 → 우붓(문화)과 꾸따(해변) 분기 → 서핑/요가 체험 → 비용 확인", clusterInsight:"발리 클러스터에서 '풀빌라'와 '우붓'이 양대 허브. 신혼여행과 일반 여행이 혼재", topKeywords:[{keyword:"발리 여행",vol:90523},{keyword:"발리 풀빌라",vol:20000},{keyword:"발리 우붓",vol:15000},{keyword:"발리 맛집",vol:12000},{keyword:"발리 서핑",vol:8000},{keyword:"발리 비용",vol:7000}], uspConnection:"Trip.Best 풀빌라 랭킹 + 가격 비교", painPoints:["풀빌라 가격 비교가 어렵다","우붓과 꾸따 중 어디에 숙소를 잡을지"], contentHook:"발리 풀빌라 1박 10만원대, 실제로 가능한 곳 3곳", dataProof:"발리여행 90,523/월, 성장률 +22%, 풀빌라 20,000/월" },
 ];
 
 const INT_OPPS = [
@@ -64,6 +73,7 @@ const INT_OPPS = [
   { id:"opp-i4", title:"효도/부모님 여행 기획자", icon:"🙏", hookType:"Emotion-hook", hookLabel:"후회 트리거", strategyCopy:"'후회'라는 감정이 가장 강력한 전환 동기.", level:"MEDIUM", interest:"효도여행", e3tag:"Elderly", monthlyVol:6692, annualVol:71640, keyInsight:"30대 자녀가 대신 검색", demographics:"여성 79% · 30대 40%", peakSeason:"1월, 5월, 9월", peakMonths:[85,60,55,50,75,55,50,45,70,55,50,65], stage:"Dream", destinations:["일본","동남아","유럽"], pathJourney:["부모님여행","60대/70대","효도여행","추천","후회/10계명"], pathInsight:"감정 콘텐츠에 강하게 반응", clusterInsight:"부모님여행에서 '60대'와 '70대'가 핵심 노드", topKeywords:[{keyword:"부모님 해외여행",vol:6692},{keyword:"효도 여행",vol:3800},{keyword:"부모님 여행 추천",vol:2500},{keyword:"60대 해외여행",vol:1800},{keyword:"부모님 여행 후회",vol:900}], uspConnection:"24시간 한국어 CS + 시니어 맞춤", painPoints:["해외 문제 발생 시 불안","영어 못하시는 부모님"], contentHook:"부모님 첫 해외여행 보내드리기 전 꼭 알아야 할 5가지", dataProof:"부모님여행 6,692/월, 여성79%" },
   { id:"opp-i5", title:"자녀 영어캠프 기획 맘", icon:"📚", hookType:"Solution-hook", hookLabel:"원스톱 해결", strategyCopy:"원스톱이라는 USP가 가장 직접적으로 소구되는 타겟.", level:"NICHE", interest:"영어캠프", e3tag:null, monthlyVol:2256, annualVol:42340, keyInsight:"40대 엄마가 검색", demographics:"여성 72% · 40대 46%", peakSeason:"1~3월, 10~11월", peakMonths:[80,75,70,50,45,40,55,50,45,70,75,65], stage:"Plan", destinations:["세부","괌","호주"], pathJourney:["영어캠프","세부","비용","프로그램비교","항공"], pathInsight:"세부가 가성비 1위", clusterInsight:"영어캠프 클러스터에서 '세부'가 압도적", topKeywords:[{keyword:"영어캠프",vol:2256},{keyword:"세부 영어캠프",vol:1800},{keyword:"영어캠프 비용",vol:900},{keyword:"겨울방학 영어캠프",vol:750},{keyword:"괌 영어캠프",vol:400}], uspConnection:"원스톱 항공+숙소+액티비티", painPoints:["캠프+항공+숙소 따로 예약 복잡"], contentHook:"세부 영어캠프 4주, 한번에 해결한 방법", dataProof:"영어캠프 2,256/월, 40대엄마 46%" },
   { id:"opp-i6", title:"이벤트+여행 연결자", icon:"🎪", hookType:"Event-hook", hookLabel:"이벤트 연결 여행", strategyCopy:"'보러 가는 여행'은 전환율이 가장 높다.", level:"NICHE", interest:"이벤트", e3tag:"Event", monthlyVol:2579, annualVol:30860, keyInsight:"3E 전략 핵심", demographics:"콘서트:20대여성/마라톤:30-40대남성/미식:여성63%", peakSeason:"이벤트별 상이", peakMonths:[55,50,55,60,55,65,60,55,60,65,55,50], stage:"Plan", destinations:["일본","미국","유럽","태국"], pathJourney:["이벤트확인","일정","항공+숙소","예약"], pathInsight:"전환 경로가 짧고 전환율 최고", clusterInsight:"이벤트 검색은 의도가 매우 구체적", topKeywords:[{keyword:"미식 여행",vol:1323},{keyword:"해외 마라톤",vol:1070},{keyword:"해외 콘서트",vol:186},{keyword:"도쿄 마라톤",vol:800},{keyword:"와인 여행",vol:450}], uspConnection:"이벤트 일정 연동 + 원스톱 예약", painPoints:["이벤트 날짜 항공편 빨리 잡아야"], contentHook:"도쿄마라톤 참가자를 위한 3박4일 루트", dataProof:"마라톤 1,070/월, 미식 1,323/월" },
+  { id:"opp-i7", title:"크루즈 여행 탐색자", icon:"🚢", hookType:"Experience-hook", hookLabel:"떠다니는 리조트", strategyCopy:"유일하게 남녀 비율이 반반인 여행 검색. 40-50대 가족/부부가 '다른 형태의 여행'을 찾고 있다.", level:"MEGA", interest:"크루즈", e3tag:"Elderly", monthlyVol:84623, annualVol:1116030, keyInsight:"남성 46%·여성 54%로 유일하게 남녀 반반. 40-50대 55%. 3E Elderly 직결", demographics:"남 46%·여 54% (거의 반반!) · 40대 28%, 50대+ 27%", peakSeason:"연중 고른 분포 (1월, 3월 약간 높음)", peakMonths:[75,75,98,61,75,78,66,63,73,77,59,62], stage:"Dream", destinations:["일본 크루즈","동남아 크루즈","지중해 크루즈","알래스카 크루즈"], pathJourney:["크루즈여행","가격","노선","크루즈회사","후기"], pathInsight:"크루즈여행 진입 → 가격이 최대 관문 → 노선 선택 → 크루즈 회사 비교 → 후기 확인 후 결정", clusterInsight:"크루즈 클러스터에서 '가격'과 '노선'이 양대 허브. 부부/가족 단위 예약이 주류", topKeywords:[{keyword:"크루즈 여행",vol:84623},{keyword:"크루즈 가격",vol:25000},{keyword:"일본 크루즈",vol:18000},{keyword:"크루즈 추천",vol:12000},{keyword:"크루즈 후기",vol:8000}], uspConnection:"원스톱(크루즈+항공+호텔) + 가격 비교 + 24시간 CS", painPoints:["크루즈 가격이 얼마인지 감이 안 잡힌다","어떤 크루즈 회사가 좋은지 모르겠다"], contentHook:"크루즈 여행 처음이라면, 100만원대로 가능한 일본 노선 비교", dataProof:"크루즈여행 84,623/월, 남46%·여54%, 40-50대 55%" },
 ];
 
 const ALL_OPPS = [...DEST_OPPS, ...INT_OPPS];
@@ -77,20 +87,25 @@ const USP_TAGS = {
   "opp-d5": ["tripbest", "price"],
   "opp-d6": ["onestop", "cs"],
   "opp-d7": ["tripbest"],
+  "opp-d8": ["onestop", "tripbest"],
+  "opp-d9": ["cs", "onestop", "tripbest"],
+  "opp-d10": ["onestop", "tripgenie"],
+  "opp-d11": ["tripbest", "price"],
   "opp-i1": ["onestop", "price"],
   "opp-i2": ["onestop", "tripgenie"],
   "opp-i3": ["price", "tripgenie"],
   "opp-i4": ["cs"],
   "opp-i5": ["onestop"],
   "opp-i6": ["onestop", "price"],
+  "opp-i7": ["onestop", "price", "cs"],
 };
 
 const USP_MAP = [
-  { id:"onestop", icon:"🔗", name:"원스톱 플랫폼", pain:"항공+호텔+액티비티를 따로 예약하는 고통을 해결", count:8 },
-  { id:"cs", icon:"🇰🇷", name:"24시간 한국어 CS", pain:"해외에서 문제 생기면?이라는 불안을 해소", count:4 },
-  { id:"tripbest", icon:"🏆", name:"Trip.Best 랭킹", pain:"너무 많아서 못 고르겠다는 선택 고통을 해결", count:5 },
-  { id:"price", icon:"💰", name:"가격 경쟁력", pain:"최저가를 찾아 헤매는 시간을 절약", count:6 },
-  { id:"tripgenie", icon:"🤖", name:"트립지니 AI", pain:"일정 짜기 귀찮다를 AI가 해결", count:4 },
+  { id:"onestop", icon:"🔗", name:"원스톱 플랫폼", pain:"항공+호텔+액티비티를 따로 예약하는 고통을 해결", count:12 },
+  { id:"cs", icon:"🇰🇷", name:"24시간 한국어 CS", pain:"해외에서 문제 생기면?이라는 불안을 해소", count:6 },
+  { id:"tripbest", icon:"🏆", name:"Trip.Best 랭킹", pain:"너무 많아서 못 고르겠다는 선택 고통을 해결", count:7 },
+  { id:"price", icon:"💰", name:"가격 경쟁력", pain:"최저가를 찾아 헤매는 시간을 절약", count:8 },
+  { id:"tripgenie", icon:"🤖", name:"트립지니 AI", pain:"일정 짜기 귀찮다를 AI가 해결", count:5 },
 ];
 const USP_ICONS = { onestop:"🔗", cs:"🇰🇷", tripbest:"🏆", price:"💰", tripgenie:"🤖" };
 const USP_NAMES = { onestop:"원스톱", cs:"한국어CS", tripbest:"Trip.Best", price:"가격", tripgenie:"트립지니" };
@@ -112,7 +127,31 @@ const CONTEXT_DATA = {
   "opp-i4": { who:{tags:["30대 여성 (자녀)","부모님 대리 검색","효도 기획자"],evidence:"여성 79% | 30대 40%"}, when:{tags:["1월 설","5월 어버이날","9월 추석"],evidence:"1월 85, 5월 75"}, journey:{tags:["부모님여행 → 60대/70대 → 효도여행 → 추천 → 후회"],evidence:"'후회' 감정에 반응"}, pain:{tags:["해외 문제 시 불안","영어 못하시는 부모님","체력 고려"],evidence:"부모님 여행 후회 900/월"}, usp:{tags:["24시간 한국어 CS","시니어 맞춤","안전 보장"],evidence:"24시간 CS가 최대 안심"}, hook:{tags:["부모님 첫 해외여행 5가지","보내드리고 후회한 것들","60대 맞춤 코스"],evidence:"부모님여행 6,692/월"} },
   "opp-i5": { who:{tags:["40대 엄마","초등학생 자녀","교육열 높은 학부모"],evidence:"여성 72% | 40대 46%"}, when:{tags:["1-3월 여름방학 준비","10-11월 겨울방학 준비"],evidence:"1월 80 피크"}, journey:{tags:["영어캠프 → 세부 → 비용 → 프로그램비교 → 항공"],evidence:"세부가 가성비 1위"}, pain:{tags:["캠프+항공+숙소 따로 복잡","프로그램 품질 불안","아이 안전 걱정"],evidence:"영어캠프 비용 900/월"}, usp:{tags:["원스톱 항공+숙소","가격 비교","24시간 CS"],evidence:"원스톱이 가장 직접 소구"}, hook:{tags:["세부 4주 한번에 해결","영어캠프 비용 비교표","엄마 준비 꿀팁"],evidence:"영어캠프 2,256/월"} },
   "opp-i6": { who:{tags:["20대 여성 (콘서트)","30-40대 남성 (마라톤)","미식 관심 여성"],evidence:"이벤트별 타겟 상이 | 높은 전환 의도"}, when:{tags:["이벤트 일정에 따라","공연 발표 직후","대회 등록 시즌"],evidence:"이벤트 확정 → 즉시 검색"}, journey:{tags:["이벤트 확인 → 일정 → 항공+숙소 → 예약"],evidence:"전환 경로 짧고 전환율 높음"}, pain:{tags:["이벤트 항공편 빨리 잡아야","교통+숙소 맞추기","티켓+여행 동시"],evidence:"시간 압박이 최대"}, usp:{tags:["이벤트 일정 연동","원스톱 예약","빠른 예약"],evidence:"원스톱이 최대 소구"}, hook:{tags:["도쿄마라톤 러닝+관광","해외 콘서트 원정","미식 페스티벌 TOP 5"],evidence:"마라톤 1,070/월"} },
+  "opp-d8": { who:{tags:["30-50대 여성","쇼핑·미식 관심자","커플·부부"],evidence:"여성 74% | 30대 25%, 40대 24%, 50대+ 26%"}, when:{tags:["1월 피크","10-12월 연말 시즌"],evidence:"1월 100 최고 피크, 10월 95"}, journey:{tags:["홍콩여행 → 맛집/딤섬 → 야경 → 쇼핑 → 마카오"],evidence:"딤섬과 야경이 양대 핵심"}, pain:{tags:["3박에 뭘 다 할 수 있을지 모름","홍콩-마카오 이동 복잡"],evidence:"3박4일 일정이 주류"}, usp:{tags:["원스톱(홍콩+마카오 묶음)","Trip.Best 맛집"],evidence:"홍콩+마카오 원스톱이 핵심"}, hook:{tags:["딤섬 5곳 야경 2곳 동선","3박4일 마카오까지","빅토리아피크 야경"],evidence:"홍콩여행 129,400/월, 마카오 60,853/월"} },
+  "opp-d9": { who:{tags:["40-50대 여성","가족 여행 기획자","시니어 동반"],evidence:"여성 77% | 50대+ 34%, 40대 26%"}, when:{tags:["1월 피크","3월","5-7월 여름"],evidence:"1월 95, 3월 93"}, journey:{tags:["싱가포르여행 → 관광지 → 맛집 → 유니버셜 → 호텔"],evidence:"유니버셜이 가족 핵심"}, pain:{tags:["물가 비쌀까 걱정","아이+시니어 모두 즐길 곳"],evidence:"싱가포르 호텔 15,000/월"}, usp:{tags:["24시간 CS","가족 패키지","Trip.Best"],evidence:"안전+청결이 핵심 소구"}, hook:{tags:["아이도 부모님도 만족 코스","비용 전부 공개","유니버셜+마리나베이"],evidence:"싱가포르여행 101,783/월"} },
+  "opp-d10": { who:{tags:["20-30대 모험가","여성 67%","자연 체험 관심자"],evidence:"여성 67% | 20-30대 50%, 50대+ 28%"}, when:{tags:["5-8월 여름 집중","6월 피크"],evidence:"6월 90 최고 피크"}, journey:{tags:["몽골여행 → 투어 → 게르 → 경비 → 준비물"],evidence:"투어가 압도적 허브"}, pain:{tags:["개별 여행 가능한지 모름","투어 예약처 모름"],evidence:"몽골 투어 25,000/월"}, usp:{tags:["원스톱 투어 패키지","트립지니 AI 일정"],evidence:"패키지 수요 높음"}, hook:{tags:["초원에서 보낸 5일","게르 체험 리얼 후기","인생 바뀐 여행"],evidence:"몽골여행 71,916/월, +27% 성장"} },
+  "opp-d11": { who:{tags:["30대 여성","신혼부부","서퍼·요가 관심자"],evidence:"여성 70% | 30대 31%, 40대 24%"}, when:{tags:["1-3월","5-7월 이중 피크"],evidence:"5-6월 93 최고 피크"}, journey:{tags:["발리여행 → 풀빌라 → 우붓 → 서핑 → 비용"],evidence:"풀빌라가 핵심 숙소"}, pain:{tags:["풀빌라 가격 비교 어려움","우붓 vs 꾸따 숙소 위치"],evidence:"발리 풀빌라 20,000/월"}, usp:{tags:["Trip.Best 풀빌라 랭킹","가격 비교"],evidence:"풀빌라 가격비교가 핵심"}, hook:{tags:["풀빌라 1박 10만원대","우붓 인생샷 스팟","서핑 초보 체험기"],evidence:"발리여행 90,523/월, +22% 성장"} },
+  "opp-i7": { who:{tags:["40-50대 부부","남46%·여54% 반반","가족 단위"],evidence:"남 46%·여 54% 거의 반반 | 40대 28%, 50대+ 27%"}, when:{tags:["연중 고른 분포","1월·3월 약간 높음"],evidence:"3월 98 최고 피크"}, journey:{tags:["크루즈여행 → 가격 → 노선 → 크루즈회사 → 후기"],evidence:"가격이 최대 관문"}, pain:{tags:["크루즈 가격 감 안 잡힘","어떤 회사가 좋은지 모름"],evidence:"크루즈 가격 25,000/월"}, usp:{tags:["원스톱(크루즈+항공+호텔)","가격 비교","24시간 CS"],evidence:"원스톱+가격 비교가 핵심"}, hook:{tags:["100만원대 일본 크루즈","처음이면 이 노선","부부 크루즈 실비 공개"],evidence:"크루즈여행 84,623/월, 남녀반반"} },
 };
+
+// ── EXTRA OPPORTUNITIES (pill tags) ──
+const EXTRA_OPPS = [
+  { keyword:"나고야 여행", annual:979030 },{ keyword:"오키나와 여행", annual:963550 },
+  { keyword:"중국 여행", annual:875790 },{ keyword:"세부 여행", annual:829010 },
+  { keyword:"호주 여행", annual:783860 },{ keyword:"마카오 여행", annual:732400 },
+  { keyword:"두바이 여행", annual:596280 },{ keyword:"터키 여행", annual:548580 },
+  { keyword:"라오스 여행", annual:480120 },{ keyword:"포르투갈 여행", annual:470600 },
+  { keyword:"캄보디아 여행", annual:470490 },{ keyword:"워킹홀리데이", annual:425690 },
+  { keyword:"푸켓 여행", annual:425880 },{ keyword:"필리핀 여행", annual:405630 },
+  { keyword:"뉴질랜드 여행", annual:355080 },{ keyword:"캐나다 여행", annual:352960 },
+  { keyword:"온천 여행", annual:302180 },{ keyword:"미국 여행", annual:296020 },
+  { keyword:"크로아티아 여행", annual:289530 },{ keyword:"사이판 여행", annual:276640 },
+  { keyword:"그리스 여행", annual:231940 },{ keyword:"쿠알라룸푸르 여행", annual:224500 },
+  { keyword:"파리 여행", annual:218480 },{ keyword:"체코 여행", annual:215940 },
+  { keyword:"런던 여행", annual:166530 },{ keyword:"멕시코 여행", annual:150560 },
+  { keyword:"몰디브 여행", annual:98820 },
+];
+const fmtMan = (n) => Math.round(n/10000) + "만";
 
 // ── CONTENT TYPES & USPS ──
 const CONTENT_TYPES = [
@@ -362,16 +401,16 @@ export default function BrandformanceEngine() {
         </div>
         <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:32, display:"flex", flexDirection:"column", justifyContent:"center" }}>
           <span style={pill("#EFF6FF",C.primary,"",{marginBottom:12,alignSelf:"flex-start"})}>ListeningMind 검색 데이터 기반</span>
-          <div style={{ color:C.primary, fontSize:34, fontWeight:800, marginBottom:6 }}>연간 {fmt(13852648)}회</div>
+          <div style={{ color:C.primary, fontSize:34, fontWeight:800, marginBottom:6 }}>연간 {fmt(20110058)}회</div>
           <div style={{ color:C.text, fontSize:14, fontWeight:600, marginBottom:16, lineHeight:1.5 }}>Trip.com을 검색하지 않고<br/>여행과 관심사를 검색하는 소비자</div>
           <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:16 }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:C.surface, borderRadius:10, padding:"10px 14px", border:`1px solid ${C.border}` }}>
-              <span style={{ color:C.text, fontSize:13 }}>여행 목적지 검색</span>
-              <span style={{ color:C.primary, fontSize:16, fontWeight:800 }}>연간 {fmt(12934968)}회</span>
+              <span style={{ color:C.text, fontSize:13 }}>여행 목적지 검색 (11개 기회)</span>
+              <span style={{ color:C.primary, fontSize:16, fontWeight:800 }}>연간 {fmt(18076348)}회</span>
             </div>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:C.surface, borderRadius:10, padding:"10px 14px", border:`1px solid ${C.border}` }}>
-              <span style={{ color:C.text, fontSize:13 }}>라이프 관심사 검색</span>
-              <span style={{ color:C.secondary, fontSize:16, fontWeight:800 }}>연간 {fmt(917680)}회</span>
+              <span style={{ color:C.text, fontSize:13 }}>라이프 관심사 검색 (7개 기회)</span>
+              <span style={{ color:C.secondary, fontSize:16, fontWeight:800 }}>연간 {fmt(2033710)}회</span>
             </div>
           </div>
           <div style={{ color:C.secondary, fontSize:12, fontWeight:600, lineHeight:1.5 }}>이 검색에서 Trip.com은 발견되지 않고 있습니다 — 이것이 기회입니다</div>
@@ -411,7 +450,7 @@ export default function BrandformanceEngine() {
         <div style={{ marginBottom:16 }}>
           <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>A. 여행 목적지에서 출발한 기회</div>
           <div style={{ color:C.textSoft, fontSize:13, marginBottom:8 }}>목적지에 따라 궁금해하는 것은 완전히 다릅니다</div>
-          <span style={pill(`${C.primary}12`,C.primary,"")}>연간 {fmt(12934968)}회 검색 | 7개 기회 클러스터</span>
+          <span style={pill(`${C.primary}12`,C.primary,"")}>연간 {fmt(18076348)}회 검색 | 11개 기회 클러스터</span>
         </div>
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
           {DEST_OPPS.map(opp => {
@@ -450,7 +489,7 @@ export default function BrandformanceEngine() {
           <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>B. 소비자 관심사에서 출발한 기회</div>
           <div style={{ color:C.textSoft, fontSize:13, marginBottom:8 }}>관심사 속에서 Trip.com이 발견됩니다</div>
           <div style={{ display:"flex", gap:8 }}>
-            <span style={pill(`${C.secondary}12`,C.secondary,"")}>연간 {fmt(917680)}회 검색 | 6개 기회 클러스터</span>
+            <span style={pill(`${C.secondary}12`,C.secondary,"")}>연간 {fmt(2033710)}회 검색 | 7개 기회 클러스터</span>
             <span style={pill("#FFFBEB","#D97706","")}>3E 전략 정합</span>
           </div>
         </div>
@@ -482,6 +521,21 @@ export default function BrandformanceEngine() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Extra Opportunities */}
+      <div style={{ marginTop:40 }}>
+        <div style={{ marginBottom:16 }}>
+          <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>추가 발견된 기회</div>
+          <div style={{ color:C.textSoft, fontSize:13 }}>검색량이 확인된 추가 목적지와 관심사입니다</div>
+        </div>
+        <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+          {EXTRA_OPPS.map((ex,i) => (
+            <span key={i} style={{ background:"#F0F9FF", border:`1px solid ${C.border}`, borderRadius:20, padding:"6px 14px", fontSize:12, color:C.text, cursor:"pointer", transition:"all 0.15s", display:"inline-flex", alignItems:"center", gap:6 }} onMouseEnter={e => e.currentTarget.style.borderColor=C.primary} onMouseLeave={e => e.currentTarget.style.borderColor=C.border}>
+              {ex.keyword} <span style={{ color:C.textSoft, fontSize:10 }}>연 {fmtMan(ex.annual)}</span>
+            </span>
+          ))}
         </div>
       </div>
     </div>
