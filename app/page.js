@@ -144,7 +144,8 @@ export default function BrandformanceEngine() {
   const [ytLoading, setYtLoading] = useState({});
   const [activeUsps, setActiveUsps] = useState(new Set());
 
-  const fmtNum = (n) => n >= 1000000 ? (n/1000000).toFixed(1)+"M" : n >= 1000 ? (n/1000).toFixed(0)+"K" : String(n);
+  const fmt = (n) => Number(n).toLocaleString('ko-KR');
+  const fmtNum = fmt; // alias
   const toggleSection = useCallback((k) => setExpandedSections(p => ({...p,[k]:!p[k]})),[]);
   const scoreColor = (s) => s >= 95 ? C.accent : s >= 85 ? C.primary : C.secondary;
   const toggleUsp = (uspId) => setActiveUsps(prev => {
@@ -359,23 +360,27 @@ export default function BrandformanceEngine() {
             ))}
           </div>
         </div>
-        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-          {[{l:"해외 출국자",v:"29.24M",s:"2025 내국인 해외관광",c:C.text},{l:"트립닷컴 검색",v:"9.49M",s:"브랜드 직접 검색",c:C.primary},{l:"발견 공백",v:"14.60M+",s:"목적지만 검색, 기회",c:C.secondary,h:true}].map((it,i) => (
-            <React.Fragment key={i}>
-              {i>0 && <div style={{ textAlign:"center", color:C.textSoft, fontSize:16, fontWeight:800 }}>{i===1?"━":"═"}</div>}
-              <div style={{ background:C.card, border:`1px solid ${it.h?"rgba(255,107,0,0.3)":C.border}`, borderRadius:14, padding:"16px 20px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <div><div style={{ color:C.textSoft, fontSize:11, marginBottom:4 }}>{it.l}</div><div style={{ color:it.c, fontSize:28, fontWeight:800 }}>{it.v}</div></div>
-                <div style={{ color:C.textSoft, fontSize:11 }}>{it.s}</div>
-              </div>
-            </React.Fragment>
-          ))}
-          <div style={{ color:C.textSoft, fontSize:11, textAlign:"center", marginTop:4 }}>이 <span style={{ color:C.secondary, fontWeight:700 }}>14.60M</span> 소비자가 Trip.com을 발견하지 못하고 있습니다</div>
+        <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:32, display:"flex", flexDirection:"column", justifyContent:"center" }}>
+          <span style={pill("#EFF6FF",C.primary,"",{marginBottom:12,alignSelf:"flex-start"})}>ListeningMind 검색 데이터 기반</span>
+          <div style={{ color:C.primary, fontSize:34, fontWeight:800, marginBottom:6 }}>연간 {fmt(13852648)}회</div>
+          <div style={{ color:C.text, fontSize:14, fontWeight:600, marginBottom:16, lineHeight:1.5 }}>Trip.com을 검색하지 않고<br/>여행과 관심사를 검색하는 소비자</div>
+          <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:16 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:C.surface, borderRadius:10, padding:"10px 14px", border:`1px solid ${C.border}` }}>
+              <span style={{ color:C.text, fontSize:13 }}>여행 목적지 검색</span>
+              <span style={{ color:C.primary, fontSize:16, fontWeight:800 }}>연간 {fmt(12934968)}회</span>
+            </div>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:C.surface, borderRadius:10, padding:"10px 14px", border:`1px solid ${C.border}` }}>
+              <span style={{ color:C.text, fontSize:13 }}>라이프 관심사 검색</span>
+              <span style={{ color:C.secondary, fontSize:16, fontWeight:800 }}>연간 {fmt(917680)}회</span>
+            </div>
+          </div>
+          <div style={{ color:C.secondary, fontSize:12, fontWeight:600, lineHeight:1.5 }}>이 검색에서 Trip.com은 발견되지 않고 있습니다 — 이것이 기회입니다</div>
         </div>
       </div>
 
       {/* Competition Banner */}
       <div style={{ background:C.bannerBg, border:`1px solid ${C.border}`, borderRadius:12, padding:"14px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:12, marginBottom:32 }}>
-        <div style={{ color:C.textSoft, fontSize:12 }}><span style={{ color:C.text, fontWeight:600 }}>OTA 경쟁 환경:</span> 스카이스캐너 317.8만 {">"}아고다 160.8만 {">"}네이버항공권 157.7만 {">"}<span style={{ color:C.primary, fontWeight:600 }}>트립닷컴 79.1만</span> {">"}마이리얼트립 57.8만</div>
+        <div style={{ color:C.textSoft, fontSize:12 }}><span style={{ color:C.text, fontWeight:600 }}>OTA 경쟁 환경 (연간):</span> 스카이스캐너 3,813만 {">"} 아고다 1,929만 {">"} 네이버항공권 1,893만 {">"} <span style={{ color:C.primary, fontWeight:600 }}>트립닷컴 949만</span> {">"} 마이리얼트립 694만</div>
         <div style={{ color:C.gold, fontSize:11 }}>스카이스캐너→트립닷컴 크로스플로우</div>
       </div>
 
@@ -406,7 +411,7 @@ export default function BrandformanceEngine() {
         <div style={{ marginBottom:16 }}>
           <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>A. 여행 목적지에서 출발한 기회</div>
           <div style={{ color:C.textSoft, fontSize:13, marginBottom:8 }}>목적지에 따라 궁금해하는 것은 완전히 다릅니다</div>
-          <span style={pill(`${C.primary}12`,C.primary,"")}>연간 14,602,000+ 검색 | 7개 기회 클러스터</span>
+          <span style={pill(`${C.primary}12`,C.primary,"")}>연간 {fmt(12934968)}회 검색 | 7개 기회 클러스터</span>
         </div>
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
           {DEST_OPPS.map(opp => {
@@ -428,9 +433,9 @@ export default function BrandformanceEngine() {
                     {oppUsps.map(u => <span key={u} style={pill("#F0F9FF",C.primary,"")}>{USP_ICONS[u]}{USP_NAMES[u]}</span>)}
                   </div>
                 </div>
-                <div style={{ textAlign:"right", minWidth:80 }}>
-                  <div style={{ color:C.primary, fontSize:22, fontWeight:800 }}>{fmtNum(opp.monthlyVol)}</div>
-                  <div style={{ color:C.textSoft, fontSize:10 }}>연 {fmtNum(opp.annualVol)}</div>
+                <div style={{ textAlign:"right", minWidth:100 }}>
+                  <div style={{ color:C.primary, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.annualVol)}회</div>
+                  <div style={{ color:C.textSoft, fontSize:10 }}>월 평균 {fmt(opp.monthlyVol)}회</div>
                   <div style={{ color:C.primary, fontSize:18, marginTop:6 }}>→</div>
                 </div>
               </div>
@@ -445,7 +450,7 @@ export default function BrandformanceEngine() {
           <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>B. 소비자 관심사에서 출발한 기회</div>
           <div style={{ color:C.textSoft, fontSize:13, marginBottom:8 }}>관심사 속에서 Trip.com이 발견됩니다</div>
           <div style={{ display:"flex", gap:8 }}>
-            <span style={pill(`${C.secondary}12`,C.secondary,"")}>연간 917,000+ 검색 | 6개 기회 클러스터</span>
+            <span style={pill(`${C.secondary}12`,C.secondary,"")}>연간 {fmt(917680)}회 검색 | 6개 기회 클러스터</span>
             <span style={pill("#FFFBEB","#D97706","")}>3E 전략 정합</span>
           </div>
         </div>
@@ -469,9 +474,9 @@ export default function BrandformanceEngine() {
                     {oppUsps.map(u => <span key={u} style={pill("#F0F9FF",C.primary,"")}>{USP_ICONS[u]}{USP_NAMES[u]}</span>)}
                   </div>
                 </div>
-                <div style={{ textAlign:"right", minWidth:80 }}>
-                  <div style={{ color:C.secondary, fontSize:22, fontWeight:800 }}>{fmtNum(opp.monthlyVol)}</div>
-                  <div style={{ color:C.textSoft, fontSize:10 }}>연 {fmtNum(opp.annualVol)}</div>
+                <div style={{ textAlign:"right", minWidth:100 }}>
+                  <div style={{ color:C.secondary, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.annualVol)}회</div>
+                  <div style={{ color:C.textSoft, fontSize:10 }}>월 평균 {fmt(opp.monthlyVol)}회</div>
                   <div style={{ color:C.secondary, fontSize:18, marginTop:6 }}>→</div>
                 </div>
               </div>
@@ -518,7 +523,7 @@ export default function BrandformanceEngine() {
               <span style={pill(`${(ss.bg||"#EFF6FF")}`, ss.color||C.primary, "")}>{opp.hookType}</span>
               <span style={pill(ss.bg||"#EFF6FF", ss.color||C.primary, "")}>{opp.stage}</span>
               <span style={{ fontSize:10, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"3px 10px", borderRadius:8 }}>{opp.level}</span>
-              <span style={pill("#EFF6FF",C.primary,"")}>월 {fmtNum(opp.monthlyVol)} / 연 {fmtNum(opp.annualVol)}</span>
+              <span style={pill("#EFF6FF",C.primary,"")}>연간 {fmt(opp.annualVol)}회 · 월 {fmt(opp.monthlyVol)}회</span>
             </div>
           </div>
           <button onClick={() => { if(!generatedIdeas[opp.id]) generateIdeas(opp); else goToIdeas(); }} disabled={isLoading} style={{ background:C.primary, color:"#fff", border:"none", borderRadius:14, padding:"14px 28px", fontSize:14, fontWeight:700, cursor:isLoading?"wait":"pointer", whiteSpace:"nowrap", opacity:isLoading?0.7:1 }}>
@@ -530,7 +535,7 @@ export default function BrandformanceEngine() {
         <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20, marginBottom:20 }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
             <span style={{ color:C.text, fontSize:14, fontWeight:600 }}>월별 검색 트렌드</span>
-            <span style={{ color:C.primary, fontSize:22, fontWeight:800 }}>월 {fmtNum(opp.monthlyVol)}</span>
+            <span style={{ color:C.primary, fontSize:18, fontWeight:800 }}>월 평균 {fmt(opp.monthlyVol)}회</span>
           </div>
           <MiniHeatmap data={opp.peakMonths} />
         </div>
@@ -586,7 +591,7 @@ export default function BrandformanceEngine() {
           <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
             {(opp.topKeywords||[]).map((kw,i) => (
               <span key={i} style={{ background:i<3?"#EFF6FF":"#F8FAFC", color:i<3?C.primary:C.text, padding:"6px 12px", borderRadius:20, fontSize:12, fontWeight:i<3?600:400, border:`1px solid ${i<3?`${C.primary}30`:C.border}` }}>
-                {kw.keyword} <span style={{ color:C.textSoft, fontSize:10 }}>{fmtNum(kw.vol)}</span>
+                {kw.keyword} <span style={{ color:C.textSoft, fontSize:10 }}>{fmt(kw.vol)}/월</span>
               </span>
             ))}
           </div>
