@@ -132,6 +132,20 @@ export default function Home() {
   const [generatedIdeas, setGeneratedIdeas] = useState([]);
   const [selectedUsp, setSelectedUsp] = useState(null);
   const [pathInsightOpen, setPathInsightOpen] = useState(null);
+  const [ytShorts, setYtShorts] = useState([]);
+  const [ytChannels, setYtChannels] = useState([]);
+  const [ytLoading, setYtLoading] = useState(false);
+
+  const fetchYouTube = useCallback(async (query, type = "search") => {
+    setYtLoading(true);
+    try {
+      const res = await fetch(`/api/youtube?q=${encodeURIComponent(query)}&type=${type}&maxResults=6`);
+      const data = await res.json();
+      if (type === "search") setYtShorts(data.items || []);
+      if (type === "channel") setYtChannels(data.items || []);
+    } catch { /* graceful fallback */ }
+    setYtLoading(false);
+  }, []);
 
   const tabs = [
     { name: "Market Intelligence", icon: "◉" },
@@ -239,9 +253,9 @@ export default function Home() {
       {/* ── CONTENT ── */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px" }}>
         {activeTab === 0 && <TabMarket />}
-        {activeTab === 1 && <TabDiscovery discoveryMode={discoveryMode} setDiscoveryMode={setDiscoveryMode} selectedDest={selectedDest} setSelectedDest={setSelectedDest} selectedInterest={selectedInterest} setSelectedInterest={setSelectedInterest} generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas} expandedCards={expandedCards} toggleCard={toggleCard} pathInsightOpen={pathInsightOpen} setPathInsightOpen={setPathInsightOpen} />}
+        {activeTab === 1 && <TabDiscovery discoveryMode={discoveryMode} setDiscoveryMode={setDiscoveryMode} selectedDest={selectedDest} setSelectedDest={setSelectedDest} selectedInterest={selectedInterest} setSelectedInterest={setSelectedInterest} generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas} expandedCards={expandedCards} toggleCard={toggleCard} pathInsightOpen={pathInsightOpen} setPathInsightOpen={setPathInsightOpen} ytShorts={ytShorts} ytLoading={ytLoading} fetchYouTube={fetchYouTube} />}
         {activeTab === 2 && <TabContent />}
-        {activeTab === 3 && <TabUSP selectedUsp={selectedUsp} setSelectedUsp={setSelectedUsp} generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas} expandedCards={expandedCards} toggleCard={toggleCard} />}
+        {activeTab === 3 && <TabUSP selectedUsp={selectedUsp} setSelectedUsp={setSelectedUsp} generating={generating} generatedIdeas={generatedIdeas} generateIdeas={generateIdeas} expandedCards={expandedCards} toggleCard={toggleCard} ytChannels={ytChannels} ytLoading={ytLoading} fetchYouTube={fetchYouTube} />}
       </div>
     </div>
   );
@@ -325,7 +339,7 @@ function TabMarket() {
 }
 
 // ═══════════ TAB 2: DISCOVERY ENGINE ═══════════
-function TabDiscovery({ discoveryMode, setDiscoveryMode, selectedDest, setSelectedDest, selectedInterest, setSelectedInterest, generating, generatedIdeas, generateIdeas, expandedCards, toggleCard, pathInsightOpen, setPathInsightOpen }) {
+function TabDiscovery({ discoveryMode, setDiscoveryMode, selectedDest, setSelectedDest, selectedInterest, setSelectedInterest, generating, generatedIdeas, generateIdeas, expandedCards, toggleCard, pathInsightOpen, setPathInsightOpen, ytShorts, ytLoading, fetchYouTube }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Toggle */}
@@ -344,7 +358,7 @@ function TabDiscovery({ discoveryMode, setDiscoveryMode, selectedDest, setSelect
           {/* Destination Grid */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
             {DESTINATIONS.map(d => (
-              <button key={d.id} onClick={() => setSelectedDest(d.id === selectedDest ? null : d.id)} style={{
+              <button key={d.id} onClick={() => { const next = d.id === selectedDest ? null : d.id; setSelectedDest(next); if (next) fetchYouTube(d.name + " 여행"); }} style={{
                 background: d.id === selectedDest ? `${C.primary}30` : C.card,
                 border: `1px solid ${d.id === selectedDest ? C.primary : C.border}`,
                 borderRadius: 10, padding: "10px 12px", cursor: "pointer", textAlign: "left", color: C.text, transition: "all 0.2s",
@@ -408,6 +422,8 @@ function TabDiscovery({ discoveryMode, setDiscoveryMode, selectedDest, setSelect
                   </div>
                 )}
 
+                <YouTubeShorts items={ytShorts} loading={ytLoading} />
+
                 {/* Generate Button */}
                 <button onClick={() => generateIdeas(`목적지: ${d.name}\n월 검색량: ${d.vol.toLocaleString()}\n인구통계: 여성${d.gender.f}%, 핵심연령 ${Object.entries(d.age).sort((a,b)=>b[1]-a[1])[0][0]}\n피크시즌: ${d.peak.join(",")}월\nTop검색: ${d.topSearch} ${d.topVol.toLocaleString()}\n검색여정: ${pathData?.journey || "N/A"}\n인사이트: ${pathData?.insight || "N/A"}\n\n이 목적지에 맞는 숏폼 아이디어 5개를 생성해주세요.`)} disabled={generating} style={{
                   marginTop: 16, background: generating ? C.textSoft : C.primary, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: generating ? "wait" : "pointer", width: "100%",
@@ -426,7 +442,7 @@ function TabDiscovery({ discoveryMode, setDiscoveryMode, selectedDest, setSelect
           {/* Interest Cards */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
             {INTERESTS.map(int => (
-              <button key={int.id} onClick={() => setSelectedInterest(int.id === selectedInterest ? null : int.id)} style={{
+              <button key={int.id} onClick={() => { const next = int.id === selectedInterest ? null : int.id; setSelectedInterest(next); if (next) fetchYouTube(int.name); }} style={{
                 background: int.id === selectedInterest ? `${C.primary}30` : C.card,
                 border: `1px solid ${int.id === selectedInterest ? C.primary : C.border}`,
                 borderRadius: 12, padding: 16, cursor: "pointer", textAlign: "left", color: C.text, transition: "all 0.2s",
@@ -473,6 +489,8 @@ function TabDiscovery({ discoveryMode, setDiscoveryMode, selectedDest, setSelect
                     <div style={{ fontSize: 11, color: C.textSoft, marginTop: 2 }}>{pathData.insight}</div>
                   </div>
                 )}
+
+                <YouTubeShorts items={ytShorts} loading={ytLoading} />
 
                 <button onClick={() => generateIdeas(`관심사: ${int.name}\n연간검색: ${int.annual.toLocaleString()}\n인구통계: ${int.ageMain}, ${int.gender.f > 60 ? "여성" : "남성"} ${Math.max(int.gender.m, int.gender.f).toFixed(0)}%\n연결목적지: ${int.destinations.join(", ")}\n결정단계: ${int.decisionStage}\n3E전략: ${int.e3}\n핵심인사이트: ${int.keyInsight}\n검색여정: ${pathData?.journey || "N/A"}\n\n이 관심사에서 트립닷컴과 연결되는 숏폼 아이디어 5개를 생성해주세요.`)} disabled={generating} style={{
                   marginTop: 16, background: generating ? C.textSoft : C.primary, color: "#fff", border: "none", borderRadius: 10, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: generating ? "wait" : "pointer", width: "100%",
@@ -533,6 +551,7 @@ function IdeaCards({ ideas, expandedCards, toggleCard }) {
                 <div><span style={{ fontSize: 10, color: C.textSoft }}>크리에이터</span><div style={{ fontSize: 12, fontWeight: 600 }}>{idea.creatorType}</div></div>
                 <div style={{ gridColumn: "1 / -1" }}><span style={{ fontSize: 10, color: C.textSoft }}>데이터 근거</span><div style={{ fontSize: 12, fontWeight: 600, color: C.accent }}>{idea.dataProof}</div></div>
                 <div style={{ gridColumn: "1 / -1" }}><span style={{ fontSize: 10, color: C.textSoft }}>시리즈 구성</span><div style={{ fontSize: 12 }}>{idea.seriesNote}</div></div>
+                <div style={{ gridColumn: "1 / -1" }}><IdeaYouTube query={idea.title} /></div>
               </div>
             )}
           </div>
@@ -636,13 +655,13 @@ function TabContent() {
 }
 
 // ═══════════ TAB 4: USP × CREATOR MATCH ═══════════
-function TabUSP({ selectedUsp, setSelectedUsp, generating, generatedIdeas, generateIdeas, expandedCards, toggleCard }) {
+function TabUSP({ selectedUsp, setSelectedUsp, generating, generatedIdeas, generateIdeas, expandedCards, toggleCard, ytChannels, ytLoading, fetchYouTube }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       {/* USP Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
         {USPS.map(usp => (
-          <button key={usp.id} onClick={() => setSelectedUsp(usp.id === selectedUsp ? null : usp.id)} style={{
+          <button key={usp.id} onClick={() => { const next = usp.id === selectedUsp ? null : usp.id; setSelectedUsp(next); if (next) fetchYouTube(usp.name + " 크리에이터", "channel"); }} style={{
             background: usp.id === selectedUsp ? `${C.primary}25` : C.card,
             border: `1px solid ${usp.id === selectedUsp ? C.primary : C.border}`,
             borderRadius: 12, padding: 16, cursor: "pointer", textAlign: "left", color: C.text,
@@ -692,6 +711,8 @@ function TabUSP({ selectedUsp, setSelectedUsp, generating, generatedIdeas, gener
               </div>
             </div>
 
+            <YouTubeChannels items={ytChannels} loading={ytLoading} />
+
             {/* Two Approaches */}
             <div style={{ marginTop: 20, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div style={{ background: C.surface, borderRadius: 12, padding: 16, border: `1px solid ${C.primary}30` }}>
@@ -715,6 +736,81 @@ function TabUSP({ selectedUsp, setSelectedUsp, generating, generatedIdeas, gener
           </div>
         );
       })()}
+    </div>
+  );
+}
+
+// ═══════════ YOUTUBE SHORTS COMPONENT ═══════════
+function YouTubeShorts({ items, loading }) {
+  if (loading) return <div style={{ padding: "16px 0", color: C.textSoft, fontSize: 12 }}>🔍 YouTube 숏폼 검색 중...</div>;
+  if (!items || items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 16 }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: C.accent, marginBottom: 10 }}>📱 최근 90일 TOP 숏폼</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 8 }}>
+        {items.map((item, i) => (
+          <a key={i} href={`https://youtube.com/watch?v=${item.id?.videoId}`} target="_blank" rel="noopener noreferrer" style={{ background: C.surface, borderRadius: 10, overflow: "hidden", border: `1px solid ${C.border}`, textDecoration: "none", color: C.text, transition: "border-color 0.2s" }}>
+            <img src={item.snippet?.thumbnails?.medium?.url} alt="" style={{ width: "100%", height: 100, objectFit: "cover" }} />
+            <div style={{ padding: "8px 10px" }}>
+              <div style={{ fontSize: 11, fontWeight: 600, lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.snippet?.title}</div>
+              <div style={{ fontSize: 10, color: C.textSoft, marginTop: 4 }}>{item.snippet?.channelTitle}</div>
+              {item.statistics?.viewCount && <div style={{ fontSize: 10, color: C.primary, fontWeight: 600, marginTop: 2 }}>▶ {Number(item.statistics.viewCount).toLocaleString()}회</div>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════ YOUTUBE CHANNELS COMPONENT ═══════════
+function YouTubeChannels({ items, loading }) {
+  if (loading) return <div style={{ padding: "16px 0", color: C.textSoft, fontSize: 12 }}>🔍 YouTube 채널 검색 중...</div>;
+  if (!items || items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 16 }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: C.accent, marginBottom: 10 }}>📺 관련 크리에이터 채널</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 8 }}>
+        {items.map((item, i) => (
+          <a key={i} href={`https://youtube.com/channel/${item.id?.channelId || item.snippet?.channelId}`} target="_blank" rel="noopener noreferrer" style={{ background: C.surface, borderRadius: 10, padding: 12, border: `1px solid ${C.border}`, textDecoration: "none", color: C.text, display: "flex", gap: 10, alignItems: "center" }}>
+            <img src={item.snippet?.thumbnails?.default?.url} alt="" style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }} />
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600 }}>{item.snippet?.title}</div>
+              {item.statistics?.subscriberCount && <div style={{ fontSize: 10, color: C.primary, fontWeight: 600 }}>구독자 {Number(item.statistics.subscriberCount).toLocaleString()}명</div>}
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════ IDEA YOUTUBE SUB-COMPONENT ═══════════
+function IdeaYouTube({ query }) {
+  const [vids, setVids] = useState([]);
+  const [loading, setLoading] = useState(true);
+  React.useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/youtube?q=${encodeURIComponent(query)}&type=search&maxResults=3`)
+      .then(r => r.json())
+      .then(d => { if (!cancelled) setVids(d.items || []); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [query]);
+  if (loading) return <div style={{ fontSize: 10, color: C.textSoft, padding: "8px 0" }}>참고 영상 검색 중...</div>;
+  if (vids.length === 0) return null;
+  return (
+    <div style={{ marginTop: 8 }}>
+      <div style={{ fontSize: 10, color: C.textSoft, marginBottom: 6 }}>📎 참고 영상</div>
+      <div style={{ display: "flex", gap: 6 }}>
+        {vids.map((v, i) => (
+          <a key={i} href={`https://youtube.com/watch?v=${v.id?.videoId}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, borderRadius: 6, overflow: "hidden", border: `1px solid ${C.border}`, textDecoration: "none", color: C.text }}>
+            <img src={v.snippet?.thumbnails?.default?.url} alt="" style={{ width: "100%", height: 56, objectFit: "cover" }} />
+            <div style={{ fontSize: 9, padding: "4px 6px", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{v.snippet?.title}</div>
+          </a>
+        ))}
+      </div>
     </div>
   );
 }
