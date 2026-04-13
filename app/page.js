@@ -254,6 +254,8 @@ export default function BrandformanceEngine() {
   const generateIdeas = useCallback(async (opp) => {
     if (loadingIds[opp.id]) return;
     setLoadingIds(p => ({...p,[opp.id]:true}));
+    // Clear previous errors
+    setGeneratedIdeas(p => { const n = {...p}; if(n[opp.id]?.[0]?.error) delete n[opp.id]; return n; });
     const ctx = CONTEXT_DATA[opp.id] || {};
     const contextStr = Object.entries(ctx).map(([k,v]) => `${k}: ${v.tags?.join(", ")} | ${v.evidence}`).join("\n");
     try {
@@ -262,13 +264,13 @@ export default function BrandformanceEngine() {
         body: JSON.stringify({ system: SYSTEM_PROMPT, messages: [{ role: "user", content: `숏폼 아이디어 5개를 생성하세요:\n제목:${opp.title}\n인사이트:${opp.keyInsight}\n인구통계:${opp.demographics}\n검색량:월${opp.monthlyVol?.toLocaleString()}\n전략:${opp.strategyCopy}\n후킹:${opp.hookType} ${opp.hookLabel}\n콘텐츠훅:${opp.contentHook}\nUSP:${opp.uspConnection}\n페인:${(opp.painPoints||[]).join(",")}\n데이터:${opp.dataProof}\n6축맥락:\n${contextStr}` }] })
       });
       const data = await res.json();
-      if (data.error) throw new Error(data.error?.message || data.error);
+      if (data.error) throw new Error(data.error?.message || (typeof data.error === "string" ? data.error : JSON.stringify(data.error)));
       const text = data.content?.[0]?.text || "";
       const m = text.match(/\[[\s\S]*\]/);
       if (m) {
         setGeneratedIdeas(p => ({...p,[opp.id]:JSON.parse(m[0])}));
         setCurrentView("ideas");
-      } else throw new Error("JSON 파싱 실패");
+      } else throw new Error("JSON 파싱 실패 — 응답: " + text.substring(0, 100));
     } catch (e) { setGeneratedIdeas(p => ({...p,[opp.id]:[{error:e.message}]})); setCurrentView("ideas"); }
     finally { setLoadingIds(p => ({...p,[opp.id]:false})); }
   }, [loadingIds]);
@@ -738,7 +740,15 @@ export default function BrandformanceEngine() {
         {isLoading && (
           <div style={{ textAlign:"center", padding:80 }}>
             <div style={{ display:"inline-block", width:40, height:40, border:"3px solid #E2E8F0", borderTopColor:C.primary, borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
-            <div style={{ color:C.textSoft, fontSize:14, marginTop:16 }}>AI가 아이디어를 생성 중...</div>
+            <div style={{ color:C.textSoft, fontSize:14, marginTop:16 }}>AI가 아이디어를 생성 중... (최대 30초 소요)</div>
+          </div>
+        )}
+
+        {/* No ideas yet */}
+        {!ideas && !isLoading && (
+          <div style={{ textAlign:"center", padding:60 }}>
+            <div style={{ color:C.textSoft, fontSize:14, marginBottom:16 }}>아직 아이디어가 생성되지 않았습니다</div>
+            <button onClick={() => generateIdeas(opp)} style={{ background:C.primary, color:"#fff", border:"none", borderRadius:12, padding:"12px 28px", fontSize:14, fontWeight:700, cursor:"pointer" }}>AI 아이디어 생성하기</button>
           </div>
         )}
 
@@ -746,7 +756,15 @@ export default function BrandformanceEngine() {
         {ideas && (
           <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
             {ideas.map((idea,idx) => {
-              if (idea.error) return <div key={idx} style={{ color:C.warn, fontSize:12, padding:16, background:"#FEF2F2", borderRadius:12 }}>⚠️ {idea.error}</div>;
+              if (idea.error) return (
+                <div key={idx} style={{ padding:20, background:"#FEF2F2", borderRadius:12, textAlign:"center" }}>
+                  <div style={{ color:C.warn, fontSize:14, fontWeight:600, marginBottom:8 }}>⚠️ AI 생성 실패</div>
+                  <div style={{ color:C.textSoft, fontSize:12, marginBottom:16 }}>{idea.error}</div>
+                  <button onClick={() => generateIdeas(opp)} disabled={isLoading} style={{ background:C.primary, color:"#fff", border:"none", borderRadius:10, padding:"10px 24px", fontSize:13, fontWeight:600, cursor:"pointer" }}>
+                    {isLoading ? "재시도 중..." : "다시 시도하기"}
+                  </button>
+                </div>
+              );
               const ct = CONTENT_TYPES.find(c => c.code === idea.contentType) || CONTENT_TYPES[0];
               const score = idea.conversionScore || (95-idx*3);
               const ss = STAGE_STYLES[idea.stage] || {};
