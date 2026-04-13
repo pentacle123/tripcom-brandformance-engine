@@ -162,12 +162,10 @@ export default function Home() {
 반드시 JSON 배열로만 응답. 마크다운 없이.
 [{"rank":1,"title":"제목","contentType":"A~G","stage":"Dream|Plan|Book|Share","hook3s":"0~3초 후킹카피","sceneFlow":["씬1","씬2","씬3","씬4"],"uspConnection":"연결USP","target":"타겟","creatorType":"MEGA|MACRO|MICRO|NANO","dataProof":"검색데이터근거","seriesNote":"시리즈구성제안"}]`;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 2000,
           system: systemPrompt,
           messages: [{ role: "user", content: context }],
         }),
