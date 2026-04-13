@@ -163,21 +163,39 @@ const fmtMan = (n) => Math.round(n/10000) + "만";
 
 // ── CONTENT TYPES & USPS ──
 const CONTENT_TYPES = [
-  { code:"A", name:"진정성형", color:"#FF6B6B" },{ code:"B", name:"가성비증명형", color:"#4ECDC4" },
-  { code:"C", name:"일정가이드형", color:"#45B7D1" },{ code:"D", name:"정보발견형", color:"#96CEB4" },
-  { code:"E", name:"UGC리뷰형", color:"#DDA0DD" },{ code:"F", name:"USP실증형", color:"#FFD93D" },
-  { code:"G", name:"허락형", color:"#FF8B94" },
+  { code:"A", name:"후기체험형", color:"#FF6B6B", by:"creator", icon:"🎬" },
+  { code:"B", name:"정보비교형", color:"#10B981", by:"brand", icon:"🖥️" },
+  { code:"C", name:"가격특가형", color:"#10B981", by:"brand", icon:"🖥️" },
+  { code:"D", name:"AI일정형", color:"#10B981", by:"brand", icon:"🖥️" },
+  { code:"E", name:"데이터랭킹형", color:"#10B981", by:"brand", icon:"🖥️" },
+  { code:"F", name:"USP실증형", color:"#0770E3", by:"brand", icon:"🖥️" },
 ];
+const PROD_STYLES = { creator: { bg:"#FEF2F2", color:"#DC2626", label:"🎬 크리에이터" }, brand: { bg:"#F0FDF4", color:"#16A34A", label:"🖥️ 브랜드 자체제작" } };
 
 // ── SYSTEM PROMPTS ──
 const SYSTEM_PROMPT = `당신은 Trip.com 한국 숏폼 콘텐츠 전략가입니다.
-규칙: 1.후킹에 브랜드명 금지 2.관심사90%+여행10% 3.콘텐츠유형A~G 4.Dream/Plan/Book/Share 5.시리즈1편(90/10)→2편(60/40)→3편(30/70) 6.USP5종(원스톱플랫폼/24시간한국어CS/Trip.Best랭킹/가격경쟁력/트립지니AI)
-JSON 배열로만 응답. 마크다운 없이. 반드시 5개 아이디어를 생성하세요.
-[{"rank":1,"title":"제목","contentType":"A~G중하나","stage":"Dream|Plan|Book|Share","perspective":"A|B|C","contextCombo":"맥락 조합 요약","conversionScore":85~98,"hook3s":"0~3초 후킹카피","sceneFlow":["씬1","씬2","씬3","씬4"],"uspConnection":"연결 USP","target":"타겟","creatorStrategy":"크리에이터 협업 전략 한 줄","dataProof":"검색 데이터 근거","seriesNote":"시리즈 구성"}]`;
+규칙: 1.후킹에 브랜드명 금지 2.관심사90%+여행10% 3.Dream/Plan/Book/Share 4.시리즈1편(90/10)→2편(60/40)→3편(30/70) 5.USP5종(원스톱플랫폼/24시간한국어CS/Trip.Best랭킹/가격경쟁력/트립지니AI)
 
-const PLATFORM_PROMPT = `당신은 Trip.com 한국 숏폼 콘텐츠 전략가입니다. 아래 아이디어를 유튜브 쇼츠와 인스타그램 릴스에 맞게 확장하세요.
+5개 아이디어를 생성할 때 다음 유형을 반드시 섞어서 생성하세요:
+- 아이디어 1-2: A.후기체험형 — 크리에이터가 실제로 다녀온 후기 콘텐츠. 생생한 현장감이 핵심. productionBy:"creator"
+- 아이디어 3: B.정보비교형 — 데이터/이미지 기반으로 브랜드가 자체 제작 가능. 가격 비교, 맛집 랭킹, 코스 추천 등. productionBy:"brand"
+- 아이디어 4: C.가격특가형 또는 D.AI일정형 — Trip.com 가격 경쟁력 또는 트립지니 AI를 직접 보여주는 콘텐츠. productionBy:"brand"
+- 아이디어 5: F.USP실증형 — Trip.com USP(Trip.Best, 24시간CS, 트립지니 등)를 직접 시연/증명. productionBy:"brand"
+
+topKeywords에 포함된 키워드들을 활용하여 아이디어를 생성하세요.
+관심사 기회의 경우:
+- 아이디어 1-2: 이미 여행을 검색하는 사람 대상
+- 아이디어 3-4: 아직 여행을 생각하지 않은 관심층 대상 → 여행을 '발견'시키는 콘텐츠. 관심사90%+여행10%.
+- 아이디어 5: Trip.com USP를 직접 소구
+
+각 아이디어에 targetKeyword(진입점 키워드)와 targetKeywordVol(검색량)을 반드시 포함하세요.
+
+JSON 배열로만 응답. 마크다운 없이. 반드시 5개.
+[{"rank":1,"title":"제목","contentType":"A|B|C|D|E|F","contentTypeLabel":"후기체험형","productionBy":"creator|brand","productionNote":"크리에이터 촬영 필요","stage":"Dream|Plan|Book|Share","conversionScore":85~98,"hook3s":"후킹카피","sceneFlow":["씬1","씬2","씬3","씬4"],"uspConnection":"연결 USP","target":"타겟","targetKeyword":"진입점 키워드","targetKeywordVol":"검색량(월 또는 연)","creatorStrategy":"크리에이터 전략","dataProof":"데이터 근거","seriesNote":"시리즈 구성"}]`;
+
+const PLATFORM_PROMPT = `당신은 Trip.com 한국 숏폼 콘텐츠 전략가입니다. 아래 아이디어를 확장하세요.
 JSON 객체로만 응답. 마크다운 없이.
-{"youtubeShorts":{"title":"유튜브용 제목","hook":"유튜브용 후킹","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA 행동","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"최적 업로드 시간","targetCluster":"타겟 클러스터"},"instagramReels":{"title":"인스타용 제목(다른톤)","hook":"인스타용 후킹(다른표현)","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA 행동","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"최적 업로드 시간","targetCluster":"타겟 클러스터"}}`;
+{"youtubeShorts":{"title":"유튜브용 제목","hook":"후킹","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"업로드 시간","targetCluster":"타겟"},"instagramReels":{"title":"인스타용 제목","hook":"후킹","scenes":["씬1","씬2","씬3","씬4"],"proof":"데이터 근거","cta":"CTA","hashtags":["태그1","태그2","태그3","태그4","태그5"],"uploadTime":"업로드 시간","targetCluster":"타겟"},"bumperAds":[{"hook2s":"1-2초 훅(10자이내)","message2s":"3-4초 메시지(15자이내)","cta2s":"5-6초 CTA(10자이내)","uspFocus":"USP","targetKeywords":["키워드1","키워드2","키워드3"]},{"hook2s":"훅2","message2s":"메시지2","cta2s":"CTA2","uspFocus":"USP","targetKeywords":["키워드1","키워드2","키워드3"]},{"hook2s":"훅3","message2s":"메시지3","cta2s":"CTA3","uspFocus":"USP","targetKeywords":["키워드1","키워드2","키워드3"]}],"displayAds":[{"headline":"헤드라인(20자이내)","subCopy":"서브카피(30자이내)","cta":"CTA(8자이내)","recommendedSizes":["300x250","728x90","320x100"],"uspFocus":"USP","targetKeywords":["키워드1","키워드2","키워드3"]},{"headline":"헤드라인2","subCopy":"서브카피2","cta":"CTA2","recommendedSizes":["300x250","728x90","320x100"],"uspFocus":"USP","targetKeywords":["키워드1","키워드2","키워드3"]},{"headline":"헤드라인3","subCopy":"서브카피3","cta":"CTA3","recommendedSizes":["300x250","728x90","320x100"],"uspFocus":"USP","targetKeywords":["키워드1","키워드2","키워드3"]}]}`;
 
 // ══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
@@ -219,7 +237,7 @@ export default function BrandformanceEngine() {
   // ── Navigation ──
   const goToAnalysis = (opp) => { setSelectedOpp(opp); setSelectedIdea(null); setCurrentView("analysis"); };
   const goToIdeas = () => setCurrentView("ideas");
-  const goToStoryboard = (idea) => { setSelectedIdea(idea); setCurrentView("storyboard"); };
+  const goToStoryboard = (idea) => { setSelectedIdea(idea); setStoryboardTab(0); setCurrentView("storyboard"); };
   const goBack = () => {
     if (currentView === "storyboard") setCurrentView("ideas");
     else if (currentView === "ideas") setCurrentView("analysis");
@@ -281,7 +299,7 @@ export default function BrandformanceEngine() {
     try {
       const res = await fetchWithTimeout("/api/generate", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system: SYSTEM_PROMPT, messages: [{ role: "user", content: `숏폼 아이디어 5개를 생성하세요:\n제목:${opp.title}\n인사이트:${opp.keyInsight}\n인구통계:${opp.demographics}\n검색량:월${opp.monthlyVol?.toLocaleString()}\n전략:${opp.strategyCopy}\n후킹:${opp.hookType} ${opp.hookLabel}\n콘텐츠훅:${opp.contentHook}\nUSP:${opp.uspConnection}\n페인:${(opp.painPoints||[]).join(",")}\n데이터:${opp.dataProof}\n6축맥락:\n${contextStr}` }] })
+        body: JSON.stringify({ system: SYSTEM_PROMPT, messages: [{ role: "user", content: `숏폼 아이디어 5개를 생성하세요:\n제목:${opp.title}\n인사이트:${opp.keyInsight}\n인구통계:${opp.demographics}\n검색량:월${opp.monthlyVol?.toLocaleString()}\n연간모수:${opp.motherAnnualVol||opp.annualVol||""}\n전략:${opp.strategyCopy}\n후킹:${opp.hookType} ${opp.hookLabel}\n콘텐츠훅:${opp.contentHook}\nUSP:${opp.uspConnection}\n페인:${(opp.painPoints||[]).join(",")}\n데이터:${opp.dataProof}\ntopKeywords:${JSON.stringify(opp.topKeywords||[])}\nYT검색어:${(YT_QUERIES[opp.id]||[]).join(",")}\n6축맥락:\n${contextStr}` }] })
       }, 60000);
       const data = await res.json();
       if (data.error) throw new Error(data.error?.message || (typeof data.error === "string" ? data.error : JSON.stringify(data.error)));
@@ -300,6 +318,7 @@ export default function BrandformanceEngine() {
 
   // ── Platform content generation (on-demand for storyboard) ──
   const [platformLoading, setPlatformLoading] = useState({});
+  const [storyboardTab, setStoryboardTab] = useState(0);
   const generatePlatformContent = useCallback(async (idea, opp) => {
     const key = `${opp.id}-${idea.rank||0}`;
     if (platformLoading[key] || idea.youtubeShorts) return;
@@ -593,16 +612,9 @@ export default function BrandformanceEngine() {
                     {oppUsps.map(u => <span key={u} style={pill("#F0F9FF",C.primary,"")}>{USP_ICONS[u]}{USP_NAMES[u]}</span>)}
                   </div>
                 </div>
-                <div style={{ textAlign:"right", minWidth:140 }}>
-                  {opp.motherAnnualVol ? (<>
-                    <div style={{ color:C.primary, fontSize:20, fontWeight:800, lineHeight:1.2 }}>관심층 연간 {fmt(opp.motherAnnualVol)}회</div>
-                    <div style={{ color:C.textSoft, fontSize:13, marginTop:2 }}>여행 연결 연간 {fmt(opp.annualVol)}회</div>
-                    <div style={{ color:C.textSoft, fontSize:12 }}>월 평균 {fmt(opp.monthlyVol)}회</div>
-                  </>) : (<>
-                    <div style={{ color:C.secondary, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.annualVol)}회</div>
-                    <div style={{ color:C.textSoft, fontSize:10 }}>월 평균 {fmt(opp.monthlyVol)}회</div>
-                  </>)}
-                  <div style={{ color:C.secondary, fontSize:18, marginTop:4 }}>→</div>
+                <div style={{ textAlign:"right", minWidth:100 }}>
+                  <div style={{ color:C.secondary, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.motherAnnualVol || opp.annualVol)}회</div>
+                  <div style={{ color:C.secondary, fontSize:18, marginTop:6 }}>→</div>
                 </div>
               </div>
             );
@@ -843,6 +855,7 @@ export default function BrandformanceEngine() {
                       {/* Tags */}
                       <div style={{ display:"flex", gap:6, marginBottom:8, flexWrap:"wrap" }}>
                         <span style={pill(`${ct.color}20`,ct.color,"")}>{ct.code}.{ct.name}</span>
+                        {(() => { const ps = PROD_STYLES[idea.productionBy] || PROD_STYLES[ct.by]; return ps ? <span style={pill(ps.bg,ps.color,"")}>{ps.label}</span> : null; })()}
                         <span style={pill(ss.bg||"#EFF6FF",ss.color||C.textSoft,"")}>{idea.stage}</span>
                         {idea.perspective && <span style={pill(`${C.purple}12`,C.purple,"")}>{idea.perspective}</span>}
                         {idea.contextCombo && <span style={pill("#F8FAFC",C.textSoft,"")}>{idea.contextCombo}</span>}
@@ -850,6 +863,15 @@ export default function BrandformanceEngine() {
 
                       {/* Title */}
                       <div style={{ color:C.text, fontSize:16, fontWeight:700, marginBottom:6 }}>{idea.title}</div>
+
+                      {/* 타겟 진입점 */}
+                      {idea.targetKeyword && (
+                        <div style={{ display:"flex", alignItems:"center", gap:6, marginBottom:8 }}>
+                          <span style={{ fontSize:11, color:C.primary, fontWeight:600 }}>🎯 타겟 진입점:</span>
+                          <span style={pill(`${C.primary}12`,C.primary,"")}>{idea.targetKeyword}</span>
+                          {idea.targetKeywordVol && <span style={{ fontSize:10, color:C.textSoft }}>({idea.targetKeywordVol})</span>}
+                        </div>
+                      )}
 
                       {/* Data Proof */}
                       {idea.dataProof && <div style={{ color:C.textSoft, fontSize:12, marginBottom:8 }}>📊 {idea.dataProof}</div>}
@@ -984,32 +1006,154 @@ export default function BrandformanceEngine() {
           <div style={{ color:C.secondary, fontSize:16, fontStyle:"italic" }}>{idea.hook3s}</div>
         </div>
 
-        {/* 2-Column: YouTube + Instagram */}
+        {/* 3-Tab Bar */}
+        <div style={{ display:"flex", gap:0, marginBottom:20, background:C.card, borderRadius:14, border:`1px solid ${C.border}`, overflow:"hidden" }}>
+          {[
+            { label:"숏폼 콘텐츠", icon:"▶" },
+            { label:"6초 범퍼 광고", icon:"⚡" },
+            { label:"DA 배너", icon:"🖼️" },
+          ].map((tab,i) => (
+            <div key={i} onClick={() => setStoryboardTab(i)} style={{ flex:1, padding:"14px 16px", textAlign:"center", cursor:"pointer", background: storyboardTab === i ? C.primary : "transparent", color: storyboardTab === i ? "#fff" : C.textSoft, fontSize:13, fontWeight: storyboardTab === i ? 700 : 500, borderRight: i < 2 ? `1px solid ${C.border}` : "none", transition:"all 0.2s" }}>
+              {tab.icon} {tab.label}
+            </div>
+          ))}
+        </div>
+
+        {/* Loading Spinner */}
         {isPlatformLoading && !yt.title && (
           <div style={{ textAlign:"center", padding:40, background:C.card, borderRadius:14, border:`1px solid ${C.border}`, marginBottom:16 }}>
             <div style={{ display:"inline-block", width:32, height:32, border:"3px solid #E2E8F0", borderTopColor:C.primary, borderRadius:"50%", animation:"spin 0.8s linear infinite" }} />
             <div style={{ color:C.textSoft, fontSize:13, marginTop:12 }}>플랫폼별 콘텐츠를 생성 중...</div>
           </div>
         )}
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
-          <PlatformCard platform="YouTube Shorts" color={C.youtube} icon="▶" maxDur="60s" data={yt} />
-          <PlatformCard platform="Instagram Reels" color={C.instagram} icon="📷" maxDur="90s" data={ig} />
-        </div>
 
-        {/* 4-Grid Info */}
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr 1fr", gap:12, marginBottom:24 }}>
-          {[
-            {i:"🎯",l:"타겟",v:idea.target||opp.demographics},
-            {i:"🎬",l:"크리에이터 추천",v:idea.creatorStrategy||"MICRO 크리에이터 협업"},
-            {i:"📊",l:"데이터 근거",v:idea.dataProof},
-            {i:"📅",l:"시리즈 구성",v:idea.seriesNote||"1편(90/10)→2편(60/40)→3편(30/70)"}
-          ].map((d,i) => (
-            <div key={i} style={{ background:C.card, borderRadius:12, border:`1px solid ${C.border}`, padding:16 }}>
-              <div style={{ fontSize:11, color:C.textSoft, marginBottom:6 }}>{d.i} {d.l}</div>
-              <div style={{ fontSize:12, color:C.text, lineHeight:1.6 }}>{d.v}</div>
+        {/* Tab 1: 숏폼 콘텐츠 */}
+        {storyboardTab === 0 && (
+          <>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
+              <PlatformCard platform="YouTube Shorts" color={C.youtube} icon="▶" maxDur="60s" data={yt} />
+              <PlatformCard platform="Instagram Reels" color={C.instagram} icon="📷" maxDur="90s" data={ig} />
             </div>
-          ))}
-        </div>
+
+            {/* 4-Grid Info */}
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr 1fr", gap:12, marginBottom:24 }}>
+              {[
+                {i:"🎯",l:"타겟",v:idea.target||opp.demographics},
+                {i:"🎬",l:"크리에이터 추천",v:idea.creatorStrategy||"MICRO 크리에이터 협업"},
+                {i:"📊",l:"데이터 근거",v:idea.dataProof},
+                {i:"📅",l:"시리즈 구성",v:idea.seriesNote||"1편(90/10)→2편(60/40)→3편(30/70)"}
+              ].map((d,i) => (
+                <div key={i} style={{ background:C.card, borderRadius:12, border:`1px solid ${C.border}`, padding:16 }}>
+                  <div style={{ fontSize:11, color:C.textSoft, marginBottom:6 }}>{d.i} {d.l}</div>
+                  <div style={{ fontSize:12, color:C.text, lineHeight:1.6 }}>{d.v}</div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Tab 2: 6초 범퍼 광고 */}
+        {storyboardTab === 1 && (
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:16, marginBottom:24 }}>
+            {(idea.bumperAds || [{},{},{}]).map((ad,i) => (
+              <div key={i} style={{ background:C.card, borderRadius:16, border:`1px solid ${C.border}`, borderTop:`3px solid ${C.secondary}`, padding:24 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
+                  <span style={{ fontSize:20 }}>⚡</span>
+                  <span style={{ color:C.secondary, fontSize:15, fontWeight:700 }}>범퍼 #{i+1}</span>
+                  <span style={pill(`${C.secondary}15`,C.secondary,"")}>6초</span>
+                </div>
+
+                {/* Hook 1-2초 */}
+                <div style={{ marginBottom:14 }}>
+                  <div style={{ color:C.secondary, fontSize:11, fontWeight:700, marginBottom:4 }}>⏱ 1-2초 HOOK</div>
+                  <div style={{ color:C.text, fontSize:18, fontWeight:800, lineHeight:1.3 }}>{ad.hook2s || "—"}</div>
+                </div>
+
+                {/* Message 3-4초 */}
+                <div style={{ marginBottom:14 }}>
+                  <div style={{ color:C.primary, fontSize:11, fontWeight:700, marginBottom:4 }}>💬 3-4초 MESSAGE</div>
+                  <div style={{ color:C.text, fontSize:14, fontWeight:600, lineHeight:1.4 }}>{ad.message2s || "—"}</div>
+                </div>
+
+                {/* CTA 5-6초 */}
+                <div style={{ marginBottom:14 }}>
+                  <div style={{ color:C.accent, fontSize:11, fontWeight:700, marginBottom:4 }}>→ 5-6초 CTA</div>
+                  <div style={{ color:C.accent, fontSize:14, fontWeight:700 }}>{ad.cta2s || "—"}</div>
+                </div>
+
+                {/* USP Focus */}
+                {ad.uspFocus && (
+                  <div style={{ marginBottom:10 }}>
+                    <span style={pill(`${C.primary}12`,C.primary,"")}>USP: {ad.uspFocus}</span>
+                  </div>
+                )}
+
+                {/* Target Keywords */}
+                {(ad.targetKeywords||[]).length > 0 && (
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:4 }}>
+                    {ad.targetKeywords.map((kw,ki) => <span key={ki} style={{ fontSize:10, color:C.textSoft, background:C.surface, padding:"3px 8px", borderRadius:8 }}>#{kw}</span>)}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Tab 3: DA 배너 */}
+        {storyboardTab === 2 && (
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:16, marginBottom:24 }}>
+            {(idea.displayAds || [{},{},{}]).map((ad,i) => (
+              <div key={i} style={{ background:C.card, borderRadius:16, border:`1px solid ${C.border}`, borderTop:`3px solid ${C.purple}`, padding:24 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
+                  <span style={{ fontSize:20 }}>🖼️</span>
+                  <span style={{ color:C.purple, fontSize:15, fontWeight:700 }}>DA #{i+1}</span>
+                </div>
+
+                {/* Headline */}
+                <div style={{ marginBottom:14 }}>
+                  <div style={{ color:C.purple, fontSize:11, fontWeight:700, marginBottom:4 }}>📌 HEADLINE</div>
+                  <div style={{ color:C.text, fontSize:18, fontWeight:800, lineHeight:1.3 }}>{ad.headline || "—"}</div>
+                </div>
+
+                {/* Sub Copy */}
+                <div style={{ marginBottom:14 }}>
+                  <div style={{ color:C.textSoft, fontSize:11, fontWeight:700, marginBottom:4 }}>💬 SUB COPY</div>
+                  <div style={{ color:C.text, fontSize:13, lineHeight:1.5 }}>{ad.subCopy || "—"}</div>
+                </div>
+
+                {/* CTA */}
+                <div style={{ marginBottom:14 }}>
+                  <div style={{ color:C.accent, fontSize:11, fontWeight:700, marginBottom:4 }}>→ CTA</div>
+                  <div style={{ background:C.primary, color:"#fff", display:"inline-block", padding:"6px 16px", borderRadius:8, fontSize:13, fontWeight:700 }}>{ad.cta || "—"}</div>
+                </div>
+
+                {/* Recommended Sizes */}
+                {(ad.recommendedSizes||[]).length > 0 && (
+                  <div style={{ marginBottom:10 }}>
+                    <div style={{ fontSize:10, color:C.textSoft, marginBottom:4 }}>추천 사이즈</div>
+                    <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
+                      {ad.recommendedSizes.map((sz,si) => <span key={si} style={pill(C.surface,C.textSoft,"")}>{sz}</span>)}
+                    </div>
+                  </div>
+                )}
+
+                {/* USP Focus */}
+                {ad.uspFocus && (
+                  <div style={{ marginBottom:10 }}>
+                    <span style={pill(`${C.primary}12`,C.primary,"")}>USP: {ad.uspFocus}</span>
+                  </div>
+                )}
+
+                {/* Target Keywords */}
+                {(ad.targetKeywords||[]).length > 0 && (
+                  <div style={{ display:"flex", flexWrap:"wrap", gap:4 }}>
+                    {ad.targetKeywords.map((kw,ki) => <span key={ki} style={{ fontSize:10, color:C.textSoft, background:C.surface, padding:"3px 8px", borderRadius:8 }}>#{kw}</span>)}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Collapsible: Ad Targeting */}
         <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, marginBottom:12, overflow:"hidden" }}>
