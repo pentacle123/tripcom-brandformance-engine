@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 // Vercel serverless function max duration (seconds)
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 function getApiKey() {
   if (process.env.ANTHROPIC_API_KEY) {
@@ -30,9 +30,15 @@ async function callClaude(apiKey, system, messages, retries = 3) {
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 3000,
+          max_tokens: 8000,
           system,
           messages,
+          tools: [
+            {
+              type: "web_search_20250305",
+              name: "web_search",
+            },
+          ],
         }),
       });
 
@@ -51,6 +57,15 @@ async function callClaude(apiKey, system, messages, retries = 3) {
 
       if (!response.ok) {
         return { error: data.error?.message || `API 오류 (${response.status})`, status: response.status, data };
+      }
+
+      // Extract text blocks only (web_search mixes text + tool_use blocks)
+      if (data.content && Array.isArray(data.content)) {
+        const textBlocks = data.content
+          .filter(block => block.type === "text")
+          .map(block => block.text)
+          .join("");
+        data._extractedText = textBlocks;
       }
 
       return { data, status: response.status };
