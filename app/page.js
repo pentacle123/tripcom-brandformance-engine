@@ -321,8 +321,12 @@ export default function BrandformanceEngine() {
     if (ytCreators[oppId] || ytLoading[oppId]) return;
     setYtLoading(p => ({...p,[oppId]:true}));
     try {
-      const queries = YT_QUERIES[oppId] || [];
-      if (!queries.length) return;
+      let queries = YT_QUERIES[oppId] || [];
+      if (!queries.length) {
+        const opp = ALL_OPPS.find(o => o.id === oppId);
+        queries = opp?.youtubeSearchQueries || [];
+      }
+      if (!queries.length) { setYtCreators(p => ({...p,[oppId]:[]})); return; }
       const res = await fetch(`/api/youtube?type=search&q=${encodeURIComponent(queries[0])}&maxResults=5`);
       const data = await res.json();
       if (data.error || !data.items?.length) { setYtCreators(p => ({...p,[oppId]:[]})); return; }
@@ -1509,7 +1513,7 @@ export default function BrandformanceEngine() {
           </div>
           {expandedSections.creator && (
             <div style={{ padding:"0 20px 16px", borderTop:`1px solid ${C.border}`, paddingTop:12 }}>
-              <div style={{ color:C.textSoft, fontSize:12, marginBottom:10 }}>"{(YT_QUERIES[opp.id]||[])[0]}" 검색 결과 기반 추천</div>
+              <div style={{ color:C.textSoft, fontSize:12, marginBottom:10 }}>"{(YT_QUERIES[opp.id]||opp.youtubeSearchQueries||[])[0]||opp.title}" 검색 결과 기반 추천</div>
               <CreatorCards oppId={opp.id} />
             </div>
           )}
