@@ -65,7 +65,10 @@ async function callClaude(apiKey, system, messages, retries = 3) {
           .filter(block => block.type === "text")
           .map(block => block.text)
           .join("");
-        data._extractedText = textBlocks;
+        // Strip Claude web_search citation markup (<cite index="...">...</cite>)
+        data._extractedText = textBlocks
+          .replace(/<cite[^>]*>([\s\S]*?)<\/cite>/g, "$1")
+          .replace(/<\/?cite[^>]*>/g, "");
       }
 
       return { data, status: response.status };

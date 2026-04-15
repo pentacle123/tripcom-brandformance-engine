@@ -401,7 +401,11 @@ export default function BrandformanceEngine() {
       const data = await res.json();
       if (data.error) throw new Error(data.error?.message || (typeof data.error === "string" ? data.error : JSON.stringify(data.error)));
       const text = data._extractedText || (data.content||[]).filter(b => b.type === "text").map(b => b.text).join("") || "";
-      const cleanText = text.replace(/```json|```/g, "").trim();
+      const cleanText = text
+        .replace(/```json|```/g, "")
+        .replace(/<cite[^>]*>([\s\S]*?)<\/cite>/g, "$1")
+        .replace(/<\/?cite[^>]*>/g, "")
+        .trim();
       const m = cleanText.match(/\[[\s\S]*\]/);
       if (m) {
         setGeneratedIdeas(p => ({...p,[opp.id]:JSON.parse(m[0])}));
@@ -429,7 +433,11 @@ export default function BrandformanceEngine() {
       const data = await res.json();
       if (!data.error) {
         const text = data._extractedText || (data.content||[]).filter(b => b.type === "text").map(b => b.text).join("") || "";
-        const cleanText = text.replace(/```json|```/g, "").trim();
+        const cleanText = text
+          .replace(/```json|```/g, "")
+          .replace(/<cite[^>]*>([\s\S]*?)<\/cite>/g, "$1")
+          .replace(/<\/?cite[^>]*>/g, "")
+          .trim();
         const m = cleanText.match(/\{[\s\S]*\}/);
         if (m) {
           const platform = JSON.parse(m[0]);
