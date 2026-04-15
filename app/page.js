@@ -275,6 +275,7 @@ export default function BrandformanceEngine() {
   const [ideaPerspective, setIdeaPerspective] = useState("auto");
   const [ytCreators, setYtCreators] = useState({});
   const [ytLoading, setYtLoading] = useState({});
+  const [ytErrors, setYtErrors] = useState({});
   const [activeUsps, setActiveUsps] = useState(new Set());
 
   const fmt = (n) => Number(n).toLocaleString('ko-KR');
@@ -318,18 +319,34 @@ export default function BrandformanceEngine() {
 
   // ── YouTube API: Search Creators ──
   const searchCreators = useCallback(async (oppId) => {
-    if (ytCreators[oppId] || ytLoading[oppId]) return;
+    if (ytCreators[oppId] !== undefined || ytLoading[oppId]) return;
     setYtLoading(p => ({...p,[oppId]:true}));
+    setYtErrors(p => ({...p,[oppId]:null}));
     try {
       let queries = YT_QUERIES[oppId] || [];
       if (!queries.length) {
         const opp = ALL_OPPS.find(o => o.id === oppId);
         queries = opp?.youtubeSearchQueries || [];
       }
-      if (!queries.length) { setYtCreators(p => ({...p,[oppId]:[]})); return; }
+      if (!queries.length) {
+        setYtErrors(p => ({...p,[oppId]:"검색 키워드가 정의되지 않았습니다"}));
+        setYtCreators(p => ({...p,[oppId]:[]}));
+        return;
+      }
+      console.log("[searchCreators]", oppId, "query:", queries[0]);
       const res = await fetch(`/api/youtube?type=search&q=${encodeURIComponent(queries[0])}&maxResults=5`);
       const data = await res.json();
-      if (data.error || !data.items?.length) { setYtCreators(p => ({...p,[oppId]:[]})); return; }
+      console.log("[searchCreators] response:", { ok: res.ok, status: res.status, error: data.error, itemsLen: data.items?.length });
+      if (data.error) {
+        setYtErrors(p => ({...p,[oppId]:`API 오류: ${data.error}`}));
+        setYtCreators(p => ({...p,[oppId]:[]}));
+        return;
+      }
+      if (!data.items?.length) {
+        setYtErrors(p => ({...p,[oppId]:"YouTube 검색 결과가 없습니다 (최근 90일 숏폼)"}));
+        setYtCreators(p => ({...p,[oppId]:[]}));
+        return;
+      }
       const channels = {};
       data.items.forEach(item => {
         const chId = item.snippet?.channelId;
@@ -338,17 +355,25 @@ export default function BrandformanceEngine() {
       });
       const chIds = Object.keys(channels).join(",");
       if (chIds) {
-        const statsRes = await fetch(`/api/youtube?type=channelStats&channelId=${chIds}`);
-        const statsData = await statsRes.json();
-        (statsData.items || []).forEach(ch => {
-          if (channels[ch.id]) {
-            channels[ch.id].subs = parseInt(ch.statistics?.subscriberCount || "0");
-            channels[ch.id].thumbnail = ch.snippet?.thumbnails?.default?.url || channels[ch.id].thumbnail;
-          }
-        });
+        try {
+          const statsRes = await fetch(`/api/youtube?type=channelStats&channelId=${chIds}`);
+          const statsData = await statsRes.json();
+          (statsData.items || []).forEach(ch => {
+            if (channels[ch.id]) {
+              channels[ch.id].subs = parseInt(ch.statistics?.subscriberCount || "0");
+              channels[ch.id].thumbnail = ch.snippet?.thumbnails?.default?.url || channels[ch.id].thumbnail;
+            }
+          });
+        } catch (e) { console.warn("[channelStats] failed", e); }
       }
-      setYtCreators(p => ({...p,[oppId]:Object.values(channels)}));
-    } catch { setYtCreators(p => ({...p,[oppId]:[]})); }
+      const finalChannels = Object.values(channels);
+      console.log("[searchCreators] channels:", finalChannels.length);
+      setYtCreators(p => ({...p,[oppId]:finalChannels}));
+    } catch (e) {
+      console.error("[searchCreators] exception:", e);
+      setYtErrors(p => ({...p,[oppId]:`네트워크 오류: ${e.message}`}));
+      setYtCreators(p => ({...p,[oppId]:[]}));
+    }
     finally { setYtLoading(p => ({...p,[oppId]:false})); }
   }, [ytCreators, ytLoading]);
 
@@ -492,7 +517,18 @@ export default function BrandformanceEngine() {
         {[0,1,2].map(i => <div key={i} style={{ flex:1, height:80, borderRadius:12, background:"#E2E8F0", animation:"pulse 1.5s infinite" }} />)}
       </div>
     );
-    if (!creators || !creators.length) return <div style={{ color:C.textSoft, fontSize:12, padding:12 }}>크리에이터 검색 결과가 없습니다</div>;
+    if (!creators || !creators.length) {
+      const err = ytErrors[oppId];
+      return (
+        <div style={{ color:C.textSoft, fontSize:12, padding:12 }}>
+          <div>크리에이터 검색 결과가 없습니다</div>
+          {err && <div style={{ color:"#DC2626", fontSize:11, marginTop:6 }}>⚠ {err}</div>}
+          <div style={{ fontSize:10, marginTop:6, color:C.textSoft }}>
+            (YOUTUBE_API_KEY 환경변수가 Vercel에 설정되어 있는지 확인하세요)
+          </div>
+        </div>
+      );
+    }
     return (
       <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
         {creators.map((cr,i) => {
