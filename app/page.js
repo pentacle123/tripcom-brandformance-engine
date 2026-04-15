@@ -90,36 +90,40 @@ const _buildUspOpp = (o) => ({
   ...o,
   demographics: o.demographics || "여행 준비 검색자",
   monthlyVol: Math.round(o.annualVol/12),
-  painPoints: [o.painPoint],
+  painPoints: o.painPoints || [o.painPoint],
   dataProof: (o.topKeywords||[]).map(k => `${k.keyword} 연 ${k.vol.toLocaleString()}`).join(" · "),
   contentHook: o.contentHookExample,
   uspConnection: o.tripcomAsset,
   level: "USP",
-  peakMonths: [60,60,60,60,60,60,60,60,60,60,60,60],
+  peakMonths: o.peakMonths || [60,60,60,60,60,60,60,60,60,60,60,60],
+  decisionJourney: o.decisionJourney || ["검색","비교","결정","예약"],
+  decisionInsight: o.decisionInsight || "",
+  competitorLandscape: o.competitorLandscape || "",
+  competitorInsight: o.competitorInsight || "",
 });
 
 const USP_OPPS = [
   // ── 💰 가격 경쟁력 ──
-  _buildUspOpp({ id:"usp-1", title:"스카이스캐너·구글에서 가격 비교하는 여행자", icon:"💰", uspGroup:"price", uspGroupLabel:"가격 경쟁력", hookType:"Price-hook", hookLabel:"더 싼 곳이 있다", strategyCopy:"스카이스캐너 항공권 연 46만, 구글 항공권 연 68만 검색. 이 사람들은 '더 싼 곳'을 찾고 있는데 Trip.com을 모른다.", annualVol:1147670, keyInsight:"스카이스캐너(46만)+구글 항공권(68만) 검색자가 Trip.com의 가격 보장제와 가격 알리미를 모름", painPoint:"여러 사이트를 돌아다니며 가격 비교하는데 시간이 너무 걸린다", tripcomAsset:"가격 보장제 (더 싸면 차액 환불) + 가격 알리미 (24시간 모니터링)", topKeywords:[{keyword:"구글 항공권",vol:684810},{keyword:"스카이스캐너 항공권",vol:462860}], contentHookExample:"스카이스캐너에서 찾은 가격, Trip.com이 더 쌌습니다", stage:"Book", youtubeSearchQueries:["항공권 싸게 사는법","항공권 가격비교 꿀팁"] }),
-  _buildUspOpp({ id:"usp-2", title:"특가 항공권·땡처리 항공권 사냥꾼", icon:"🏷️", uspGroup:"price", uspGroupLabel:"가격 경쟁력", hookType:"Deal-hook", hookLabel:"지금 아니면 없다", strategyCopy:"항공권 특가 연 57만, 항공권 최저가 연 7.5만, 항공권 싸게 연 1.6만. '지금 이 가격이 최저인가?'가 핵심 불안.", annualVol:661170, keyInsight:"특가/최저가/싸게 검색자는 '타이밍'에 민감. Trip.com 가격 알리미가 이 불안을 해결", painPoint:"지금 이 가격이 최저가인지 알 수 없다. 더 기다려야 할까?", tripcomAsset:"가격 알리미 (목표 가격 설정 → 도달 시 알림) + 항공사별 단독 특가", topKeywords:[{keyword:"항공권 특가",vol:570360},{keyword:"항공권 최저가",vol:75180},{keyword:"항공권 싸게",vol:15630}], contentHookExample:"항공권 가격이 떨어지면 알려주는 앱, 실제로 써봤습니다", stage:"Book", youtubeSearchQueries:["항공권 싸게 사는 타이밍","특가 항공권 찾는법"] }),
-  _buildUspOpp({ id:"usp-3", title:"호텔 가격 비교에 지친 여행자", icon:"🏨", uspGroup:"price", uspGroupLabel:"가격 경쟁력", hookType:"Compare-hook", hookLabel:"비교 종결", strategyCopy:"아고다 연 1,963만, 부킹닷컴 연 205만, 호텔스닷컴 연 174만. 3개 앱을 왔다갔다하는 소비자에게 '한 곳에서 최저가 보장'을 약속.", annualVol:208650, keyInsight:"호텔 예약 시장에서 아고다(1,963만)가 압도적. Trip.com이 '가격 보장+패키지 할인'으로 틈새 진입", painPoint:"아고다, 부킹, 호텔스닷컴을 다 비교해야 해서 피곤하다", tripcomAsset:"가격 보장제 + 항공+호텔 패키지 묶음 할인 + 3,000만 리뷰", topKeywords:[{keyword:"호텔 가격비교",vol:26630},{keyword:"호텔 예약 사이트",vol:40180},{keyword:"호텔 최저가",vol:11590},{keyword:"해외 호텔 예약",vol:47730},{keyword:"해외 숙소 예약",vol:31410}], contentHookExample:"같은 호텔, 아고다 vs 부킹 vs 트립닷컴 실제 가격 비교해봤습니다", stage:"Book", youtubeSearchQueries:["호텔 예약 사이트 비교","호텔 싸게 예약하는법"] }),
+  _buildUspOpp({ id:"usp-1", title:"스카이스캐너·구글에서 가격 비교하는 여행자", icon:"💰", uspGroup:"price", uspGroupLabel:"가격 경쟁력", hookType:"Price-hook", hookLabel:"더 싼 곳이 있다", strategyCopy:"스카이스캐너 항공권 연 46만, 구글 항공권 연 68만 검색. 이 사람들은 '더 싼 곳'을 찾고 있는데 Trip.com을 모른다.", annualVol:1147670, keyInsight:"스카이스캐너(46만)+구글 항공권(68만) 검색자가 Trip.com의 가격 보장제와 가격 알리미를 모름", painPoint:"여러 사이트를 돌아다니며 가격 비교하는데 시간이 너무 걸린다", painPoints:["여러 사이트 비교 피로","최저가 확신 불가","시간 소모"], tripcomAsset:"가격 보장제 (더 싸면 차액 환불) + 가격 알리미 (24시간 모니터링)", topKeywords:[{keyword:"구글 항공권",vol:684810},{keyword:"스카이스캐너 항공권",vol:462860}], contentHookExample:"스카이스캐너에서 찾은 가격, Trip.com이 더 쌌습니다", stage:"Book", youtubeSearchQueries:["항공권 싸게 사는법","항공권 가격비교 꿀팁"], demographics:"여성 58% · 30대 32%, 40대 25% (항공권 예약자 기준)", peakMonths:[80,75,85,80,85,90,95,85,75,80,85,95], decisionJourney:["항공권 검색","스카이스캐너/구글","가격 비교","최저가 확인","예약 결정"], decisionInsight:"항공권 검색 → 스카이스캐너/구글이 1차 관문. 가격 비교 단계에서 Trip.com이 더 싸다는 것을 발견시켜야 함", competitorLandscape:"스카이스캐너 연 3,813만 · 네이버 항공권 연 1,626만 · 인터파크 항공 연 930만 · Trip.com 연 812만 · 구글 항공권 연 685만", competitorInsight:"가격 검색 1순위에 Trip.com이 없음. 가격 보장제+알리미를 알리면 전환 가능" }),
+  _buildUspOpp({ id:"usp-2", title:"특가 항공권·땡처리 항공권 사냥꾼", icon:"🏷️", uspGroup:"price", uspGroupLabel:"가격 경쟁력", hookType:"Deal-hook", hookLabel:"지금 아니면 없다", strategyCopy:"항공권 특가 연 57만, 항공권 최저가 연 7.5만, 항공권 싸게 연 1.6만. '지금 이 가격이 최저인가?'가 핵심 불안.", annualVol:661170, keyInsight:"특가/최저가/싸게 검색자는 '타이밍'에 민감. Trip.com 가격 알리미가 이 불안을 해결", painPoint:"지금 이 가격이 최저가인지 알 수 없다. 더 기다려야 할까?", painPoints:["타이밍 불안","더 기다려야 하나","최저가 확신 불가"], tripcomAsset:"가격 알리미 (목표 가격 설정 → 도달 시 알림) + 항공사별 단독 특가", topKeywords:[{keyword:"항공권 특가",vol:570360},{keyword:"항공권 최저가",vol:75180},{keyword:"항공권 싸게",vol:15630}], contentHookExample:"항공권 가격이 떨어지면 알려주는 앱, 실제로 써봤습니다", stage:"Book", youtubeSearchQueries:["항공권 싸게 사는 타이밍","특가 항공권 찾는법"], demographics:"여성 55% · 20-30대 60% (가성비 민감층)", peakMonths:[85,80,75,70,75,80,90,95,80,75,80,90], decisionJourney:["특가 검색","여러 사이트 모니터링","가격 변동 관찰","적정가 도달","즉시 예약"], decisionInsight:"특가 사냥꾼은 매일 가격을 모니터링하는 피로감이 큼. 가격 알리미가 이 노동을 자동화", competitorLandscape:"네이버 항공권 1순위 · 인터파크 특가존 · 익스피디아 딜 · Trip.com 단독 특가", competitorInsight:"'알람 자동화'가 차별화 포인트. 매일 5번씩 사이트 들어가는 사람에게 솔루션" }),
+  _buildUspOpp({ id:"usp-3", title:"호텔 가격 비교에 지친 여행자", icon:"🏨", uspGroup:"price", uspGroupLabel:"가격 경쟁력", hookType:"Compare-hook", hookLabel:"비교 종결", strategyCopy:"아고다 연 1,963만, 부킹닷컴 연 205만, 호텔스닷컴 연 174만. 3개 앱을 왔다갔다하는 소비자에게 '한 곳에서 최저가 보장'을 약속.", annualVol:208650, keyInsight:"호텔 예약 시장에서 아고다(1,963만)가 압도적. Trip.com이 '가격 보장+패키지 할인'으로 틈새 진입", painPoint:"아고다, 부킹, 호텔스닷컴을 다 비교해야 해서 피곤하다", painPoints:["3개 앱 왕복 피로","리뷰 신뢰 어려움","최종 결정 어려움"], tripcomAsset:"가격 보장제 + 항공+호텔 패키지 묶음 할인 + 3,000만 리뷰", topKeywords:[{keyword:"호텔 가격비교",vol:26630},{keyword:"호텔 예약 사이트",vol:40180},{keyword:"호텔 최저가",vol:11590},{keyword:"해외 호텔 예약",vol:47730},{keyword:"해외 숙소 예약",vol:31410}], contentHookExample:"같은 호텔, 아고다 vs 부킹 vs 트립닷컴 실제 가격 비교해봤습니다", stage:"Book", youtubeSearchQueries:["호텔 예약 사이트 비교","호텔 싸게 예약하는법"], demographics:"여성 64% · 30-40대 55%", peakMonths:[80,75,70,75,85,90,95,90,75,80,85,90], decisionJourney:["호텔 검색","아고다/부킹 비교","호텔스닷컴 추가","리뷰 재확인","결정"], decisionInsight:"호텔 예약자는 평균 3-4개 사이트를 비교. 비교 피로가 결정 지연의 주원인", competitorLandscape:"아고다 연 1,963만 · 부킹닷컴 연 205만 · 호텔스닷컴 연 174만 · Trip.com 호텔 카테고리 잠재력", competitorInsight:"가격 보장제+패키지 묶음 할인이 차별화. 같은 호텔 가격 비교 콘텐츠가 강력" }),
 
   // ── 🏆 Trip.Best ──
-  _buildUspOpp({ id:"usp-4", title:"어디로 갈까? 여행지 선택 장애", icon:"🌍", uspGroup:"tripbest", uspGroupLabel:"Trip.Best", hookType:"Choice-hook", hookLabel:"선택의 고통 끝", strategyCopy:"해외여행 추천 연 13만, 일본여행 추천 연 29만, 가족여행 추천 연 9만. '어디로 갈까?'는 여행의 첫 번째이자 가장 큰 고민.", annualVol:506330, keyInsight:"'결정까지 9~11일'의 시작점. Trip.Best 도시 랭킹+계절 테마(벚꽃/단풍/물놀이)가 결정 시간을 줄임", painPoint:"일본? 동남아? 유럽? 선택지가 너무 많아서 결정을 못하겠다", tripcomAsset:"Trip.Best 도시 랭킹 + 계절별 테마 랭킹(벚꽃/단풍/물놀이) + '유럽100' '아시아100'", topKeywords:[{keyword:"일본여행 추천",vol:287610},{keyword:"해외여행 추천",vol:129490},{keyword:"가족 여행 추천",vol:89230}], contentHookExample:"여행지 못 정했으면 이거 보세요. Trip.Best 2025 아시아 TOP 10", stage:"Dream", youtubeSearchQueries:["해외여행 추천 2025","가족여행 추천"] }),
-  _buildUspOpp({ id:"usp-5", title:"뭘 먹을까? 맛집 선택 장애", icon:"🍽️", uspGroup:"tripbest", uspGroupLabel:"Trip.Best", hookType:"Taste-hook", hookLabel:"맛집 랭킹", strategyCopy:"맛집추천 연 43만 + 여행지추천 연 25만. 정보 과잉 시대, '검증된 랭킹'이 선택의 고통을 끝낸다.", annualVol:676080, keyInsight:"블로그·유튜브에서 정보를 찾지만 광고인지 진짜인지 구분 불가. Trip.Best는 수억건 예약 데이터 기반이라 신뢰도 차별화", painPoint:"맛집 블로그가 너무 많아서 뭘 믿어야 할지 모르겠다. 광고 아닌 진짜 맛집은?", tripcomAsset:"Trip.Best 레스토랑 랭킹 + '고향의 맛(Taste of Hometown)' 한식 랭킹 + 뷰맛집 + 현지풍미", topKeywords:[{keyword:"맛집 추천",vol:428380},{keyword:"여행지 추천",vol:247700}], contentHookExample:"블로그 맛집 말고, 수억 건 데이터가 뽑은 오사카 맛집 TOP 5", stage:"Plan", youtubeSearchQueries:["맛집 추천 해외","여행 맛집 찾는법"] }),
-  _buildUspOpp({ id:"usp-6", title:"어디서 잘까? 호텔 결정 장애", icon:"🛏️", uspGroup:"tripbest", uspGroupLabel:"Trip.Best", hookType:"Stay-hook", hookLabel:"후기 검증", strategyCopy:"호텔 예약 연 86만, 호텔 추천 연 1.3만. 이용자 평균 20~24회 앱 접속 — 비교만 하다 지침. 3,000만 리뷰 기반 랭킹이 결정을 도움.", annualVol:916080, keyInsight:"호텔 예약(86만)이 카테고리 최대. '20~24회 앱 접속'의 원인. Trip.Best 호텔 랭킹+인스타핫플 호텔이 '비교 피로'를 해결", painPoint:"아고다 리뷰, 부킹 리뷰, 다 봤는데 뭘 골라야 할지 더 모르겠다", tripcomAsset:"Trip.Best 호텔 랭킹 + 인스타 핫플 호텔 + 레스토랑 맛집 호텔 + 3,000만 실제 리뷰", topKeywords:[{keyword:"호텔 예약",vol:862800},{keyword:"호텔 추천",vol:13100},{keyword:"호텔 예약 사이트",vol:40180}], contentHookExample:"호텔 고르다 지쳤으면, Trip.Best 인스타 핫플 호텔 TOP 10", stage:"Plan", youtubeSearchQueries:["호텔 추천 해외","호텔 예약 꿀팁"] }),
+  _buildUspOpp({ id:"usp-4", title:"어디로 갈까? 여행지 선택 장애", icon:"🌍", uspGroup:"tripbest", uspGroupLabel:"Trip.Best", hookType:"Choice-hook", hookLabel:"선택의 고통 끝", strategyCopy:"해외여행 추천 연 13만, 일본여행 추천 연 29만, 가족여행 추천 연 9만. '어디로 갈까?'는 여행의 첫 번째이자 가장 큰 고민.", annualVol:506330, keyInsight:"'결정까지 9~11일'의 시작점. Trip.Best 도시 랭킹+계절 테마(벚꽃/단풍/물놀이)가 결정 시간을 줄임", painPoint:"일본? 동남아? 유럽? 선택지가 너무 많아서 결정을 못하겠다", painPoints:["선택지 과잉","결정 시간 길어짐","비교 기준 부재"], tripcomAsset:"Trip.Best 도시 랭킹 + 계절별 테마 랭킹(벚꽃/단풍/물놀이) + '유럽100' '아시아100'", topKeywords:[{keyword:"일본여행 추천",vol:287610},{keyword:"해외여행 추천",vol:129490},{keyword:"가족 여행 추천",vol:89230}], contentHookExample:"여행지 못 정했으면 이거 보세요. Trip.Best 2025 아시아 TOP 10", stage:"Dream", youtubeSearchQueries:["해외여행 추천 2025","가족여행 추천"], demographics:"여성 65% · 30-40대 55% (여행지 추천 검색자)", peakMonths:[90,80,75,70,80,85,90,75,65,70,75,85], decisionJourney:["어디로 갈까","네이버/유튜브 검색","추천 리스트 비교","목적지 결정","예약 시작"], decisionInsight:"여행지 추천 검색의 1차 도착지는 네이버 블로그와 유튜브. Trip.Best가 '데이터 기반 랭킹'으로 차별화 가능하지만 인지도가 부족", competitorLandscape:"네이버 블로그 1위 · 유튜브 2위 · 인스타그램 3위 · Trip.Best 인지도 낮음", competitorInsight:"수억 건 예약 데이터 기반 랭킹이라는 차별점을 알리는 콘텐츠 필요" }),
+  _buildUspOpp({ id:"usp-5", title:"뭘 먹을까? 맛집 선택 장애", icon:"🍽️", uspGroup:"tripbest", uspGroupLabel:"Trip.Best", hookType:"Taste-hook", hookLabel:"맛집 랭킹", strategyCopy:"맛집추천 연 43만 + 여행지추천 연 25만. 정보 과잉 시대, '검증된 랭킹'이 선택의 고통을 끝낸다.", annualVol:676080, keyInsight:"블로그·유튜브에서 정보를 찾지만 광고인지 진짜인지 구분 불가. Trip.Best는 수억건 예약 데이터 기반이라 신뢰도 차별화", painPoint:"맛집 블로그가 너무 많아서 뭘 믿어야 할지 모르겠다. 광고 아닌 진짜 맛집은?", painPoints:["광고/진짜 구분 불가","블로그 신뢰 어려움","정보 과잉"], tripcomAsset:"Trip.Best 레스토랑 랭킹 + '고향의 맛(Taste of Hometown)' 한식 랭킹 + 뷰맛집 + 현지풍미", topKeywords:[{keyword:"맛집 추천",vol:428380},{keyword:"여행지 추천",vol:247700}], contentHookExample:"블로그 맛집 말고, 수억 건 데이터가 뽑은 오사카 맛집 TOP 5", stage:"Plan", youtubeSearchQueries:["맛집 추천 해외","여행 맛집 찾는법"], demographics:"여성 68% · 30대 35%, 20대 22%", peakMonths:[75,70,80,80,85,85,80,75,70,85,80,75], decisionJourney:["맛집 검색","네이버 블로그/유튜브","리뷰 비교","실제 방문자 후기 확인","방문 결정"], decisionInsight:"맛집 정보의 문제: 블로그 광고와 진짜 리뷰 구분 불가. Trip.Best는 '수억 건 예약 데이터 기반'이라 광고 아닌 실제 랭킹이라는 차별점", competitorLandscape:"네이버 블로그 1위 · 망고플레이트 · 미쉐린 · Trip.Best는 해외 맛집에서 틈새", competitorInsight:"맛집 정보: 네이버 블로그 1위, 유튜브 2위, Trip.Best는 아직 인지도 부족 — 데이터 기반 신뢰도 차별화 가능" }),
+  _buildUspOpp({ id:"usp-6", title:"어디서 잘까? 호텔 결정 장애", icon:"🛏️", uspGroup:"tripbest", uspGroupLabel:"Trip.Best", hookType:"Stay-hook", hookLabel:"후기 검증", strategyCopy:"호텔 예약 연 86만, 호텔 추천 연 1.3만. 이용자 평균 20~24회 앱 접속 — 비교만 하다 지침. 3,000만 리뷰 기반 랭킹이 결정을 도움.", annualVol:916080, keyInsight:"호텔 예약(86만)이 카테고리 최대. '20~24회 앱 접속'의 원인. Trip.Best 호텔 랭킹+인스타핫플 호텔이 '비교 피로'를 해결", painPoint:"아고다 리뷰, 부킹 리뷰, 다 봤는데 뭘 골라야 할지 더 모르겠다", painPoints:["리뷰 너무 많음","20~24회 앱 접속","결정 못함"], tripcomAsset:"Trip.Best 호텔 랭킹 + 인스타 핫플 호텔 + 레스토랑 맛집 호텔 + 3,000만 실제 리뷰", topKeywords:[{keyword:"호텔 예약",vol:862800},{keyword:"호텔 추천",vol:13100},{keyword:"호텔 예약 사이트",vol:40180}], contentHookExample:"호텔 고르다 지쳤으면, Trip.Best 인스타 핫플 호텔 TOP 10", stage:"Plan", youtubeSearchQueries:["호텔 추천 해외","호텔 예약 꿀팁"], demographics:"여성 64% · 30-40대 60%", peakMonths:[80,75,75,80,85,90,95,90,75,80,85,90], decisionJourney:["호텔 검색","Trip.Best 랭킹 확인","리뷰 검증","사진/위치 비교","최종 예약"], decisionInsight:"호텔 결정에 평균 20-24회 앱 접속. 큐레이션된 랭킹이 결정 시간을 단축시킴", competitorLandscape:"아고다 호텔 검색 1위 · 부킹닷컴 2위 · 호텔스닷컴 · Trip.Best 랭킹 차별화 시도 중", competitorInsight:"인스타 핫플 호텔, 레스토랑 맛집 호텔 등 큐레이션 랭킹이 차별점" }),
 
   // ── 🤖 트립지니 AI ──
-  _buildUspOpp({ id:"usp-7", title:"여행 코스·일정을 못 짜겠는 여행자", icon:"📋", uspGroup:"tripgenie", uspGroupLabel:"트립지니 AI", hookType:"Plan-hook", hookLabel:"AI가 짜주는 여행", strategyCopy:"도쿄 여행 코스 연 17만, 오사카 여행 코스 연 15만, 후쿠오카 연 14만... '[목적지] 여행 코스' 카테고리 전체 합계 연 200만+. 일정 짜기가 여행 준비의 가장 큰 시간 소모.", annualVol:2000000, keyInsight:"'[목적지] 여행 코스/일정' 검색이 연 200만+. 이 모든 사람에게 '오사카 3박4일 50만원 가족여행' 한 줄이면 AI가 다 짜준다고 알려주면 됨", painPoint:"블로그 5개, 유튜브 10개 보고도 일정을 못 짜겠다. 시간만 낭비", tripcomAsset:"트립지니 AI — 자연어 입력('다낭 3박4일 50만원 가족여행') → 항공+숙소+액티비티 자동 구성", topKeywords:[{keyword:"도쿄 여행 코스",vol:166860},{keyword:"오사카 여행 코스",vol:149760},{keyword:"후쿠오카 여행 코스",vol:141450},{keyword:"다낭 여행 코스",vol:99200},{keyword:"나트랑 여행 코스",vol:87220},{keyword:"상하이 여행 코스",vol:83080},{keyword:"발리 여행 코스",vol:65960},{keyword:"방콕 여행 코스",vol:60430},{keyword:"홍콩 여행 일정",vol:59010},{keyword:"싱가포르 여행 코스",vol:55660},{keyword:"오사카 여행 일정",vol:69910}], contentHookExample:"오사카 3박4일 코스, 블로그 대신 AI한테 짜달라고 했더니", stage:"Plan", youtubeSearchQueries:["여행 일정 짜는법","AI 여행 플래너"] }),
-  _buildUspOpp({ id:"usp-8", title:"여행 앱 뭐가 좋아? 플랫폼 선택 고민", icon:"📱", uspGroup:"tripgenie", uspGroupLabel:"트립지니 AI", hookType:"App-hook", hookLabel:"앱 하나면 끝", strategyCopy:"여행 일정 어플 연 4만, 여행 앱 추천 연 6,790. 여행 앱을 찾는 소비자에게 '일정+예약+AI까지 한 앱'을 보여주면 전환.", annualVol:46940, keyInsight:"여행 앱/어플 검색자는 '좋은 도구'를 찾는 사람. Trip.com이 일정 짜기(트립지니)+예약+가격비교를 한 앱에서 제공한다는 것을 모름", painPoint:"일정 짜는 앱, 항공권 앱, 호텔 앱 따로 설치하기 귀찮다", tripcomAsset:"트립지니 AI + 항공/호텔/액티비티 + 가격 알리미 = 올인원 앱", topKeywords:[{keyword:"여행 일정 어플",vol:40150},{keyword:"여행 앱 추천",vol:6790}], contentHookExample:"여행 앱 5개 깔 필요 없어요. 이 앱 하나면 끝입니다", stage:"Plan", youtubeSearchQueries:["여행 앱 추천 2025","여행 일정 앱 비교"] }),
+  _buildUspOpp({ id:"usp-7", title:"여행 코스·일정을 못 짜겠는 여행자", icon:"📋", uspGroup:"tripgenie", uspGroupLabel:"트립지니 AI", hookType:"Plan-hook", hookLabel:"AI가 짜주는 여행", strategyCopy:"도쿄 여행 코스 연 17만, 오사카 여행 코스 연 15만, 후쿠오카 연 14만... '[목적지] 여행 코스' 카테고리 전체 합계 연 200만+. 일정 짜기가 여행 준비의 가장 큰 시간 소모.", annualVol:2000000, keyInsight:"'[목적지] 여행 코스/일정' 검색이 연 200만+. 이 모든 사람에게 '오사카 3박4일 50만원 가족여행' 한 줄이면 AI가 다 짜준다고 알려주면 됨", painPoint:"블로그 5개, 유튜브 10개 보고도 일정을 못 짜겠다. 시간만 낭비", painPoints:["정보 과잉","일정 짜기 시간 소모","결정 피로"], tripcomAsset:"트립지니 AI — 자연어 입력('다낭 3박4일 50만원 가족여행') → 항공+숙소+액티비티 자동 구성", topKeywords:[{keyword:"도쿄 여행 코스",vol:166860},{keyword:"오사카 여행 코스",vol:149760},{keyword:"후쿠오카 여행 코스",vol:141450},{keyword:"다낭 여행 코스",vol:99200},{keyword:"나트랑 여행 코스",vol:87220},{keyword:"상하이 여행 코스",vol:83080},{keyword:"발리 여행 코스",vol:65960},{keyword:"방콕 여행 코스",vol:60430},{keyword:"홍콩 여행 일정",vol:59010},{keyword:"싱가포르 여행 코스",vol:55660},{keyword:"오사카 여행 일정",vol:69910}], contentHookExample:"오사카 3박4일 코스, 블로그 대신 AI한테 짜달라고 했더니", stage:"Plan", youtubeSearchQueries:["여행 일정 짜는법","AI 여행 플래너"], demographics:"여성 62% · 30대 38%, 20대 25%", peakMonths:[85,80,75,70,80,90,95,80,65,70,75,80], decisionJourney:["목적지 결정","여행 코스 검색","블로그 5개+유튜브 10개","정보 과잉 → 일정 못 짜겠다","AI 도구 또는 포기"], decisionInsight:"'[목적지] 여행 코스' 검색 연 200만+. 이 사람들의 대부분이 블로그를 보고도 일정을 못 짜서 시간만 낭비. 트립지니 AI가 '한 줄 입력 → 완성 일정'으로 이 고통을 해결", competitorLandscape:"네이버 블로그 압도적 · 여행 일정 앱(트리플 등) · AI 플래너 인지도 매우 낮음 = 블루오션", competitorInsight:"여행 코스 검색 시장은 블루오션. AI 자연어 입력 → 즉시 일정이라는 차별점이 강력" }),
+  _buildUspOpp({ id:"usp-8", title:"여행 앱 뭐가 좋아? 플랫폼 선택 고민", icon:"📱", uspGroup:"tripgenie", uspGroupLabel:"트립지니 AI", hookType:"App-hook", hookLabel:"앱 하나면 끝", strategyCopy:"여행 일정 어플 연 4만, 여행 앱 추천 연 6,790. 여행 앱을 찾는 소비자에게 '일정+예약+AI까지 한 앱'을 보여주면 전환.", annualVol:46940, keyInsight:"여행 앱/어플 검색자는 '좋은 도구'를 찾는 사람. Trip.com이 일정 짜기(트립지니)+예약+가격비교를 한 앱에서 제공한다는 것을 모름", painPoint:"일정 짜는 앱, 항공권 앱, 호텔 앱 따로 설치하기 귀찮다", painPoints:["여러 앱 설치 부담","앱 비교 피로","올인원 부재"], tripcomAsset:"트립지니 AI + 항공/호텔/액티비티 + 가격 알리미 = 올인원 앱", topKeywords:[{keyword:"여행 일정 어플",vol:40150},{keyword:"여행 앱 추천",vol:6790}], contentHookExample:"여행 앱 5개 깔 필요 없어요. 이 앱 하나면 끝입니다", stage:"Plan", youtubeSearchQueries:["여행 앱 추천 2025","여행 일정 앱 비교"], demographics:"여성 60% · 20-30대 65%", peakMonths:[80,75,70,75,85,90,95,85,75,75,80,85], decisionJourney:["여행 앱 검색","유튜브 리뷰","앱스토어 비교","다운로드","사용/이탈"], decisionInsight:"여행 앱 비교 검색자는 '도구'를 찾는 능동적 사용자. 올인원이라는 점이 강력한 차별화", competitorLandscape:"트리플 · 여행친구 · 마이리얼트립 등 다수 · Trip.com 올인원 포지션 강점", competitorInsight:"AI 일정 + 예약 + 가격 알리미가 통합된 앱은 Trip.com이 유일" }),
 
   // ── 🔗 원스톱 ──
-  _buildUspOpp({ id:"usp-9", title:"항공+호텔 따로 예약하는 번거로움", icon:"🔗", uspGroup:"onestop", uspGroupLabel:"원스톱 플랫폼", hookType:"Bundle-hook", hookLabel:"묶으면 싸고 편하다", strategyCopy:"항공권 예약 연 433만, 호텔 예약 연 86만. 이 두 가지를 '따로' 하는 소비자에게 '함께' 하면 할인+편의를 제안.", annualVol:5193100, keyInsight:"항공권과 호텔을 따로 예약하는 게 당연한 소비자에게 '항공+호텔 패키지' 할인을 알리면 전환. 항공편 변경 시 호텔 보장 포함", painPoint:"항공권 따로, 호텔 따로, 액티비티 따로... 너무 번거롭다", tripcomAsset:"항공+호텔 패키지 (묶음 할인+항공편 변경 시 호텔 보장) + 600개 항공사 + 170만 호텔", topKeywords:[{keyword:"항공권 예약",vol:4330300},{keyword:"호텔 예약",vol:862800}], contentHookExample:"항공권이랑 호텔 따로 예약하면 손해. 묶으면 이만큼 싸집니다", stage:"Book", youtubeSearchQueries:["항공 호텔 패키지 예약","여행 예약 한번에"] }),
-  _buildUspOpp({ id:"usp-10", title:"유심·보험·픽업까지 챙겨야 하는 여행 준비", icon:"✅", uspGroup:"onestop", uspGroupLabel:"원스톱 플랫폼", hookType:"Checklist-hook", hookLabel:"준비물 원스톱", strategyCopy:"여행 준비물 연 21만, 해외여행 체크리스트 연 4.9만, 공항 픽업 연 1.9만. 항공·호텔 외에 챙길 것이 너무 많은 소비자.", annualVol:276470, keyInsight:"유심/eSIM, 여행자보험, 공항 픽업, 기차표 — 이 모든 것을 Trip.com 한 앱에서 해결 가능한데 대부분 모름. 특히 코레일 유일한 제3자 판매처", painPoint:"유심은 유심대로, 보험은 보험대로, 픽업은 픽업대로 따로 알아보기 번거롭다", tripcomAsset:"유심/eSIM + 여행자보험 + 공항 픽업(939개 공항) + 기차표(코레일 유일한 제3자) + 렌터카 + 액티비티", topKeywords:[{keyword:"여행 준비물",vol:209250},{keyword:"해외여행 체크리스트",vol:48600},{keyword:"공항 픽업",vol:18620}], contentHookExample:"해외여행 준비물 체크리스트, 이 앱 하나로 전부 해결됩니다", stage:"Plan", youtubeSearchQueries:["해외여행 준비물 체크리스트","여행 준비 꿀팁"] }),
+  _buildUspOpp({ id:"usp-9", title:"항공+호텔 따로 예약하는 번거로움", icon:"🔗", uspGroup:"onestop", uspGroupLabel:"원스톱 플랫폼", hookType:"Bundle-hook", hookLabel:"묶으면 싸고 편하다", strategyCopy:"항공권 예약 연 433만, 호텔 예약 연 86만. 이 두 가지를 '따로' 하는 소비자에게 '함께' 하면 할인+편의를 제안.", annualVol:5193100, keyInsight:"항공권과 호텔을 따로 예약하는 게 당연한 소비자에게 '항공+호텔 패키지' 할인을 알리면 전환. 항공편 변경 시 호텔 보장 포함", painPoint:"항공권 따로, 호텔 따로, 액티비티 따로... 너무 번거롭다", painPoints:["분리 예약 번거로움","변경 시 리스크","할인 기회 놓침"], tripcomAsset:"항공+호텔 패키지 (묶음 할인+항공편 변경 시 호텔 보장) + 600개 항공사 + 170만 호텔", topKeywords:[{keyword:"항공권 예약",vol:4330300},{keyword:"호텔 예약",vol:862800}], contentHookExample:"항공권이랑 호텔 따로 예약하면 손해. 묶으면 이만큼 싸집니다", stage:"Book", youtubeSearchQueries:["항공 호텔 패키지 예약","여행 예약 한번에"], demographics:"여성 56% · 30-40대 60%", peakMonths:[80,75,80,80,85,90,95,90,75,80,85,90], decisionJourney:["항공권 검색","호텔 따로 검색","액티비티 따로","변경 발생 시 혼란","결제 분리"], decisionInsight:"항공권 변경이 일어나면 호텔도 같이 변경해야 하는데 따로 예약했으면 환불 어려움. 패키지가 이를 해결", competitorLandscape:"항공권: 스카이스캐너/네이버 · 호텔: 아고다/부킹 · 패키지 묶음은 Trip.com 강점", competitorInsight:"분리 예약자에게 패키지 묶음 할인 + 항공편 변경 보장의 가치를 알리면 전환" }),
+  _buildUspOpp({ id:"usp-10", title:"유심·보험·픽업까지 챙겨야 하는 여행 준비", icon:"✅", uspGroup:"onestop", uspGroupLabel:"원스톱 플랫폼", hookType:"Checklist-hook", hookLabel:"준비물 원스톱", strategyCopy:"여행 준비물 연 21만, 해외여행 체크리스트 연 4.9만, 공항 픽업 연 1.9만. 항공·호텔 외에 챙길 것이 너무 많은 소비자.", annualVol:276470, keyInsight:"유심/eSIM, 여행자보험, 공항 픽업, 기차표 — 이 모든 것을 Trip.com 한 앱에서 해결 가능한데 대부분 모름. 특히 코레일 유일한 제3자 판매처", painPoint:"유심은 유심대로, 보험은 보험대로, 픽업은 픽업대로 따로 알아보기 번거롭다", painPoints:["여러 사이트 검색 피로","빠뜨리는 항목 불안","결제처 분산"], tripcomAsset:"유심/eSIM + 여행자보험 + 공항 픽업(939개 공항) + 기차표(코레일 유일한 제3자) + 렌터카 + 액티비티", topKeywords:[{keyword:"여행 준비물",vol:209250},{keyword:"해외여행 체크리스트",vol:48600},{keyword:"공항 픽업",vol:18620}], contentHookExample:"해외여행 준비물 체크리스트, 이 앱 하나로 전부 해결됩니다", stage:"Plan", youtubeSearchQueries:["해외여행 준비물 체크리스트","여행 준비 꿀팁"], demographics:"여성 60% · 30-40대 55%", peakMonths:[80,75,75,80,85,90,95,90,75,80,85,85], decisionJourney:["체크리스트 검색","유심 따로 검색","보험 따로 검색","픽업 따로 검색","빠뜨림 불안"], decisionInsight:"준비물이 너무 많아 빠뜨리는 항목이 두려움. 한 앱에서 모두 해결되면 시간+안심 동시 확보", competitorLandscape:"유심: 말톡/도시락 · 보험: 캐롯/카카오 · 픽업: 마이리얼트립 · Trip.com만 모두 통합", competitorInsight:"코레일 유일 제3자 + 939개 공항 픽업이 강력한 통합 USP" }),
 
   // ── 🛡️ 해외 안심 ──
-  _buildUspOpp({ id:"usp-11", title:"해외에서 문제 생기면? 불안한 여행자", icon:"🛡️", uspGroup:"safety", uspGroupLabel:"24시간 한국어 CS", hookType:"Safety-hook", hookLabel:"24시간 안심", strategyCopy:"여행자보험 연 285만 검색. 보험을 찾는 사람은 '해외에서 문제 생기면?'이 핵심 불안. 24시간 한국어 CS + 글로벌 SOS가 보험 이상의 안심.", annualVol:2852460, keyInsight:"여행자보험 검색자의 본질적 니즈는 '안심'. 24시간 한국어 상담 + 번역 지원 + 분실수하물 SOS = 보험보다 실질적 안심", painPoint:"해외에서 비행기 놓치거나, 짐 잃어버리거나, 병원 가야 하면 어떡하지? 말도 안 통하는데", tripcomAsset:"서울 24시간 고객센터 (전원 한국인) + 글로벌 SOS (번역, 분실수하물, 긴급지원) + 도쿄/에든버러 추가 센터", topKeywords:[{keyword:"여행자보험",vol:2850200},{keyword:"여행 안전",vol:2260}], contentHookExample:"해외에서 짐 잃어버렸는데 전화 한 통으로 해결된 실제 후기", stage:"Plan", youtubeSearchQueries:["해외여행 안전 팁","여행 트러블 대처"] }),
-  _buildUspOpp({ id:"usp-12", title:"처음 해외여행이라 모든 게 불안한 초보", icon:"🔰", uspGroup:"safety", uspGroupLabel:"24시간 한국어 CS", hookType:"First-hook", hookLabel:"처음이어도 괜찮다", strategyCopy:"첫 해외여행 연 1.3만, 여행사 추천 연 5.7만. 자유여행은 하고 싶지만 혼자서 다 해본 적이 없는 사람. 트립지니가 일정 짜주고, CS가 24시간 도와주면 '처음이어도 괜찮은 자유여행'이 가능.", annualVol:69960, keyInsight:"여행사 추천(5.7만) 검색자의 상당수가 '자유여행은 무섭고 패키지는 자유롭지 않은' 사이에 있음. Trip.com의 AI+CS 조합이 이 갭을 메움", painPoint:"자유여행 하고 싶은데 혼자서 비행기 예약, 호텔 예약, 일정 짜기 다 못하겠다", tripcomAsset:"트립지니 AI (일정 자동 설계) + 24시간 CS (언제든 도움) + Trip.Best (검증된 추천) = '풀서비스 자유여행'", topKeywords:[{keyword:"여행사 추천",vol:57020},{keyword:"첫 해외여행",vol:12790}], contentHookExample:"해외여행 처음이면 여행사 안 가도 됩니다. 이 앱이면 충분해요", stage:"Dream", youtubeSearchQueries:["첫 해외여행 준비","자유여행 초보 가이드"] }),
+  _buildUspOpp({ id:"usp-11", title:"해외에서 문제 생기면? 불안한 여행자", icon:"🛡️", uspGroup:"safety", uspGroupLabel:"24시간 한국어 CS", hookType:"Safety-hook", hookLabel:"24시간 안심", strategyCopy:"여행자보험 연 285만 검색. 보험을 찾는 사람은 '해외에서 문제 생기면?'이 핵심 불안. 24시간 한국어 CS + 글로벌 SOS가 보험 이상의 안심.", annualVol:2852460, keyInsight:"여행자보험 검색자의 본질적 니즈는 '안심'. 24시간 한국어 상담 + 번역 지원 + 분실수하물 SOS = 보험보다 실질적 안심", painPoint:"해외에서 비행기 놓치거나, 짐 잃어버리거나, 병원 가야 하면 어떡하지? 말도 안 통하는데", painPoints:["언어 장벽","현지 트러블 공포","CS 연결 불안"], tripcomAsset:"서울 24시간 고객센터 (전원 한국인) + 글로벌 SOS (번역, 분실수하물, 긴급지원) + 도쿄/에든버러 추가 센터", topKeywords:[{keyword:"여행자보험",vol:2850200},{keyword:"여행 안전",vol:2260}], contentHookExample:"해외에서 짐 잃어버렸는데 전화 한 통으로 해결된 실제 후기", stage:"Plan", youtubeSearchQueries:["해외여행 안전 팁","여행 트러블 대처"], demographics:"여성 62% · 30-50대 70% (보험 검색자)", peakMonths:[75,70,75,80,85,90,95,90,80,75,75,80], decisionJourney:["여행자보험 검색","상품 비교","CS 채널 확인","구매","사용/불안"], decisionInsight:"여행자보험 검색의 진짜 니즈는 '문제 생기면 누가 도와주나'. 24시간 한국어 CS가 보험보다 실질적 안심 제공", competitorLandscape:"여행자보험 검색자는 캐롯/삼성/카카오 보험 사이트 직행 · Trip.com 24시간 한국어 CS는 인지도 낮음", competitorInsight:"보험 가입 단계에 'CS 안심'을 광고하면 보험+예약 동시 전환" }),
+  _buildUspOpp({ id:"usp-12", title:"처음 해외여행이라 모든 게 불안한 초보", icon:"🔰", uspGroup:"safety", uspGroupLabel:"24시간 한국어 CS", hookType:"First-hook", hookLabel:"처음이어도 괜찮다", strategyCopy:"첫 해외여행 연 1.3만, 여행사 추천 연 5.7만. 자유여행은 하고 싶지만 혼자서 다 해본 적이 없는 사람. 트립지니가 일정 짜주고, CS가 24시간 도와주면 '처음이어도 괜찮은 자유여행'이 가능.", annualVol:69960, keyInsight:"여행사 추천(5.7만) 검색자의 상당수가 '자유여행은 무섭고 패키지는 자유롭지 않은' 사이에 있음. Trip.com의 AI+CS 조합이 이 갭을 메움", painPoint:"자유여행 하고 싶은데 혼자서 비행기 예약, 호텔 예약, 일정 짜기 다 못하겠다", painPoints:["자유여행 두려움","패키지는 답답","혼자 결정 부담"], tripcomAsset:"트립지니 AI (일정 자동 설계) + 24시간 CS (언제든 도움) + Trip.Best (검증된 추천) = '풀서비스 자유여행'", topKeywords:[{keyword:"여행사 추천",vol:57020},{keyword:"첫 해외여행",vol:12790}], contentHookExample:"해외여행 처음이면 여행사 안 가도 됩니다. 이 앱이면 충분해요", stage:"Dream", youtubeSearchQueries:["첫 해외여행 준비","자유여행 초보 가이드"], demographics:"여성 65% · 20대 35%, 30대 30% (초보 여행자)", peakMonths:[85,80,75,70,75,85,90,80,70,70,80,90], decisionJourney:["여행사/패키지 검색","자유여행 도전 고민","정보 검색 → 정보 과잉","포기 또는 패키지","자유여행 미실행"], decisionInsight:"자유여행 두려움의 핵심은 '문제 생기면 누구한테?'. AI+24시간 CS가 그 갭을 메움", competitorLandscape:"하나투어/모두투어 등 패키지 여행사 · Trip.com은 '풀서비스 자유여행' 새 카테고리", competitorInsight:"패키지를 검색하던 초보를 자유여행으로 전환시키는 강력한 포지션" }),
 ];
 
 const ALL_OPPS = [...USP_OPPS, ...DEST_OPPS, ...INT_OPPS];
@@ -259,7 +263,9 @@ JSON 객체로만 응답. 마크다운 없이.
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
 export default function BrandformanceEngine() {
-  const [currentView, setCurrentView] = useState("main");
+  const [currentView, setCurrentView] = useState("hub");
+  const [currentCategory, setCurrentCategory] = useState(null);
+  const [mainTab, setMainTab] = useState(0);
   const [selectedOpp, setSelectedOpp] = useState(null);
   const [selectedIdea, setSelectedIdea] = useState(null);
   const [generatedIdeas, setGeneratedIdeas] = useState({});
@@ -293,18 +299,22 @@ export default function BrandformanceEngine() {
   };
 
   // ── Navigation ──
+  const goToCategory = (cat) => { setCurrentCategory(cat); setCurrentView("category"); };
   const goToAnalysis = (opp) => { setSelectedOpp(opp); setSelectedIdea(null); setCurrentView("analysis"); };
   const goToIdeas = () => setCurrentView("ideas");
   const goToStoryboard = (idea) => { setSelectedIdea(idea); setStoryboardTab(0); setCurrentView("storyboard"); };
   const goBack = () => {
     if (currentView === "storyboard") setCurrentView("ideas");
     else if (currentView === "ideas") setCurrentView("analysis");
-    else if (currentView === "analysis") { setCurrentView("main"); setSelectedOpp(null); }
+    else if (currentView === "analysis") { setCurrentView("category"); setSelectedOpp(null); }
+    else if (currentView === "category") { setCurrentView("hub"); setCurrentCategory(null); }
   };
-  const goHome = () => { setCurrentView("main"); setSelectedOpp(null); setSelectedIdea(null); };
+  const goHome = () => { setCurrentView("hub"); setCurrentCategory(null); setSelectedOpp(null); setSelectedIdea(null); };
 
-  const VIEW_STEP = { main: 0, analysis: 1, ideas: 2, storyboard: 3 };
-  const activeStep = VIEW_STEP[currentView] || 0;
+  const VIEW_STEP = { hub: -1, category: 0, analysis: 1, ideas: 2, storyboard: 3 };
+  const activeStep = VIEW_STEP[currentView] ?? 0;
+  const showStepIndicator = currentView !== "hub";
+  const showTabs = currentView === "hub" || currentView === "category";
 
   // ── YouTube API: Search Creators ──
   const searchCreators = useCallback(async (oppId) => {
@@ -513,90 +523,135 @@ export default function BrandformanceEngine() {
   );
 
   // ══════════════════════════════════════════════════════════════
-  // VIEW 1: MAIN (기회 발견)
+  // TAB BAR (3 tabs: 기회 발견 / 콘텐츠 전략 / 크리에이터 매칭)
   // ══════════════════════════════════════════════════════════════
-  const renderMain = () => (
+  const TAB_LABELS = ["기회 발견","콘텐츠 전략","크리에이터 매칭"];
+  const TabBar = () => (
+    <div style={{ background:"#FFFFFF", borderBottom:`1px solid ${C.border}` }}>
+      <div style={{ maxWidth:1200, margin:"0 auto", padding:"0 24px", display:"flex", gap:4 }}>
+        {TAB_LABELS.map((t,i) => (
+          <div key={i} onClick={() => setMainTab(i)} style={{ padding:"14px 22px", cursor:"pointer", fontSize:13, fontWeight:600, color:mainTab===i?C.primary:C.textSoft, borderBottom:`3px solid ${mainTab===i?C.primary:"transparent"}`, transition:"all 0.15s" }}>{t}</div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderTabStub = () => (
+    <div style={{ maxWidth:1200, margin:"0 auto", padding:"60px 24px", textAlign:"center" }}>
+      <div style={{ fontSize:48, marginBottom:16 }}>🚧</div>
+      <div style={{ color:C.text, fontSize:20, fontWeight:700, marginBottom:8 }}>{TAB_LABELS[mainTab]}</div>
+      <div style={{ color:C.textSoft, fontSize:13 }}>이 섹션은 곧 공개됩니다. '기회 발견' 탭에서 분석을 시작해보세요.</div>
+    </div>
+  );
+
+  // ══════════════════════════════════════════════════════════════
+  // VIEW 1A: HUB (3 카테고리 요약)
+  // ══════════════════════════════════════════════════════════════
+  const CATEGORY_META = {
+    usp: {
+      key: "usp", label: "A. Trip.com USP", color: "#0770E3",
+      tagline: "Trip.com의 USP 자산에서 출발한 기회",
+      countLabel: `${USP_OPPS.length}개 기회`,
+      volLabel: "연간 14,000,000+회",
+      icons: ["💰","🏆","🤖","🔗","🛡️"],
+      preview: USP_OPPS.slice(0,3),
+      borderColor: "#0770E3",
+    },
+    destination: {
+      key: "destination", label: "B. 여행 목적지", color: "#FF6B00",
+      tagline: "목적지에서 출발한 검색 기회",
+      countLabel: `${DEST_OPPS.length}개 기회`,
+      volLabel: `연간 ${fmt(18076348)}회`,
+      icons: ["🗼","🍣","🏖️","🌴","🛕"],
+      preview: DEST_OPPS.slice(0,3),
+      borderColor: "#FF6B00",
+    },
+    interest: {
+      key: "interest", label: "C. 소비자 관심사", color: "#10B981",
+      tagline: "관심사에서 출발한 발견 기회",
+      countLabel: `${INT_OPPS.length}개 기회`,
+      volLabel: "관심층 연 22M+",
+      icons: ["🎵","🏃","🍷","💍","👵"],
+      preview: INT_OPPS.slice(0,3),
+      borderColor: "#10B981",
+    },
+  };
+
+  const renderHub = () => (
     <div style={{ maxWidth:1200, margin:"0 auto", padding:"24px 24px 40px" }}>
       {/* Hero */}
-      <div style={{ display:"grid", gridTemplateColumns:"55% 45%", gap:20, marginBottom:24 }}>
-        <div style={{ background:"linear-gradient(135deg, #0770E3 0%, #0EA5E9 100%)", borderRadius:20, padding:36 }}>
-          <div style={{ color:"rgba(255,255,255,0.8)", fontSize:12, letterSpacing:3, fontWeight:600, marginBottom:8 }}>TRIP.COM × PENTACLE</div>
-          <div style={{ color:"#fff", fontSize:28, fontWeight:800, marginBottom:8 }}>AI Brandformance Engine</div>
-          <div style={{ color:"rgba(255,255,255,0.8)", fontSize:13, lineHeight:1.6, marginBottom:24 }}>소비자의 관심사에서 여행과 Trip.com을 발견하게 하는<br/>AI 기반 마케팅 전략 플랫폼</div>
-          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-            {[{e:"🔍",t:"관심사 데이터"},{e:"✈️",t:"여행 발견"},{e:"📈",t:"Trip.com 성장"}].map((it,i) => (
-              <React.Fragment key={i}>
-                {i>0 && <span style={{ color:"rgba(255,255,255,0.6)", fontSize:20, fontWeight:800 }}>{i===1?"×":"="}</span>}
-                <div style={{ flex:1, background:"rgba(255,255,255,0.15)", borderRadius:12, padding:"12px 8px", textAlign:"center" }}>
-                  <div style={{ fontSize:22 }}>{it.e}</div>
-                  <div style={{ color:"#fff", fontSize:11, fontWeight:600, marginTop:4 }}>{it.t}</div>
-                </div>
-              </React.Fragment>
-            ))}
+      <div style={{ background:"linear-gradient(135deg, #0770E3 0%, #0EA5E9 100%)", borderRadius:20, padding:36, marginBottom:24 }}>
+        <div style={{ color:"rgba(255,255,255,0.8)", fontSize:12, letterSpacing:3, fontWeight:600, marginBottom:8 }}>TRIP.COM × PENTACLE</div>
+        <div style={{ color:"#fff", fontSize:28, fontWeight:800, marginBottom:8 }}>AI Brandformance Engine</div>
+        <div style={{ color:"rgba(255,255,255,0.85)", fontSize:13, lineHeight:1.6, marginBottom:20 }}>소비자의 관심사에서 여행과 Trip.com을 발견하게 하는 AI 기반 마케팅 전략 플랫폼<br/>3개 카테고리에서 출발한 기회를 분석하고, AI 숏폼 아이디어를 생성합니다</div>
+        <div style={{ display:"flex", gap:16, alignItems:"center", flexWrap:"wrap" }}>
+          <div style={{ background:"rgba(255,255,255,0.15)", borderRadius:10, padding:"10px 16px" }}>
+            <span style={{ color:"rgba(255,255,255,0.7)", fontSize:11 }}>전체 기회 </span>
+            <span style={{ color:"#fff", fontSize:18, fontWeight:800 }}>{USP_OPPS.length + DEST_OPPS.length + INT_OPPS.length}개</span>
           </div>
-        </div>
-        <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:32, display:"flex", flexDirection:"column", justifyContent:"center" }}>
-          <span style={pill("#EFF6FF",C.primary,"",{marginBottom:12,alignSelf:"flex-start"})}>ListeningMind 검색 데이터 기반</span>
-          <div style={{ color:C.primary, fontSize:34, fontWeight:800, marginBottom:6 }}>연간 {fmt(20110058)}회</div>
-          <div style={{ color:C.text, fontSize:14, fontWeight:600, marginBottom:16, lineHeight:1.5 }}>Trip.com을 검색하지 않고<br/>여행과 관심사를 검색하는 소비자</div>
-          <div style={{ display:"flex", flexDirection:"column", gap:8, marginBottom:16 }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:C.surface, borderRadius:10, padding:"10px 14px", border:`1px solid ${C.border}` }}>
-              <span style={{ color:C.text, fontSize:13 }}>A. Trip.com USP 기회 (12개)</span>
-              <span style={{ color:C.purple, fontSize:16, fontWeight:800 }}>연간 14,000,000+회</span>
-            </div>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:C.surface, borderRadius:10, padding:"10px 14px", border:`1px solid ${C.border}` }}>
-              <span style={{ color:C.text, fontSize:13 }}>B. 여행 목적지 검색 (11개 기회)</span>
-              <span style={{ color:C.primary, fontSize:16, fontWeight:800 }}>연간 {fmt(18076348)}회</span>
-            </div>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", background:C.surface, borderRadius:10, padding:"10px 14px", border:`1px solid ${C.border}` }}>
-              <span style={{ color:C.text, fontSize:13 }}>C. 라이프 관심사 검색 (10개 기회)</span>
-              <span style={{ color:C.secondary, fontSize:16, fontWeight:800 }}>연간 {fmt(2033710)}회</span>
-            </div>
+          <div style={{ background:"rgba(255,255,255,0.15)", borderRadius:10, padding:"10px 16px" }}>
+            <span style={{ color:"rgba(255,255,255,0.7)", fontSize:11 }}>연간 검색량 </span>
+            <span style={{ color:"#fff", fontSize:18, fontWeight:800 }}>{fmt(20110058)}회+</span>
           </div>
-          <div style={{ color:C.secondary, fontSize:12, fontWeight:600, lineHeight:1.5 }}>이 검색에서 Trip.com은 발견되지 않고 있습니다 — 이것이 기회입니다</div>
         </div>
       </div>
 
-      {/* Competition Banner */}
-      <div style={{ background:C.bannerBg, border:`1px solid ${C.border}`, borderRadius:12, padding:"14px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:12, marginBottom:32 }}>
-        <div style={{ color:C.textSoft, fontSize:12 }}><span style={{ color:C.text, fontWeight:600 }}>OTA 경쟁 환경 (연간):</span> 스카이스캐너 3,813만 {">"} 아고다 1,929만 {">"} 네이버항공권 1,893만 {">"} <span style={{ color:C.primary, fontWeight:600 }}>트립닷컴 949만</span> {">"} 마이리얼트립 694만</div>
-        <div style={{ color:C.gold, fontSize:11 }}>스카이스캐너→트립닷컴 크로스플로우</div>
-      </div>
-
-      {/* USP Asset Map */}
-      <div style={{ background:"#F0F9FF", borderRadius:20, padding:"28px 24px", marginBottom:32, border:`1px solid ${C.border}` }}>
-        <div style={{ marginBottom:16 }}>
-          <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>Trip.com이 이 기회를 잡을 수 있는 이유</div>
-          <div style={{ color:C.textSoft, fontSize:13 }}>5가지 USP 자산이 소비자의 페인포인트를 해결합니다{activeUsps.size > 0 ? ` · ${activeUsps.size}개 USP 필터 활성` : ""}</div>
-        </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(5, 1fr)", gap:12 }}>
-          {USP_MAP.map(usp => {
-            const isActive = activeUsps.has(usp.id);
-            return (
-              <div key={usp.id} onClick={() => toggleUsp(usp.id)} style={{ background:isActive?"#EFF6FF":"#FFFFFF", borderRadius:16, border:`2px solid ${isActive?C.primary:C.border}`, padding:20, cursor:"pointer", textAlign:"center", transition:"all 0.2s", transform:isActive?"translateY(-2px)":"none", boxShadow:isActive?"0 4px 12px rgba(7,112,227,0.15)":"none" }}>
-                <div style={{ fontSize:28, marginBottom:8 }}>{usp.icon}</div>
-                <div style={{ color:C.text, fontSize:13, fontWeight:700, marginBottom:6 }}>{usp.name}</div>
-                <div style={{ color:C.textSoft, fontSize:11, lineHeight:1.4, marginBottom:10, minHeight:30 }}>{usp.pain}</div>
-                <div style={{ color:C.primary, fontSize:22, fontWeight:800 }}>{usp.count}</div>
-                <div style={{ color:C.textSoft, fontSize:10 }}>기회 연결</div>
+      {/* 3 Category Cards */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:20 }}>
+        {["usp","destination","interest"].map(k => {
+          const cat = CATEGORY_META[k];
+          return (
+            <div key={k} onClick={() => goToCategory(k)} onMouseEnter={() => setHoveredCard(k)} onMouseLeave={() => setHoveredCard(null)} style={{ background:C.card, borderRadius:18, border:`2px solid ${cat.borderColor}`, padding:24, cursor:"pointer", minHeight:320, display:"flex", flexDirection:"column", transition:"all 0.2s", transform:hoveredCard===k?"translateY(-3px)":"none", boxShadow:hoveredCard===k?`0 8px 20px ${cat.color}25`:"none" }}>
+              <div style={{ display:"flex", gap:6, marginBottom:14 }}>
+                {cat.icons.map((e,i) => <span key={i} style={{ fontSize:22 }}>{e}</span>)}
               </div>
-            );
-          })}
-        </div>
+              <div style={{ color:cat.color, fontSize:11, fontWeight:700, letterSpacing:1, marginBottom:6 }}>{cat.label}</div>
+              <div style={{ color:C.text, fontSize:17, fontWeight:800, marginBottom:8, lineHeight:1.4 }}>{cat.tagline}</div>
+              <div style={{ display:"flex", gap:8, marginBottom:14, flexWrap:"wrap" }}>
+                <span style={pill(`${cat.color}15`,cat.color,"")}>{cat.countLabel}</span>
+                <span style={pill(`${cat.color}15`,cat.color,"")}>{cat.volLabel}</span>
+              </div>
+              <div style={{ flex:1, display:"flex", flexDirection:"column", gap:6, marginBottom:14 }}>
+                {cat.preview.map(opp => (
+                  <div key={opp.id} style={{ display:"flex", alignItems:"center", gap:8, fontSize:11, color:C.textSoft, padding:"6px 10px", background:C.surface, borderRadius:8, borderLeft:`2px solid ${cat.color}` }}>
+                    <span style={{ fontSize:14 }}>{opp.icon}</span>
+                    <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{opp.title}</span>
+                  </div>
+                ))}
+              </div>
+              <button style={{ background:cat.color, color:"#fff", border:"none", borderRadius:10, padding:"12px 0", fontSize:13, fontWeight:700, cursor:"pointer", marginTop:"auto" }}>기회 보기 →</button>
+            </div>
+          );
+        })}
       </div>
+    </div>
+  );
 
-      {/* Section A: Trip.com USP Opportunities */}
-      <div style={{ marginBottom:40 }}>
-        <div style={{ marginBottom:16 }}>
-          <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>A. Trip.com USP에서 출발한 기회</div>
-          <div style={{ color:C.textSoft, fontSize:13, marginBottom:8 }}>여행을 준비하는 소비자의 페인포인트에서 Trip.com을 발견시킵니다</div>
-          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-            <span style={pill(`${C.purple}12`,C.purple,"")}>여행 준비 여정 검색 연간 14,000,000+회 | 12개 기회</span>
+  // ══════════════════════════════════════════════════════════════
+  // VIEW 1B: CATEGORY (선택된 카테고리 기회 목록)
+  // ══════════════════════════════════════════════════════════════
+  const renderCategory = () => {
+    if (!currentCategory) return null;
+    const cat = CATEGORY_META[currentCategory];
+    return (
+      <div style={{ maxWidth:1200, margin:"0 auto", padding:"24px 24px 40px" }}>
+        <BackNav label="← 카테고리 선택으로" />
+
+        {/* Category Header */}
+        <div style={{ background:`linear-gradient(135deg, ${cat.color}10 0%, ${cat.color}03 100%)`, borderRadius:18, border:`1px solid ${cat.color}30`, padding:28, marginBottom:24 }}>
+          <div style={{ display:"flex", gap:8, marginBottom:10 }}>
+            {cat.icons.map((e,i) => <span key={i} style={{ fontSize:24 }}>{e}</span>)}
           </div>
-          <div style={{ color:C.textSoft, fontSize:11, marginTop:6, fontStyle:"italic" }}>트립닷컴 자체 데이터: 이용자 평균 20~24회 앱 접속, 결정까지 9~11일, 예약 클릭까지 2시간 10분 소요</div>
+          <div style={{ color:cat.color, fontSize:12, fontWeight:700, letterSpacing:1, marginBottom:4 }}>{cat.label}</div>
+          <div style={{ color:C.text, fontSize:24, fontWeight:800, marginBottom:8 }}>{cat.tagline}</div>
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            <span style={pill(`${cat.color}15`,cat.color,"")}>{cat.countLabel}</span>
+            <span style={pill(`${cat.color}15`,cat.color,"")}>{cat.volLabel}</span>
+          </div>
         </div>
 
-        {(() => {
+        {/* USP Category */}
+        {currentCategory === "usp" && (() => {
           const groupOrder = ["price","tripbest","tripgenie","onestop","safety"];
           const groupNames = { price:"💰 가격 경쟁력", tripbest:"🏆 Trip.Best (선택 고통 해결)", tripgenie:"🤖 트립지니 AI (일정 설계)", onestop:"🔗 원스톱 (예약의 번거로움)", safety:"🛡️ 해외 안심" };
           return (
@@ -640,125 +695,72 @@ export default function BrandformanceEngine() {
             </div>
           );
         })()}
-      </div>
 
-      {/* Section B: Destination */}
-      <div style={{ marginBottom:40 }}>
-        <div style={{ marginBottom:16 }}>
-          <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>B. 여행 목적지에서 출발한 기회</div>
-          <div style={{ color:C.textSoft, fontSize:13, marginBottom:8 }}>목적지에 따라 궁금해하는 것은 완전히 다릅니다</div>
-          <span style={pill(`${C.primary}12`,C.primary,"")}>연간 {fmt(18076348)}회 검색 | 11개 기회 클러스터</span>
-        </div>
-        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-          {DEST_OPPS.map(opp => {
-            const ss = STAGE_STYLES[opp.stage] || {};
-            const highlighted = isOppHighlighted(opp.id);
-            const oppUsps = USP_TAGS[opp.id] || [];
-            return (
-              <div key={opp.id} onClick={() => goToAnalysis(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?C.primary:C.border}`, borderLeft:`3px solid ${C.primary}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none", opacity:highlighted?1:0.3 }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
-                <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:48 }}>
-                  <span style={{ fontSize:28 }}>{opp.icon}</span>
-                  <span style={{ fontSize:9, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"2px 6px", borderRadius:4 }}>{opp.level}</span>
-                </div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ color:C.text, fontSize:15, fontWeight:700, marginBottom:3 }}>{opp.title}</div>
-                  <div style={{ fontSize:12, marginBottom:2 }}><span style={{ color:C.primary, fontWeight:600 }}>{opp.hookType}</span> <span style={{ color:C.textSoft }}>{opp.hookLabel}</span></div>
-                  <div style={{ color:C.textSoft, fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{opp.strategyCopy}</div>
-                  <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginTop:4 }}>
-                    <span style={pill(ss.bg||"#EFF6FF", ss.color||C.primary, "")}>{opp.stage}</span>
-                    {oppUsps.map(u => <span key={u} style={pill("#F0F9FF",C.primary,"")}>{USP_ICONS[u]}{USP_NAMES[u]}</span>)}
+        {/* Destination Category */}
+        {currentCategory === "destination" && (
+          <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+            {DEST_OPPS.map(opp => {
+              const ss = STAGE_STYLES[opp.stage] || {};
+              const oppUsps = USP_TAGS[opp.id] || [];
+              return (
+                <div key={opp.id} onClick={() => goToAnalysis(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?cat.color:C.border}`, borderLeft:`3px solid ${cat.color}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none" }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:48 }}>
+                    <span style={{ fontSize:28 }}>{opp.icon}</span>
+                    <span style={{ fontSize:9, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"2px 6px", borderRadius:4 }}>{opp.level}</span>
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ color:C.text, fontSize:15, fontWeight:700, marginBottom:3 }}>{opp.title}</div>
+                    <div style={{ fontSize:12, marginBottom:2 }}><span style={{ color:cat.color, fontWeight:600 }}>{opp.hookType}</span> <span style={{ color:C.textSoft }}>{opp.hookLabel}</span></div>
+                    <div style={{ color:C.textSoft, fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{opp.strategyCopy}</div>
+                    <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginTop:4 }}>
+                      <span style={pill(ss.bg||"#EFF6FF", ss.color||C.primary, "")}>{opp.stage}</span>
+                      {oppUsps.map(u => <span key={u} style={pill("#F0F9FF",C.primary,"")}>{USP_ICONS[u]}{USP_NAMES[u]}</span>)}
+                    </div>
+                  </div>
+                  <div style={{ textAlign:"right", minWidth:100 }}>
+                    <div style={{ color:cat.color, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.annualVol)}회</div>
+                    <div style={{ color:C.textSoft, fontSize:10 }}>월 평균 {fmt(opp.monthlyVol)}회</div>
+                    <div style={{ color:cat.color, fontSize:18, marginTop:6 }}>→</div>
                   </div>
                 </div>
-                <div style={{ textAlign:"right", minWidth:100 }}>
-                  <div style={{ color:C.primary, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.annualVol)}회</div>
-                  <div style={{ color:C.textSoft, fontSize:10 }}>월 평균 {fmt(opp.monthlyVol)}회</div>
-                  <div style={{ color:C.primary, fontSize:18, marginTop:6 }}>→</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Section C: Interest */}
-      <div>
-        <div style={{ marginBottom:16 }}>
-          <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>C. 소비자 관심사에서 출발한 기회</div>
-          <div style={{ color:C.textSoft, fontSize:13, marginBottom:8 }}>관심사 속에서 Trip.com이 발견됩니다</div>
-          <div style={{ display:"flex", gap:8 }}>
-            <span style={pill(`${C.secondary}12`,C.secondary,"")}>관심층 연간 14,000,000+회 | 해외 연결 연간 {fmt(2146916)}회 | 10개 기회 클러스터</span>
-            <span style={pill("#FFFBEB","#D97706","")}>3E 전략 정합</span>
+              );
+            })}
           </div>
-        </div>
+        )}
 
-        {/* 3E Strategy Banner */}
-        <div style={{ background:"#FFFBEB", borderRadius:14, border:"1px solid #FDE68A", padding:16, marginBottom:16 }}>
-          <div style={{ color:"#92400E", fontSize:13, fontWeight:700, marginBottom:10 }}>3E 전략 — Elderly · Event · Life Transition</div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10 }}>
-            <div style={{ background:"#FFFFFF", borderRadius:10, padding:12, border:"1px solid #FDE68A" }}>
-              <div style={{ fontSize:13, fontWeight:700, color:"#92400E", marginBottom:4 }}>👴 Elderly — 시니어 시장의 재발견</div>
-              <div style={{ fontSize:11, color:C.text, lineHeight:1.5, marginBottom:6 }}>어버이날(400만)·환갑(71만)·칠순(24만) = 연 600만 감정 모먼트<br/>+ 골프(130만)·크루즈(112만) = 시니어 라이프스타일 여행</div>
-              <div style={{ fontSize:10, color:C.textSoft, lineHeight:1.4 }}>연결: 효도·어버이날·환갑, 골프(스크린골프→해외), 한달살기, 크루즈<br/>Trip.com: 24시간 CS + 시니어 맞춤 + "여행이 최고의 선물"</div>
-            </div>
-            <div style={{ background:"#FFFFFF", borderRadius:10, padding:12, border:"1px solid #FDE68A" }}>
-              <div style={{ fontSize:13, fontWeight:700, color:"#92400E", marginBottom:4 }}>🎪 Event — 이벤트 연결 여행</div>
-              <div style={{ fontSize:11, color:C.text, lineHeight:1.5, marginBottom:6 }}>콘서트·마라톤·미식 = 전환 경로가 가장 짧은 여행<br/>+ 프로포즈(77만)·결혼기념일(21만) = 인생 이벤트 반복 기회</div>
-              <div style={{ fontSize:10, color:C.textSoft, lineHeight:1.4 }}>연결: 이벤트+여행, 프로포즈→신혼여행→기념일 반복<br/>Trip.com: 이벤트 일정 연동 + 원스톱 예약</div>
-            </div>
-            <div style={{ background:"#F0FDF4", borderRadius:10, padding:12, border:"1px solid #BBF7D0" }}>
-              <div style={{ fontSize:13, fontWeight:700, color:"#166534", marginBottom:4 }}>🔄 Life Transition — 삶의 전환점 여행</div>
-              <div style={{ fontSize:11, color:C.text, lineHeight:1.5, marginBottom:6 }}>번아웃(65.7만)·퇴사(48.6만)·워케이션(14만,+70%)·갭이어(4.7만,+157%)</div>
-              <div style={{ fontSize:10, color:C.textSoft, lineHeight:1.4 }}>연결: 한달살기, 워케이션, 디지털노마드, 안식년, 정년퇴직<br/>Trip.com: 장기숙소 + 트립지니 AI 플래너 + 가격 경쟁력</div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-          {INT_OPPS.map(opp => {
-            const ss = STAGE_STYLES[opp.stage] || {};
-            const highlighted = isOppHighlighted(opp.id);
-            const oppUsps = USP_TAGS[opp.id] || [];
-            return (
-              <div key={opp.id} onClick={() => goToAnalysis(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?C.secondary:C.border}`, borderLeft:`3px solid ${C.secondary}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none", opacity:highlighted?1:0.3 }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
-                <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:48 }}>
-                  <span style={{ fontSize:28 }}>{opp.icon}</span>
-                  <span style={{ fontSize:9, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"2px 6px", borderRadius:4 }}>{opp.level}</span>
-                  {opp.e3tag && <span style={pill("#FFFBEB","#D97706","")}>{opp.e3tag}</span>}
-                </div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ color:C.text, fontSize:15, fontWeight:700, marginBottom:3 }}>{opp.title}</div>
-                  <div style={{ fontSize:12, marginBottom:2 }}><span style={{ color:C.secondary, fontWeight:600 }}>{opp.hookType}</span> <span style={{ color:C.textSoft }}>{opp.hookLabel}</span></div>
-                  <div style={{ color:C.textSoft, fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{opp.strategyCopy}</div>
-                  <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginTop:4 }}>
-                    {oppUsps.map(u => <span key={u} style={pill("#F0F9FF",C.primary,"")}>{USP_ICONS[u]}{USP_NAMES[u]}</span>)}
+        {/* Interest Category */}
+        {currentCategory === "interest" && (
+          <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+            {INT_OPPS.map(opp => {
+              const oppUsps = USP_TAGS[opp.id] || [];
+              return (
+                <div key={opp.id} onClick={() => goToAnalysis(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?cat.color:C.border}`, borderLeft:`3px solid ${cat.color}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none" }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:48 }}>
+                    <span style={{ fontSize:28 }}>{opp.icon}</span>
+                    <span style={{ fontSize:9, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"2px 6px", borderRadius:4 }}>{opp.level}</span>
+                    {opp.e3tag && <span style={pill("#FFFBEB","#D97706","")}>{opp.e3tag}</span>}
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ color:C.text, fontSize:15, fontWeight:700, marginBottom:3 }}>{opp.title}</div>
+                    <div style={{ fontSize:12, marginBottom:2 }}><span style={{ color:cat.color, fontWeight:600 }}>{opp.hookType}</span> <span style={{ color:C.textSoft }}>{opp.hookLabel}</span></div>
+                    <div style={{ color:C.textSoft, fontSize:12, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{opp.strategyCopy}</div>
+                    <div style={{ display:"flex", gap:4, flexWrap:"wrap", marginTop:4 }}>
+                      {oppUsps.map(u => <span key={u} style={pill("#F0F9FF",C.primary,"")}>{USP_ICONS[u]}{USP_NAMES[u]}</span>)}
+                    </div>
+                  </div>
+                  <div style={{ textAlign:"right", minWidth:100 }}>
+                    <div style={{ color:cat.color, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.motherAnnualVol || opp.annualVol)}회</div>
+                    <div style={{ color:cat.color, fontSize:18, marginTop:6 }}>→</div>
                   </div>
                 </div>
-                <div style={{ textAlign:"right", minWidth:100 }}>
-                  <div style={{ color:C.secondary, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.motherAnnualVol || opp.annualVol)}회</div>
-                  <div style={{ color:C.secondary, fontSize:18, marginTop:6 }}>→</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+    );
+  };
 
-      {/* Extra Opportunities */}
-      <div style={{ marginTop:40 }}>
-        <div style={{ marginBottom:16 }}>
-          <div style={{ color:C.text, fontSize:18, fontWeight:700, marginBottom:4 }}>추가 발견된 기회</div>
-          <div style={{ color:C.textSoft, fontSize:13 }}>검색량이 확인된 추가 목적지와 관심사입니다</div>
-        </div>
-        <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
-          {EXTRA_OPPS.map((ex,i) => (
-            <span key={i} style={{ background:"#F0F9FF", border:`1px solid ${C.border}`, borderRadius:20, padding:"6px 14px", fontSize:12, color:C.text, cursor:"pointer", transition:"all 0.15s", display:"inline-flex", alignItems:"center", gap:6 }} onMouseEnter={e => e.currentTarget.style.borderColor=C.primary} onMouseLeave={e => e.currentTarget.style.borderColor=C.border}>
-              {ex.keyword} <span style={{ color:C.textSoft, fontSize:10 }}>연 {fmtMan(ex.annual)}</span>
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 
   // ══════════════════════════════════════════════════════════════
   // VIEW 2: ANALYSIS (기회 분석) — Full Page
@@ -786,6 +788,16 @@ export default function BrandformanceEngine() {
       safety: "여행자보험은 보험사 직접 검색이 다수 — 24시간 한국어 CS+SOS로 '실질적 안심' 차별화",
     }[opp.uspGroup] || "";
 
+    // 6-axis cells derived from USP opp fields
+    const axes = [
+      { key:"who", icon:"👤", color:"#FF6B6B", label:"WHO", sub:"누가 검색하는가?", tags:[opp.demographics], evidence:`${opp.uspGroupLabel} 검색자 — ${opp.demographics}` },
+      { key:"when", icon:"📅", color:"#4ECDC4", label:"WHEN", sub:"언제 검색하는가?", tags:["월별 트렌드 데이터"], evidence:"아래 월별 검색 트렌드 차트 참고" },
+      { key:"journey", icon:"🔍", color:"#45B7D1", label:"JOURNEY", sub:"어떤 경로로 검색하는가?", tags:opp.decisionJourney||[], evidence:opp.decisionInsight||"의사결정 여정 데이터 기반" },
+      { key:"pain", icon:"😣", color:"#FF8B94", label:"PAIN", sub:"소비자의 고통은?", tags:opp.painPoints||[opp.painPoint], evidence:`"${opp.painPoint}"` },
+      { key:"usp", icon:"🔗", color:"#FFD93D", label:"USP FIT", sub:"Trip.com이 해결할 수 있는 것", tags:[opp.uspGroupLabel], evidence:opp.tripcomAsset },
+      { key:"hook", icon:"🎣", color:"#DDA0DD", label:"HOOK", sub:"콘텐츠 진입점", tags:[opp.hookType,opp.hookLabel], evidence:opp.contentHookExample },
+    ];
+
     return (
       <div style={{ maxWidth:1200, margin:"0 auto", padding:"24px 24px 40px" }}>
         <BackNav label="← 이전 단계" />
@@ -812,54 +824,90 @@ export default function BrandformanceEngine() {
           </button>
         </div>
 
-        {/* 2-column: Pain + Asset / Data + Competition */}
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:20 }}>
-          {/* Left col */}
-          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-            {/* Pain Point */}
-            <div style={{ background:"#FEF2F2", borderRadius:14, border:"1px solid #FECACA", padding:24 }}>
-              <div style={{ color:"#DC2626", fontSize:13, fontWeight:700, marginBottom:10 }}>😣 소비자 페인포인트</div>
-              <div style={{ color:C.text, fontSize:18, fontWeight:600, lineHeight:1.5, fontStyle:"italic", borderLeft:`3px solid #DC2626`, paddingLeft:14 }}>"{opp.painPoint}"</div>
-            </div>
-            {/* Trip.com Asset */}
-            <div style={{ background:`${grpColor}08`, borderRadius:14, border:`1px solid ${grpColor}30`, padding:24 }}>
-              <div style={{ color:grpColor, fontSize:13, fontWeight:700, marginBottom:10 }}>🎯 Trip.com 자산 (해결책)</div>
-              <div style={{ color:C.text, fontSize:14, lineHeight:1.6, fontWeight:500 }}>{opp.tripcomAsset}</div>
-              <div style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${grpColor}20` }}>
-                <div style={{ color:C.textSoft, fontSize:11, fontWeight:600, letterSpacing:1, marginBottom:4 }}>핵심 인사이트</div>
-                <div style={{ color:C.text, fontSize:12, lineHeight:1.5 }}>{opp.keyInsight}</div>
-              </div>
-            </div>
+        {/* Monthly Trend */}
+        <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20, marginBottom:20 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+            <span style={{ color:C.text, fontSize:14, fontWeight:600 }}>월별 검색 트렌드</span>
+            <span style={{ color:grpColor, fontSize:18, fontWeight:800 }}>월 평균 {fmt(opp.monthlyVol)}회</span>
           </div>
+          <MiniHeatmap data={opp.peakMonths} />
+        </div>
 
-          {/* Right col */}
-          <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-            {/* Search Data */}
-            <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:24 }}>
-              <div style={{ color:C.text, fontSize:13, fontWeight:700, marginBottom:12 }}>📊 검색 데이터 근거</div>
-              <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
-                {(opp.topKeywords||[]).map((kw,i) => (
-                  <div key={i} style={{ background:i<3?`${grpColor}10`:"#F8FAFC", color:i<3?grpColor:C.text, padding:"8px 12px", borderRadius:10, fontSize:12, fontWeight:i<3?600:400, border:`1px solid ${i<3?`${grpColor}30`:C.border}` }}>
-                    {kw.keyword} <span style={{ color:C.textSoft, fontSize:10, marginLeft:4 }}>연 {fmt(kw.vol)}</span>
-                  </div>
-                ))}
+        {/* 6-Axis Grid (2col x 3row) */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:20 }}>
+          {axes.map(ax => (
+            <div key={ax.key} style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12 }}>
+                <span style={{ fontSize:16 }}>{ax.icon}</span>
+                <div>
+                  <div style={{ color:C.text, fontSize:14, fontWeight:700 }}>{ax.label}</div>
+                  <div style={{ color:C.textSoft, fontSize:11 }}>{ax.sub}</div>
+                </div>
               </div>
-              <div style={{ marginTop:14, paddingTop:14, borderTop:`1px solid ${C.border}`, color:C.text, fontSize:13, fontWeight:600 }}>
-                총 검색량: <span style={{ color:grpColor, fontSize:16, fontWeight:800 }}>연 {fmt(opp.annualVol)}회</span>
+              <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:12 }}>
+                {ax.tags.filter(Boolean).map((tag,i) => <span key={i} style={{ fontSize:11, fontWeight:500, color:C.text, background:`${ax.color}15`, border:`1px solid ${ax.color}30`, padding:"4px 10px", borderRadius:20 }}>{tag}</span>)}
+              </div>
+              <div style={{ background:"#F8FAFC", borderRadius:8, padding:"8px 12px", border:`1px solid ${C.border}` }}>
+                <div style={{ color:C.textSoft, fontSize:9, fontWeight:600, letterSpacing:1, marginBottom:4 }}>DATA EVIDENCE</div>
+                <div style={{ color:C.text, fontSize:11, lineHeight:1.5 }}>{ax.evidence}</div>
               </div>
             </div>
-            {/* Competition */}
-            <div style={{ background:C.bannerBg, borderRadius:14, border:`1px solid ${C.border}`, padding:24 }}>
-              <div style={{ color:C.text, fontSize:13, fontWeight:700, marginBottom:10 }}>🏆 경쟁 환경</div>
-              <div style={{ color:C.text, fontSize:13, lineHeight:1.6 }}>{competitionMsg}</div>
+          ))}
+        </div>
+
+        {/* Decision Journey (PathFinder) */}
+        {opp.decisionJourney && opp.decisionJourney.length > 0 && (
+          <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20, marginBottom:16 }}>
+            <div style={{ color:C.text, fontSize:14, fontWeight:700, marginBottom:10 }}>🔍 의사결정 여정 (PathFinder)</div>
+            <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:10 }}>
+              {opp.decisionJourney.map((node,i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <span style={{ color:grpColor, fontWeight:700 }}>→</span>}
+                  <span style={{ background:`${grpColor}10`, color:grpColor, padding:"6px 14px", borderRadius:20, fontSize:12, fontWeight:600 }}>{node}</span>
+                </React.Fragment>
+              ))}
             </div>
+            {opp.decisionInsight && <div style={{ color:C.textSoft, fontSize:12 }}>{opp.decisionInsight}</div>}
+          </div>
+        )}
+
+        {/* Competition Landscape */}
+        <div style={{ background:C.bannerBg, borderRadius:14, border:`1px solid ${C.border}`, padding:20, marginBottom:16 }}>
+          <div style={{ color:C.text, fontSize:14, fontWeight:700, marginBottom:10 }}>🏆 경쟁 환경</div>
+          <div style={{ color:C.text, fontSize:13, lineHeight:1.6, marginBottom:8 }}>{opp.competitorLandscape || competitionMsg}</div>
+          {opp.competitorInsight && (
+            <div style={{ background:"#FFFFFF", borderRadius:10, padding:"10px 14px", border:`1px solid ${C.border}`, marginTop:8 }}>
+              <div style={{ color:C.textSoft, fontSize:10, fontWeight:600, letterSpacing:1, marginBottom:4 }}>INSIGHT</div>
+              <div style={{ color:C.text, fontSize:12, lineHeight:1.5 }}>{opp.competitorInsight}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Top Keywords */}
+        <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:20, marginBottom:16 }}>
+          <div style={{ color:C.text, fontSize:14, fontWeight:700, marginBottom:10 }}>🔑 관련 검색어 TOP</div>
+          <div style={{ display:"flex", flexWrap:"wrap", gap:8 }}>
+            {(opp.topKeywords||[]).map((kw,i) => (
+              <span key={i} style={{ background:i<3?`${grpColor}10`:"#F8FAFC", color:i<3?grpColor:C.text, padding:"6px 12px", borderRadius:20, fontSize:12, fontWeight:i<3?600:400, border:`1px solid ${i<3?`${grpColor}30`:C.border}` }}>
+                {kw.keyword} <span style={{ color:C.textSoft, fontSize:10 }}>연 {fmt(kw.vol)}</span>
+              </span>
+            ))}
+          </div>
+          <div style={{ marginTop:14, paddingTop:14, borderTop:`1px solid ${C.border}`, color:C.text, fontSize:13, fontWeight:600 }}>
+            총 검색량: <span style={{ color:grpColor, fontSize:16, fontWeight:800 }}>연 {fmt(opp.annualVol)}회</span>
           </div>
         </div>
 
-        {/* Content Hook */}
-        <div style={{ background:`linear-gradient(135deg, ${grpColor}08 0%, ${grpColor}03 100%)`, borderRadius:14, border:`1px solid ${grpColor}30`, padding:24, marginBottom:20 }}>
-          <div style={{ color:grpColor, fontSize:13, fontWeight:700, marginBottom:8 }}>✨ 콘텐츠 훅 예시</div>
-          <div style={{ color:C.text, fontSize:20, fontWeight:700, lineHeight:1.5 }}>"{opp.contentHookExample}"</div>
+        {/* Content Hook + Data Proof */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:24 }}>
+          <div style={{ background:`linear-gradient(135deg, ${grpColor}08 0%, ${grpColor}03 100%)`, borderRadius:14, border:`1px solid ${grpColor}30`, padding:20 }}>
+            <div style={{ color:grpColor, fontSize:14, fontWeight:700, marginBottom:8 }}>✨ 콘텐츠 훅 예시</div>
+            <div style={{ color:C.text, fontSize:18, fontWeight:700, lineHeight:1.5 }}>"{opp.contentHookExample}"</div>
+          </div>
+          <div style={{ background:"#F8FAFC", borderRadius:14, border:`1px solid ${C.border}`, padding:20 }}>
+            <div style={{ color:C.text, fontSize:14, fontWeight:700, marginBottom:8 }}>DATA EVIDENCE</div>
+            <div style={{ color:C.text, fontSize:13, lineHeight:1.6 }}>{opp.dataProof}</div>
+          </div>
         </div>
 
         {/* Execute Button */}
@@ -1489,8 +1537,10 @@ export default function BrandformanceEngine() {
     <div style={{ minHeight:"100vh", background:C.bg, color:C.text }}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes pulse{0%,100%{opacity:0.6}50%{opacity:0.3}}`}</style>
       <Header />
-      <StepIndicator />
-      {currentView === "main" && renderMain()}
+      {showStepIndicator && <StepIndicator />}
+      {showTabs && <TabBar />}
+      {currentView === "hub" && (mainTab === 0 ? renderHub() : renderTabStub())}
+      {currentView === "category" && (mainTab === 0 ? renderCategory() : renderTabStub())}
       {currentView === "analysis" && renderAnalysis()}
       {currentView === "ideas" && renderIdeas()}
       {currentView === "storyboard" && renderStoryboard()}
