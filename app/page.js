@@ -393,25 +393,56 @@ export default function BrandformanceEngine() {
     setGeneratedIdeas(p => { const n = {...p}; if(n[opp.id]?.[0]?.error) delete n[opp.id]; return n; });
     const ctx = CONTEXT_DATA[opp.id] || {};
     const contextStr = Object.entries(ctx).map(([k,v]) => `${k}: ${v.tags?.join(", ")} | ${v.evidence}`).join("\n");
+    const ytQ = YT_QUERIES[opp.id] || opp.youtubeSearchQueries || [];
+    console.log("[generateIdeas] start:", opp.id, opp.title);
     try {
       const res = await fetchWithTimeout("/api/generate", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system: SYSTEM_PROMPT, messages: [{ role: "user", content: `숏폼 아이디어 5개를 생성하세요:\n제목:${opp.title}\n인사이트:${opp.keyInsight}\n인구통계:${opp.demographics}\n검색량:월${opp.monthlyVol?.toLocaleString()}\n연간모수:${opp.motherAnnualVol||opp.annualVol||""}\n전략:${opp.strategyCopy}\n후킹:${opp.hookType} ${opp.hookLabel}\n콘텐츠훅:${opp.contentHook}\nUSP:${opp.uspConnection}\n페인:${(opp.painPoints||[]).join(",")}\n데이터:${opp.dataProof}\ntopKeywords:${JSON.stringify(opp.topKeywords||[])}\nYT검색어:${(YT_QUERIES[opp.id]||[]).join(",")}\n6축맥락:\n${contextStr}` }] })
+        body: JSON.stringify({ system: SYSTEM_PROMPT, messages: [{ role: "user", content: `숏폼 아이디어 5개를 생성하세요:\n제목:${opp.title}\n인사이트:${opp.keyInsight}\n인구통계:${opp.demographics}\n검색량:월${opp.monthlyVol?.toLocaleString()}\n연간모수:${opp.motherAnnualVol||opp.annualVol||""}\n전략:${opp.strategyCopy}\n후킹:${opp.hookType} ${opp.hookLabel}\n콘텐츠훅:${opp.contentHook}\nUSP:${opp.uspConnection}\n페인:${(opp.painPoints||[]).join(",")}\n데이터:${opp.dataProof}\ntopKeywords:${JSON.stringify(opp.topKeywords||[])}\nYT검색어:${ytQ.join(",")}\n6축맥락:\n${contextStr}` }] })
       }, 120000);
+      console.log("[generateIdeas] response status:", res.status);
       const data = await res.json();
-      if (data.error) throw new Error(data.error?.message || (typeof data.error === "string" ? data.error : JSON.stringify(data.error)));
+      if (data.error) {
+        console.error("[generateIdeas] API error:", data.error);
+        throw new Error(data.error?.message || (typeof data.error === "string" ? data.error : JSON.stringify(data.error)));
+      }
       const text = data._extractedText || (data.content||[]).filter(b => b.type === "text").map(b => b.text).join("") || "";
+      console.log("[generateIdeas] text length:", text.length, "stop_reason:", data.stop_reason);
       const cleanText = text
         .replace(/```json|```/g, "")
         .replace(/<cite[^>]*>([\s\S]*?)<\/cite>/g, "$1")
         .replace(/<\/?cite[^>]*>/g, "")
         .trim();
-      const m = cleanText.match(/\[[\s\S]*\]/);
-      if (m) {
-        setGeneratedIdeas(p => ({...p,[opp.id]:JSON.parse(m[0])}));
+      // Try array match first, then object match
+      let parsed = null;
+      const arrM = cleanText.match(/\[[\s\S]*\]/);
+      if (arrM) {
+        try { parsed = JSON.parse(arrM[0]); } catch (pe) {
+          console.error("[generateIdeas] JSON array parse error:", pe.message, "at:", arrM[0].substring(0,200));
+        }
+      }
+      // If array parse failed, try to find individual objects and wrap
+      if (!parsed) {
+        const objMatches = cleanText.match(/\{[\s\S]*?\n\}/g);
+        if (objMatches && objMatches.length > 0) {
+          try { parsed = objMatches.map(s => JSON.parse(s)); } catch (pe2) {
+            console.error("[generateIdeas] JSON object parse fallback error:", pe2.message);
+          }
+        }
+      }
+      if (parsed && parsed.length > 0) {
+        console.log("[generateIdeas] success:", parsed.length, "ideas");
+        setGeneratedIdeas(p => ({...p,[opp.id]:parsed}));
         setCurrentView("ideas");
-      } else throw new Error("JSON 파싱 실패 — 응답: " + cleanText.substring(0, 100));
+      } else if (data.stop_reason === "max_tokens") {
+        console.error("[generateIdeas] truncated (max_tokens reached)");
+        throw new Error("응답이 너무 길어 잘렸습니다 (max_tokens). 다시 시도해주세요.");
+      } else {
+        console.error("[generateIdeas] no JSON found. stop_reason:", data.stop_reason, "cleanText:", cleanText.substring(0,300));
+        throw new Error("JSON 파싱 실패 — stop_reason:" + (data.stop_reason||"?") + " 응답길이:" + text.length + "자 — " + cleanText.substring(0, 80));
+      }
     } catch (e) {
+      console.error("[generateIdeas] catch:", e);
       const msg = e.name === "AbortError" ? "요청 시간 초과 (120초). 웹 검색이 포함되어 시간이 더 필요할 수 있습니다. 잠시 후 다시 시도해주세요." : e.message;
       setGeneratedIdeas(p => ({...p,[opp.id]:[{error:msg}]})); setCurrentView("ideas");
     }

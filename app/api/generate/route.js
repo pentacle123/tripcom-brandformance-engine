@@ -30,7 +30,7 @@ async function callClaude(apiKey, system, messages, retries = 3) {
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 8000,
+          max_tokens: 16000,
           system,
           messages,
           tools: [
@@ -69,6 +69,12 @@ async function callClaude(apiKey, system, messages, retries = 3) {
         data._extractedText = textBlocks
           .replace(/<cite[^>]*>([\s\S]*?)<\/cite>/g, "$1")
           .replace(/<\/?cite[^>]*>/g, "");
+        console.log(`[callClaude] stop_reason=${data.stop_reason} text_len=${data._extractedText.length} blocks=${data.content.length}`);
+      }
+
+      // If stop_reason is "end_turn" but no text was extracted, the model may have only done tool calls
+      if (data.stop_reason === "tool_use") {
+        console.log("[callClaude] response ended with tool_use — model needs multi-turn for web_search");
       }
 
       return { data, status: response.status };
