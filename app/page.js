@@ -128,6 +128,18 @@ const USP_OPPS = [
 
 const ALL_OPPS = [...USP_OPPS, ...DEST_OPPS, ...INT_OPPS];
 
+// ── DEMO MODE: only these opportunities are fully unlocked ──
+const DEMO_OPPS = new Set([
+  "usp-1", "usp-7",
+  "opp-d1", "opp-d2", "opp-d4",
+  "opp-i1", "opp-i4",
+]);
+const DEMO_PREVIEW_COUNT = {
+  usp: 2,
+  destination: 3,
+  interest: 2,
+};
+
 // ── USP TAGS per opportunity ──
 const USP_TAGS = {
   "opp-d1": ["tripbest", "price"],
@@ -276,6 +288,13 @@ export default function BrandformanceEngine() {
   const [ytCreators, setYtCreators] = useState({});
   const [ytLoading, setYtLoading] = useState({});
   const [ytErrors, setYtErrors] = useState({});
+  const [lockedToast, setLockedToast] = useState(null);
+
+  // Show short toast for locked card click
+  const showLockedToast = (oppId) => {
+    setLockedToast(oppId);
+    setTimeout(() => setLockedToast(p => p === oppId ? null : p), 1500);
+  };
   const [activeUsps, setActiveUsps] = useState(new Set());
 
   const fmt = (n) => Number(n).toLocaleString('ko-KR');
@@ -630,28 +649,31 @@ export default function BrandformanceEngine() {
     usp: {
       key: "usp", label: "A. Trip.com USP", color: "#0770E3",
       tagline: "Trip.com의 USP 자산에서 출발한 기회",
-      countLabel: `${USP_OPPS.length}개 기회`,
+      countLabel: `${USP_OPPS.length}개 기회 발견`,
+      previewLabel: `${DEMO_PREVIEW_COUNT.usp}개 미리보기`,
       volLabel: "연간 14,000,000+회",
       icons: ["💰","🏆","🤖","🔗","🛡️"],
-      preview: USP_OPPS.slice(0,3),
+      preview: USP_OPPS.filter(o => DEMO_OPPS.has(o.id)).slice(0, DEMO_PREVIEW_COUNT.usp),
       borderColor: "#0770E3",
     },
     destination: {
       key: "destination", label: "B. 여행 목적지", color: "#FF6B00",
       tagline: "목적지에서 출발한 검색 기회",
-      countLabel: `${DEST_OPPS.length}개 기회`,
+      countLabel: `${DEST_OPPS.length}개 기회 발견`,
+      previewLabel: `${DEMO_PREVIEW_COUNT.destination}개 미리보기`,
       volLabel: `연간 ${fmt(18076348)}회`,
       icons: ["🗼","🍣","🏖️","🌴","🛕"],
-      preview: DEST_OPPS.slice(0,3),
+      preview: DEST_OPPS.filter(o => DEMO_OPPS.has(o.id)).slice(0, DEMO_PREVIEW_COUNT.destination),
       borderColor: "#FF6B00",
     },
     interest: {
       key: "interest", label: "C. 소비자 관심사", color: "#10B981",
       tagline: "관심사에서 출발한 발견 기회",
-      countLabel: `${INT_OPPS.length}개 기회`,
+      countLabel: `${INT_OPPS.length}개 기회 발견`,
+      previewLabel: `${DEMO_PREVIEW_COUNT.interest}개 미리보기`,
       volLabel: "관심층 연 22M+",
       icons: ["🎵","🏃","🍷","💍","👵"],
-      preview: INT_OPPS.slice(0,3),
+      preview: INT_OPPS.filter(o => DEMO_OPPS.has(o.id)).slice(0, DEMO_PREVIEW_COUNT.interest),
       borderColor: "#10B981",
     },
   };
@@ -686,8 +708,12 @@ export default function BrandformanceEngine() {
               </div>
               <div style={{ color:cat.color, fontSize:11, fontWeight:700, letterSpacing:1, marginBottom:6 }}>{cat.label}</div>
               <div style={{ color:C.text, fontSize:17, fontWeight:800, marginBottom:8, lineHeight:1.4 }}>{cat.tagline}</div>
+              <div style={{ display:"flex", gap:8, marginBottom:6, flexWrap:"wrap" }}>
+                <span style={{ fontSize:11, fontWeight:600, color:C.textSoft }}>{cat.countLabel}</span>
+                <span style={{ fontSize:11, color:"#CBD5E1" }}>·</span>
+                <span style={{ fontSize:11, fontWeight:700, color:"#0770E3" }}>{cat.previewLabel}</span>
+              </div>
               <div style={{ display:"flex", gap:8, marginBottom:14, flexWrap:"wrap" }}>
-                <span style={pill(`${cat.color}15`,cat.color,"")}>{cat.countLabel}</span>
                 <span style={pill(`${cat.color}15`,cat.color,"")}>{cat.volLabel}</span>
               </div>
               <div style={{ flex:1, display:"flex", flexDirection:"column", gap:6, marginBottom:14 }}>
@@ -746,8 +772,13 @@ export default function BrandformanceEngine() {
                       <span style={{ color:grpColor, fontSize:12, fontWeight:700, padding:"4px 12px", background:`${grpColor}10`, borderRadius:12 }}>{groupNames[grp]}</span>
                       <div style={{ flex:1, height:1, background:`${grpColor}30` }} />
                     </div>
-                    {groupOpps.map(opp => (
-                      <div key={opp.id} onClick={() => goToAnalysis(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?grpColor:C.border}`, borderLeft:`4px solid ${grpColor}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none" }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+                    {groupOpps.map(opp => {
+                      const unlocked = DEMO_OPPS.has(opp.id);
+                      const isHover = hoveredCard === opp.id;
+                      return (
+                      <React.Fragment key={opp.id}>
+                      <div onClick={() => unlocked ? goToAnalysis(opp) : showLockedToast(opp.id)} style={{ position:"relative", background:C.card, borderRadius:16, border:`1px solid ${unlocked && isHover?grpColor:C.border}`, borderLeft:`4px solid ${grpColor}`, padding:"16px 20px", cursor:unlocked?"pointer":"default", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:unlocked&&isHover?"translateY(-2px)":"none", boxShadow:unlocked&&isHover?"0 4px 12px rgba(0,0,0,0.08)":"none", opacity:unlocked?1:(isHover?0.7:0.55) }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+                        {!unlocked && <span style={{ position:"absolute", top:10, right:12, fontSize:12, color:"#94A3B8" }}>🔒</span>}
                         <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:48 }}>
                           <span style={{ fontSize:28 }}>{opp.icon}</span>
                           <span style={pill(`${grpColor}15`,grpColor,"")}>{USP_GROUP_ICONS[grp]} {opp.uspGroupLabel}</span>
@@ -764,10 +795,17 @@ export default function BrandformanceEngine() {
                         <div style={{ textAlign:"right", minWidth:120 }}>
                           <div style={{ color:C.secondary, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.annualVol)}회</div>
                           <div style={{ color:C.textSoft, fontSize:10 }}>월 평균 {fmt(opp.monthlyVol)}회</div>
-                          <div style={{ color:grpColor, fontSize:18, marginTop:6 }}>→</div>
+                          {unlocked && <div style={{ color:grpColor, fontSize:18, marginTop:6 }}>→</div>}
                         </div>
                       </div>
-                    ))}
+                      {lockedToast === opp.id && (
+                        <div style={{ fontSize:12, color:"#64748B", background:"#F0F9FF", padding:"8px 12px", borderRadius:8, animation:"slideDown 0.2s ease-out" }}>
+                          상세 분석과 AI 콘텐츠 생성은 전체 플랫폼에서 이용 가능합니다
+                        </div>
+                      )}
+                      </React.Fragment>
+                      );
+                    })}
                   </React.Fragment>
                 );
               })}
@@ -781,8 +819,12 @@ export default function BrandformanceEngine() {
             {DEST_OPPS.map(opp => {
               const ss = STAGE_STYLES[opp.stage] || {};
               const oppUsps = USP_TAGS[opp.id] || [];
+              const unlocked = DEMO_OPPS.has(opp.id);
+              const isHover = hoveredCard === opp.id;
               return (
-                <div key={opp.id} onClick={() => goToAnalysis(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?cat.color:C.border}`, borderLeft:`3px solid ${cat.color}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none" }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+                <React.Fragment key={opp.id}>
+                <div onClick={() => unlocked ? goToAnalysis(opp) : showLockedToast(opp.id)} style={{ position:"relative", background:C.card, borderRadius:16, border:`1px solid ${unlocked&&isHover?cat.color:C.border}`, borderLeft:`3px solid ${cat.color}`, padding:"16px 20px", cursor:unlocked?"pointer":"default", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:unlocked&&isHover?"translateY(-2px)":"none", boxShadow:unlocked&&isHover?"0 4px 12px rgba(0,0,0,0.08)":"none", opacity:unlocked?1:(isHover?0.7:0.55) }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+                  {!unlocked && <span style={{ position:"absolute", top:10, right:12, fontSize:12, color:"#94A3B8" }}>🔒</span>}
                   <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:48 }}>
                     <span style={{ fontSize:28 }}>{opp.icon}</span>
                     <span style={{ fontSize:9, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"2px 6px", borderRadius:4 }}>{opp.level}</span>
@@ -799,9 +841,15 @@ export default function BrandformanceEngine() {
                   <div style={{ textAlign:"right", minWidth:100 }}>
                     <div style={{ color:cat.color, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.annualVol)}회</div>
                     <div style={{ color:C.textSoft, fontSize:10 }}>월 평균 {fmt(opp.monthlyVol)}회</div>
-                    <div style={{ color:cat.color, fontSize:18, marginTop:6 }}>→</div>
+                    {unlocked && <div style={{ color:cat.color, fontSize:18, marginTop:6 }}>→</div>}
                   </div>
                 </div>
+                {lockedToast === opp.id && (
+                  <div style={{ fontSize:12, color:"#64748B", background:"#F0F9FF", padding:"8px 12px", borderRadius:8, animation:"slideDown 0.2s ease-out" }}>
+                    상세 분석과 AI 콘텐츠 생성은 전체 플랫폼에서 이용 가능합니다
+                  </div>
+                )}
+                </React.Fragment>
               );
             })}
           </div>
@@ -812,8 +860,12 @@ export default function BrandformanceEngine() {
           <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
             {INT_OPPS.map(opp => {
               const oppUsps = USP_TAGS[opp.id] || [];
+              const unlocked = DEMO_OPPS.has(opp.id);
+              const isHover = hoveredCard === opp.id;
               return (
-                <div key={opp.id} onClick={() => goToAnalysis(opp)} style={{ background:C.card, borderRadius:16, border:`1px solid ${hoveredCard===opp.id?cat.color:C.border}`, borderLeft:`3px solid ${cat.color}`, padding:"16px 20px", cursor:"pointer", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:hoveredCard===opp.id?"translateY(-2px)":"none", boxShadow:hoveredCard===opp.id?"0 4px 12px rgba(0,0,0,0.08)":"none" }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+                <React.Fragment key={opp.id}>
+                <div onClick={() => unlocked ? goToAnalysis(opp) : showLockedToast(opp.id)} style={{ position:"relative", background:C.card, borderRadius:16, border:`1px solid ${unlocked&&isHover?cat.color:C.border}`, borderLeft:`3px solid ${cat.color}`, padding:"16px 20px", cursor:unlocked?"pointer":"default", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s", transform:unlocked&&isHover?"translateY(-2px)":"none", boxShadow:unlocked&&isHover?"0 4px 12px rgba(0,0,0,0.08)":"none", opacity:unlocked?1:(isHover?0.7:0.55) }} onMouseEnter={() => setHoveredCard(opp.id)} onMouseLeave={() => setHoveredCard(null)}>
+                  {!unlocked && <span style={{ position:"absolute", top:10, right:12, fontSize:12, color:"#94A3B8" }}>🔒</span>}
                   <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, minWidth:48 }}>
                     <span style={{ fontSize:28 }}>{opp.icon}</span>
                     <span style={{ fontSize:9, fontWeight:700, color:"#fff", background:LEVEL_COLORS[opp.level], padding:"2px 6px", borderRadius:4 }}>{opp.level}</span>
@@ -829,9 +881,15 @@ export default function BrandformanceEngine() {
                   </div>
                   <div style={{ textAlign:"right", minWidth:100 }}>
                     <div style={{ color:cat.color, fontSize:14, fontWeight:800 }}>연간 {fmt(opp.motherAnnualVol || opp.annualVol)}회</div>
-                    <div style={{ color:cat.color, fontSize:18, marginTop:6 }}>→</div>
+                    {unlocked && <div style={{ color:cat.color, fontSize:18, marginTop:6 }}>→</div>}
                   </div>
                 </div>
+                {lockedToast === opp.id && (
+                  <div style={{ fontSize:12, color:"#64748B", background:"#F0F9FF", padding:"8px 12px", borderRadius:8, animation:"slideDown 0.2s ease-out" }}>
+                    상세 분석과 AI 콘텐츠 생성은 전체 플랫폼에서 이용 가능합니다
+                  </div>
+                )}
+                </React.Fragment>
               );
             })}
           </div>
@@ -1614,7 +1672,7 @@ export default function BrandformanceEngine() {
   // ══════════════════════════════════════════════════════════════
   return (
     <div style={{ minHeight:"100vh", background:C.bg, color:C.text }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes pulse{0%,100%{opacity:0.6}50%{opacity:0.3}}`}</style>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes pulse{0%,100%{opacity:0.6}50%{opacity:0.3}} @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}`}</style>
       <Header />
       {showStepIndicator && <StepIndicator />}
       {showTabs && <TabBar />}
