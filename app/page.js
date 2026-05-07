@@ -534,18 +534,43 @@ export default function BrandformanceEngine() {
   // STEP INDICATOR
   // ══════════════════════════════════════════════════════════════
   const STEPS_LABEL = ["기회 발견","기회 분석","AI 아이디어","스토리보드"];
+
+  // Step navigation availability — each step is clickable if its prerequisite results exist
+  const stepAvailable = (i) => {
+    if (i === 0) return true; // 기회 발견 — always available
+    if (i === 1) return !!selectedOpp; // 기회 분석 — needs an opp selected
+    if (i === 2) return !!selectedOpp && !!generatedIdeas[selectedOpp.id] && !generatedIdeas[selectedOpp.id]?.[0]?.error; // AI 아이디어 — needs ideas generated
+    if (i === 3) return !!selectedOpp && !!selectedIdea; // 스토리보드 — needs an idea picked
+    return false;
+  };
+  const goToStep = (i) => {
+    if (!stepAvailable(i)) return;
+    if (i === 0) {
+      // Return to category list if a category was opened, else hub
+      if (currentCategory) setCurrentView("category");
+      else setCurrentView("hub");
+    } else if (i === 1) setCurrentView("analysis");
+    else if (i === 2) setCurrentView("ideas");
+    else if (i === 3) setCurrentView("storyboard");
+  };
+
   const StepIndicator = () => (
     <div style={{ position:"sticky", top:52, zIndex:99, background:"#FFFFFF", borderBottom:`1px solid ${C.border}` }}>
       <div style={{ maxWidth:1200, margin:"0 auto", padding:"14px 24px", display:"flex", alignItems:"center" }}>
-        {STEPS_LABEL.map((s,i) => (
-          <React.Fragment key={i}>
-            {i > 0 && <div style={{ flex:1, height:2, background:i<=activeStep?C.primary:"#CBD5E1", margin:"0 4px" }} />}
-            <div style={{ display:"flex", alignItems:"center", gap:6, opacity:i<=activeStep?1:0.4 }}>
-              <div style={{ width:26, height:26, borderRadius:13, display:"flex", alignItems:"center", justifyContent:"center", background:i===activeStep?C.primary:i<activeStep?C.accent:"#CBD5E1", color:i<=activeStep?"#fff":C.textSoft, fontSize:12, fontWeight:700 }}>{i+1}</div>
-              <span style={{ color:i<=activeStep?C.text:C.textSoft, fontSize:12, fontWeight:i===activeStep?700:500, whiteSpace:"nowrap" }}>{s}</span>
-            </div>
-          </React.Fragment>
-        ))}
+        {STEPS_LABEL.map((s,i) => {
+          const available = stepAvailable(i);
+          const isActive = i === activeStep;
+          const isDone = i < activeStep && available;
+          return (
+            <React.Fragment key={i}>
+              {i > 0 && <div style={{ flex:1, height:2, background:i<=activeStep?C.primary:"#CBD5E1", margin:"0 4px" }} />}
+              <div onClick={() => goToStep(i)} title={available ? `${s}로 이동` : "이전 단계를 먼저 진행해주세요"} style={{ display:"flex", alignItems:"center", gap:6, opacity:i<=activeStep?1:(available?0.7:0.4), cursor:available?"pointer":"not-allowed", padding:"4px 8px", borderRadius:8, transition:"background 0.15s" }} onMouseEnter={e => { if (available) e.currentTarget.style.background = "#F0F9FF"; }} onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
+                <div style={{ width:26, height:26, borderRadius:13, display:"flex", alignItems:"center", justifyContent:"center", background:isActive?C.primary:isDone?C.accent:available?"#94A3B8":"#CBD5E1", color:i<=activeStep||available?"#fff":C.textSoft, fontSize:12, fontWeight:700 }}>{isDone?"✓":i+1}</div>
+                <span style={{ color:i<=activeStep?C.text:available?C.textSoft:"#CBD5E1", fontSize:12, fontWeight:isActive?700:500, whiteSpace:"nowrap" }}>{s}</span>
+              </div>
+            </React.Fragment>
+          );
+        })}
       </div>
     </div>
   );
